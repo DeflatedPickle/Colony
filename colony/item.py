@@ -4,7 +4,6 @@
 
 """
 
-from .references import *
 from .entity import Entity
 
 __title__ = "Item"

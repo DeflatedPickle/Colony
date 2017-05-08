@@ -8,7 +8,11 @@ from tkinter import font
 
 __title__ = "Pawn"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.0"
+__version__ = "1.2.0"
+
+
+def get_frame_rate():
+    return 10
 
 
 def get_references():

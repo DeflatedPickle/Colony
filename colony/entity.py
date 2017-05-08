@@ -10,7 +10,7 @@ from .references import *
 
 __title__ = "Entity"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.0"
+__version__ = "1.3.0"
 
 
 class Entity(object):
@@ -43,20 +43,42 @@ class Entity(object):
             self.entity_name = self.parent.canvas.create_text(self.location["x"], self.location["y"] + 10, text=self.name, font=get_fonts()["text"]["normal"])
 
         self.parent.canvas.tag_bind(self.entity, "<ButtonRelease-1>", self.select, "+")
-        self.parent.canvas.tag_bind(self.entity, "<Button-3>", self.show_menu, "+")
         self.parent.canvas.tag_bind(self.entity, "<Enter>", self.enter, "+")
         self.parent.canvas.tag_bind(self.entity, "<Leave>", self.leave, "+")
 
         self.parent.canvas.bind("<Button-1>", self.unselect, "+")
+        self.parent.canvas.bind("<Button-1>", self.delete_all, "+")
 
-    def show_menu(self, event):
+    def find_coordinates(self):
+        return self.parent.canvas.coords(self)
+
+    def show_menu(self, event, background: bool=False):
+        self.delete_all()
+        if self.parent.selected_pawn is not None:
+            if background:
+                self.menu.add_command(label="Move Here", command=lambda: self.parent.selected_pawn.move(x=self.parent.mouse_x, y=self.parent.mouse_y))
+            elif not background:
+                # TODO: Figure out why the menu is being shown twice
+                if self.type == "item":
+                    self.menu.add_command(label="Pick Up")
+
         self.menu.post(event.x_root, event.y_root)
+
+    def delete_all(self, *args):
+        try:
+            for item in range(self.menu.index("end") + 1):
+                self.menu.delete(item)
+        except TypeError:
+            pass
 
     def select(self, event):
         self.parent.canvas.itemconfigure(self.entity, font=get_fonts()[self.type]["selected"])
         self.parent.canvas.itemconfigure(self.entity_name, font=get_fonts()["text"]["selected"])
         if self.type == "pawn":
             self.parent.canvas.itemconfigure(self.entity_health, font=get_fonts()["text"]["selected"])
+            self.parent.selected_pawn = self
+        elif self.type == "item":
+            self.parent.selected_pawn = None
 
         self.selected = True
 
@@ -65,11 +87,19 @@ class Entity(object):
         self.parent.canvas.itemconfigure(self.entity_name, font=get_fonts()["text"]["normal"])
         if self.type == "pawn":
             self.parent.canvas.itemconfigure(self.entity_health, font=get_fonts()["text"]["normal"])
+            self.parent.selected_pawn = None
+        elif self.type == "item":
+            self.parent.selected_pawn = None
 
         self.selected = False
 
     def enter(self, event):
         self.parent.canvas.configure(cursor="hand2")
+        self.parent.canvas.unbind("<Button-3>")
+        self.parent.canvas.tag_bind(self.entity, "<Button-3>", lambda event: self.show_menu(event, background=False), "+")
 
     def leave(self, event):
         self.parent.canvas.configure(cursor="arrow")
+
+        self.parent.canvas.bind("<Button-3>", lambda event: self.show_menu(event, background=True))
+        self.parent.canvas.tag_unbind(self.entity, "<Button-3>")

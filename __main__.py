@@ -8,21 +8,30 @@ import tkinter as tk
 
 import colony
 
+__title__ = "Colony"
+__author__ = "DeflatedPickle"
+__version__ = "1.4.0"
+
 
 class Window(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         self.title("Colony")
+        self.option_add('*tearOff', False)
 
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
         self.canvas = tk.Canvas(self)
         self.canvas.grid(row=0, column=0)
+        self.canvas.bind("<Motion>", self.update_mouse)
 
         self.entities = []
         self.pawns = []
         self.items = []
+
+        self.mouse_x = 0
+        self.mouse_y = 0
 
         self.selected_pawn = None
 
@@ -33,6 +42,10 @@ class Window(tk.Tk):
 
         item = colony.Item(self, name="Broken Sword", x=250, y=30)
         item2 = colony.Item(self, name="Wood", x=230, y=90)
+
+    def update_mouse(self, event):
+        self.mouse_x = event.x
+        self.mouse_y = event.y
 
 
 class DeBug(object):

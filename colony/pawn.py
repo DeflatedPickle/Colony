@@ -34,3 +34,6 @@ class Pawn(Entity):
         self.parent.pawns.append(self)
 
         self.draw()
+
+    def move(self, x: int=0, y: int=0):
+        self.parent.canvas.move(self.entity, x, y)
