@@ -10,10 +10,20 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.5.0"
+__version__ = "1.9.1"
 
 
-class Window(tk.Tk):
+class StartWindow(tk.Tk):
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
+        self.title("Colony")
+        self.option_add('*tearOff', False)
+
+        tk.Label(self, text="Colony", font=colony.get_fonts()["menu"]["title"]).place(x=5, y=5)
+        tk.Label(self, text="A simple colony simulator created by Dibbo, inspired by RimWorld and Dwarf Fortress.", font=colony.get_fonts()["menu"]["subtitle"]).place(x=5, y=45)
+
+
+class GameWindow(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         self.title("Colony")
@@ -29,15 +39,16 @@ class Window(tk.Tk):
         self.pawns = []
         self.items = []
 
-        self.selected_pawn = None
+        self.selected_item = None
 
         debug = DeBug(self)
 
-        pawn = colony.Pawn(self, forename="Frank", surname="Lyatut", gender=True, x=70, y=50)
-        pawn2 = colony.Pawn(self, forename="Ima", surname="Nothrpwn", gender=False, x=130, y=70)
+        pawn = colony.Pawn(self, forename="Frank", surname="Lyatut", gender=True, x=70, y=50).draw()
+        pawn_2 = colony.Pawn(self, forename="Ima", surname="Nothrpwn", gender=False, x=130, y=70).draw()
+        pawn_random = colony.Pawn(self, x=270, y=130).generate_random().draw()
 
-        item = colony.Item(self, name="Broken Sword", x=250, y=30)
-        item2 = colony.Item(self, name="Wood", x=230, y=90)
+        item = colony.Item(self, name="Broken Sword", x=250, y=30).draw()
+        item_2 = colony.Item(self, name="Wood", x=230, y=90).draw()
 
     def get_mouse_position(self):
         mouse_x_raw = self.winfo_pointerx()
@@ -52,26 +63,57 @@ class Window(tk.Tk):
 class DeBug(object):
     def __init__(self, parent):
         self.parent = parent
+        self.counter = 10
 
         self.update()
 
-    def update(self, interval=colony.get_interval()):
+    def update(self):
         self.parent.canvas.delete("debug")
+        self.counter = 10
 
-        self.parent.canvas.create_text(5, 10, anchor="w", text="Selected: {}".format(self.find_selected()), tag="debug")
-        self.parent.canvas.create_text(5, 25, anchor="w", text="Pawns: {}".format(len(self.parent.pawns)), tag="debug")
-        self.parent.canvas.create_text(5, 40, anchor="w", text="Items: {}".format(len(self.parent.items)), tag="debug")
+        self.add_debug_line(text="Selected: {}".format(self.find_selected()))
+        self.add_debug_line(text="Selected Location: {}".format(self.find_selected_location()))
+        self.add_debug_line(text="Selected Action: {}".format(None))
+        self.add_debug_line(text="Selected Inventory: {}".format(self.find_selected_inventory()))
+        self.counter += 15
+        self.add_debug_line(text="Pawns: {}".format(len(self.parent.pawns)))
+        self.add_debug_line(text="Items: {}".format(len(self.parent.items)))
 
-        self.parent.after(interval, self.update)
+        self.parent.after(colony.get_interval(), self.update)
+
+    def add_debug_line(self, text: str=""):
+        self.parent.canvas.create_text(5, self.counter, anchor="w", text=text, tag="debug")
+        self.counter += 15
 
     def find_selected(self):
         for item in self.parent.entities:
             if item.selected:
-                return "{}: {}".format(item.type, item.name if not isinstance(item.name, type(dict())) else "{} {}".format(item.name["forename"], item.name["surname"]))
+                return "{}: {}".format(item.entity_type, item.name if not isinstance(item.name, type(dict())) else "{} {}".format(item.name["forename"], item.name["surname"]))
+
+    def find_selected_location(self):
+        for item in self.parent.entities:
+            if item.selected:
+                return "x={0[0]}, y={0[1]}".format(self.parent.selected_item.find_coordinates_own())
+
+    def find_selected_action(self):
+        for item in self.parent.entities:
+            if item.selected:
+                if item.entity_type == "pawn":
+                    return item.action
+                elif item.entity_type == "item":
+                    return None
+
+    def find_selected_inventory(self):
+        for item in self.parent.entities:
+            if item.selected:
+                if item.entity_type == "pawn":
+                    return item.inventory
+                elif item.entity_type == "item":
+                    return None
 
 
 def main():
-    app = Window()
+    app = StartWindow()
     app.mainloop()
 
 if __name__ == "__main__":

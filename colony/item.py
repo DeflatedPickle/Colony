@@ -22,8 +22,6 @@ class Item(Entity):
         self.location = {"x": x,
                          "y": y}
 
-        self.type = "item"
-
         self.parent.entities.append(self)
         self.parent.items.append(self)
 

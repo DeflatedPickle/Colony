@@ -8,7 +8,7 @@ from tkinter import font
 
 __title__ = "Pawn"
 __author__ = "DeflatedPickle"
-__version__ = "1.2.0"
+__version__ = "1.5.0"
 
 
 def get_frame_rate():
@@ -43,6 +43,10 @@ def get_fonts():
         "text": {
             "normal": font.Font(family="Arial", size=get_size() // 4),
             "selected": font.Font(family="Arial", size=get_size() // 4, weight="bold")
+        },
+        "menu": {
+            "title": font.Font(family="Arial", size=get_size(), weight="bold"),
+            "subtitle": font.Font(family="Arial", size=get_size() - 15),
         }
     }
     return fonts
@@ -50,3 +54,12 @@ def get_fonts():
 
 def get_interval():
     return 100
+
+def get_male_names():
+    return ["Frank", "Dan"]
+
+def get_female_names():
+    return ["Amy", "Shara"]
+
+def get_surnames():
+    return ["Wright"]
