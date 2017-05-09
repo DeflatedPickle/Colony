@@ -10,7 +10,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.4.0"
+__version__ = "1.5.0"
 
 
 class Window(tk.Tk):
@@ -24,14 +24,10 @@ class Window(tk.Tk):
 
         self.canvas = tk.Canvas(self)
         self.canvas.grid(row=0, column=0)
-        self.canvas.bind("<Motion>", self.update_mouse)
 
         self.entities = []
         self.pawns = []
         self.items = []
-
-        self.mouse_x = 0
-        self.mouse_y = 0
 
         self.selected_pawn = None
 
@@ -43,9 +39,14 @@ class Window(tk.Tk):
         item = colony.Item(self, name="Broken Sword", x=250, y=30)
         item2 = colony.Item(self, name="Wood", x=230, y=90)
 
-    def update_mouse(self, event):
-        self.mouse_x = event.x
-        self.mouse_y = event.y
+    def get_mouse_position(self):
+        mouse_x_raw = self.winfo_pointerx()
+        mouse_y_raw = self.winfo_pointery()
+
+        mouse_x = mouse_x_raw - self.winfo_rootx()
+        mouse_y = mouse_y_raw - self.winfo_rooty()
+
+        return mouse_x, mouse_y
 
 
 class DeBug(object):

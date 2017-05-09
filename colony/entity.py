@@ -16,7 +16,7 @@ __version__ = "1.3.0"
 class Entity(object):
     """Creates a pawn."""
     # TODO: Finish this class
-    def __init__(self, parent, x: int=0, y: int=0, type: str=""):
+    def __init__(self, parent, x: int=0, y: int=0, entity_type: str=""):
         self.parent = parent
         self.name = ""
         self.health = 0
@@ -26,13 +26,16 @@ class Entity(object):
                          "y": y}
 
         self.selected = False
-        self.type = type
+        self.type = entity_type
 
         self.entity = None
         self.entity_name = None
         self.entity_health = None
 
         self.menu = tk.Menu(self.parent)
+
+        self.parent.update()
+        self.parent.update_idletasks()
 
     def draw(self):
         self.entity = self.parent.canvas.create_text(self.location["x"], self.location["y"], text=get_references()["icons"][self.type], font=get_fonts()[self.type]["normal"])
@@ -50,17 +53,17 @@ class Entity(object):
         self.parent.canvas.bind("<Button-1>", self.delete_all, "+")
 
     def find_coordinates(self):
-        return self.parent.canvas.coords(self)
+        return self.parent.canvas.coords(self.entity)
 
     def show_menu(self, event, background: bool=False):
         self.delete_all()
         if self.parent.selected_pawn is not None:
             if background:
-                self.menu.add_command(label="Move Here", command=lambda: self.parent.selected_pawn.move(x=self.parent.mouse_x, y=self.parent.mouse_y))
+                self.menu.add_command(label="Move Here", command=self.parent.selected_pawn.move_to_mouse)
             elif not background:
                 # TODO: Figure out why the menu is being shown twice
                 if self.type == "item":
-                    self.menu.add_command(label="Pick Up")
+                    self.menu.add_command(label="Pick Up", command=lambda: self.parent.selected_pawn.move_to(self))
 
         self.menu.post(event.x_root, event.y_root)
 

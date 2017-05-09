@@ -15,7 +15,7 @@ class Item(Entity):
     """Creates an item."""
     # TODO: Finish this class
     def __init__(self, parent, name: str="", x: int=0, y: int=0):
-        Entity.__init__(self, parent, x, y, type="item")
+        Entity.__init__(self, parent, x, y, entity_type="item")
         self.parent = parent
         self.name = name
 
