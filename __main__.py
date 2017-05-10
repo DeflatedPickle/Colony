@@ -5,12 +5,13 @@
 """
 
 import tkinter as tk
+from tkinter import ttk
 
 import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.9.1"
+__version__ = "1.11.0"
 
 
 class GameWindow(tk.Tk):
@@ -22,7 +23,7 @@ class GameWindow(tk.Tk):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
-        self.canvas = tk.Canvas(self)
+        self.canvas = ResizingCanvas(self)
         self.canvas.grid(row=0, column=0)
 
         self.start_menu_title()
@@ -30,6 +31,14 @@ class GameWindow(tk.Tk):
     def start_menu_title(self):
         self.canvas.create_text(5, 20, text="Colony", anchor="w", font=colony.get_fonts()["menu"]["title"])
         self.canvas.create_text(5, 45, text="A simple colony simulator created by Dibbo, inspired by RimWorld and Dwarf Fortress.", anchor="w", font=colony.get_fonts()["menu"]["subtitle"])
+
+        self.canvas.create_window(5, 70, window=ttk.Button(self.canvas, text="Start", command=self.start_game), anchor="w")
+        self.canvas.create_window(5, 100, window=ttk.Button(self.canvas, text="Options"), anchor="w")
+        self.canvas.create_window(5, 130, window=ttk.Button(self.canvas, text="Exit"), anchor="w")
+
+    def start_game(self):
+        self.canvas.delete("all")
+        Game(self)
 
     def get_mouse_position(self):
         mouse_x_raw = self.winfo_pointerx()
@@ -43,9 +52,12 @@ class GameWindow(tk.Tk):
 
 class Game(object):
     def __init__(self, parent, *args, **kwargs):
+        self.parent = parent
         self.entities = []
         self.pawns = []
         self.items = []
+
+        self.canvas = self.parent.canvas
 
         self.selected_item = None
 
@@ -78,7 +90,7 @@ class DeBug(object):
         self.add_debug_line(text="Pawns: {}".format(len(self.parent.pawns)))
         self.add_debug_line(text="Items: {}".format(len(self.parent.items)))
 
-        self.parent.after(colony.get_interval(), self.update)
+        self.parent.parent.after(colony.get_interval(), self.update)
 
     def add_debug_line(self, text: str=""):
         self.parent.canvas.create_text(5, self.counter, anchor="w", text=text, tag="debug")
@@ -109,6 +121,15 @@ class DeBug(object):
                     return item.inventory
                 elif item.entity_type == "item":
                     return None
+
+class ResizingCanvas(tk.Canvas):
+    def __init__(self, parent, **kwargs):
+        tk.Canvas.__init__(self, parent, highlightthickness=0, **kwargs)
+        self.parent = parent
+        self.bind("<Configure>", self.on_resize)
+
+    def on_resize(self, event):
+        self.configure(width=self.parent.winfo_width(), height=self.parent.winfo_height())
 
 
 def main():

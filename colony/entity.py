@@ -10,7 +10,7 @@ from .references import *
 
 __title__ = "Entity"
 __author__ = "DeflatedPickle"
-__version__ = "1.3.0"
+__version__ = "1.3.3"
 
 
 class Entity(object):
@@ -32,10 +32,10 @@ class Entity(object):
         self.entity_name = None
         self.entity_health = None
 
-        self.menu = tk.Menu(self.parent)
+        self.menu = tk.Menu(self.parent.parent)
 
-        self.parent.update()
-        self.parent.update_idletasks()
+        self.parent.parent.update()
+        self.parent.parent.update_idletasks()
 
     def draw(self):
         self.entity = self.parent.canvas.create_text(self.location["x"], self.location["y"], text=get_references()["icons"][self.entity_type], font=get_fonts()[self.entity_type]["normal"])
