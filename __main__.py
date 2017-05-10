@@ -13,16 +13,6 @@ __author__ = "DeflatedPickle"
 __version__ = "1.9.1"
 
 
-class StartWindow(tk.Tk):
-    def __init__(self, *args, **kwargs):
-        tk.Tk.__init__(self, *args, **kwargs)
-        self.title("Colony")
-        self.option_add('*tearOff', False)
-
-        tk.Label(self, text="Colony", font=colony.get_fonts()["menu"]["title"]).place(x=5, y=5)
-        tk.Label(self, text="A simple colony simulator created by Dibbo, inspired by RimWorld and Dwarf Fortress.", font=colony.get_fonts()["menu"]["subtitle"]).place(x=5, y=45)
-
-
 class GameWindow(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
@@ -35,6 +25,24 @@ class GameWindow(tk.Tk):
         self.canvas = tk.Canvas(self)
         self.canvas.grid(row=0, column=0)
 
+        self.start_menu_title()
+
+    def start_menu_title(self):
+        self.canvas.create_text(5, 20, text="Colony", anchor="w", font=colony.get_fonts()["menu"]["title"])
+        self.canvas.create_text(5, 45, text="A simple colony simulator created by Dibbo, inspired by RimWorld and Dwarf Fortress.", anchor="w", font=colony.get_fonts()["menu"]["subtitle"])
+
+    def get_mouse_position(self):
+        mouse_x_raw = self.winfo_pointerx()
+        mouse_y_raw = self.winfo_pointery()
+
+        mouse_x = mouse_x_raw - self.winfo_rootx()
+        mouse_y = mouse_y_raw - self.winfo_rooty()
+
+        return mouse_x, mouse_y
+
+
+class Game(object):
+    def __init__(self, parent, *args, **kwargs):
         self.entities = []
         self.pawns = []
         self.items = []
@@ -49,15 +57,6 @@ class GameWindow(tk.Tk):
 
         item = colony.Item(self, name="Broken Sword", x=250, y=30).draw()
         item_2 = colony.Item(self, name="Wood", x=230, y=90).draw()
-
-    def get_mouse_position(self):
-        mouse_x_raw = self.winfo_pointerx()
-        mouse_y_raw = self.winfo_pointery()
-
-        mouse_x = mouse_x_raw - self.winfo_rootx()
-        mouse_y = mouse_y_raw - self.winfo_rooty()
-
-        return mouse_x, mouse_y
 
 
 class DeBug(object):
@@ -113,7 +112,7 @@ class DeBug(object):
 
 
 def main():
-    app = StartWindow()
+    app = GameWindow()
     app.mainloop()
 
 if __name__ == "__main__":
