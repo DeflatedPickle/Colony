@@ -10,7 +10,7 @@ from .references import *
 
 __title__ = "Entity"
 __author__ = "DeflatedPickle"
-__version__ = "1.3.3"
+__version__ = "1.3.4"
 
 
 class Entity(object):
@@ -65,6 +65,8 @@ class Entity(object):
         self.location["y"] = y
 
     def show_menu(self, event, background: bool=False):
+        self.last_mouse_x, self.last_mouse_y = self.parent.parent.get_mouse_position()
+
         self.delete_all()
         closest = list(self.parent.canvas.find_closest(event.x_root, event.y_root, halo=1))[0]
         if self.parent.selected_item is not None:

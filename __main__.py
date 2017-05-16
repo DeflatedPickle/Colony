@@ -18,6 +18,7 @@ class GameWindow(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         self.title("Colony")
+        self.geometry("600x300")
         self.option_add('*tearOff', False)
 
         self.rowconfigure(0, weight=1)
@@ -29,16 +30,8 @@ class GameWindow(tk.Tk):
         self.start_menu_title()
 
     def start_menu_title(self):
-        self.canvas.create_text(5, 20, text="Colony", anchor="w", font=colony.get_fonts()["menu"]["title"])
-        self.canvas.create_text(5, 45, text="A simple colony simulator created by Dibbo, inspired by RimWorld and Dwarf Fortress.", anchor="w", font=colony.get_fonts()["menu"]["subtitle"])
-
-        self.canvas.create_window(5, 70, window=ttk.Button(self.canvas, text="Start", command=self.start_game), anchor="w")
-        self.canvas.create_window(5, 100, window=ttk.Button(self.canvas, text="Options"), anchor="w")
-        self.canvas.create_window(5, 130, window=ttk.Button(self.canvas, text="Exit"), anchor="w")
-
-    def start_game(self):
         self.canvas.delete("all")
-        Game(self)
+        Start(self)
 
     def get_mouse_position(self):
         mouse_x_raw = self.winfo_pointerx()
@@ -48,6 +41,29 @@ class GameWindow(tk.Tk):
         mouse_y = mouse_y_raw - self.winfo_rooty()
 
         return mouse_x, mouse_y
+
+
+class Start(object):
+    def __init__(self, parent, *args, **kwargs):
+        self.parent = parent
+
+        self.parent.canvas.create_text(5, 5, text="Colony", anchor="nw", font=colony.get_fonts()["menu"]["title"])
+        self.parent.canvas.create_text(5, 45, text="A simple colony simulator created by Dibbo, inspired by RimWorld and Dwarf Fortress.", anchor="nw", font=colony.get_fonts()["menu"]["subtitle"])
+
+        self.parent.canvas.create_window(5, 70, window=ttk.Button(self.parent.canvas, text="Start", command=self.start_game), anchor="nw")
+        self.parent.canvas.create_window(5, 100, window=ttk.Button(self.parent.canvas, text="Options", command=self.start_options), anchor="nw")
+        self.parent.canvas.create_window(5, 130, window=ttk.Button(self.parent.canvas, text="Exit", command=self.exit), anchor="nw")
+
+    def start_game(self):
+        self.parent.canvas.delete("all")
+        Scenarios(self.parent)
+
+    def start_options(self):
+        self.parent.canvas.delete("all")
+        Options(self.parent)
+
+    def exit(self):
+        raise SystemExit
 
 
 class Game(object):
@@ -63,12 +79,63 @@ class Game(object):
 
         debug = DeBug(self)
 
-        pawn = colony.Pawn(self, forename="Frank", surname="Lyatut", gender=True, x=70, y=50).draw()
-        pawn_2 = colony.Pawn(self, forename="Ima", surname="Nothrpwn", gender=False, x=130, y=70).draw()
-        pawn_random = colony.Pawn(self, x=270, y=130).generate_random().draw()
+        # pawn = colony.Pawn(self, forename="Frank", surname="Lyatut", gender=True, x=90, y=50).draw()
+        # pawn_2 = colony.Pawn(self, forename="Ima", surname="Nothrpwn", gender=False, x=130, y=70).draw()
+        # pawn_random = colony.Pawn(self, x=270, y=130).generate_random().draw()
 
-        item = colony.Item(self, name="Broken Sword", x=250, y=30).draw()
-        item_2 = colony.Item(self, name="Wood", x=230, y=90).draw()
+        # item = colony.Item(self, name="Broken Sword", x=250, y=30).draw()
+        # item_2 = colony.Item(self, name="Wood", x=230, y=90).draw()
+
+
+class Options(object):
+    def __init__(self, parent, *args, **kwargs):
+        self.parent = parent
+
+        self.parent.canvas.create_window(5, 130, window=ttk.Button(self.parent.canvas, text="Back", command=self.parent.start_menu_title), anchor="nw")
+
+
+class Scenarios(object):
+    def __init__(self, parent, *args, **kwargs):
+        self.parent = parent
+        self.scenario_list = []
+
+        frame_listbox = ttk.Frame(self.parent.canvas)
+        self.treeview = ttk.Treeview(frame_listbox, show="tree")
+        self.treeview.pack(side="left", fill="both", expand=True)
+        self.treeview.bind("<<TreeviewSelect>>", self.select_scenario)
+        scrollbar_treeview = ttk.Scrollbar(frame_listbox, command=self.treeview.yview)
+        scrollbar_treeview.pack(side="right", fill="y", expand=True)
+        self.treeview.configure(yscrollcommand=scrollbar_treeview.set)
+
+        self.parent.canvas.create_window(5, 5, window=frame_listbox, anchor="nw")
+
+        frame_text = ttk.Frame(self.parent.canvas)
+        self.text = tk.Text(frame_text, width=30, height=12)
+        self.text.pack(side="left", fill="both", expand=True)
+        scrollbar_text = ttk.Scrollbar(frame_text, command=self.text.yview)
+        scrollbar_text.pack(side="right", fill="y", expand=True)
+        self.text.configure(yscrollcommand=scrollbar_text.set)
+
+        self.parent.canvas.create_window(230, 5, window=frame_text, anchor="nw")
+
+        self.parent.canvas.create_window(510, 260, window=ttk.Button(self.parent.canvas, text="Start", command=self.start_game), anchor="nw")
+
+        self.default_scenarios()
+
+    def default_scenarios(self):
+        colony.Scenario(self.treeview, title="Lonely Bean", description="Just you, yourself and you.", contents={"pawns": 1})
+        colony.Scenario(self.treeview, title="Weekend Camp Gone Wrong", description="You were camping with your friends when suddenly... you were still camping but it was boring.", contents={"pawns": 3})
+
+    def select_scenario(self, *args):
+        self.text.delete(1.0, "end")
+        self.text.insert("end", "{}\n\n".format(self.treeview.item(self.treeview.focus())["text"]))
+        self.text.insert("end", "Description: {}\n\n".format(self.treeview.item(self.treeview.focus())["values"][0]))
+        self.text.insert("end", "Contents: {}\n\n".format(self.treeview.item(self.treeview.focus())["values"][1]))
+
+    def start_game(self):
+        if self.treeview.focus() != "":
+            self.parent.canvas.delete("all")
+            Game(self.parent)
 
 
 class DeBug(object):

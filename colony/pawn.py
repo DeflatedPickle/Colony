@@ -11,7 +11,7 @@ from .references import get_male_names, get_female_names, get_surnames
 
 __title__ = "Pawn"
 __author__ = "DeflatedPickle"
-__version__ = "1.5.1"
+__version__ = "1.5.2"
 
 
 class Pawn(Entity):
@@ -54,10 +54,10 @@ class Pawn(Entity):
 
     def move_to_mouse(self):
         pawn_location = self.parent.canvas.coords(self.entity)
-        mouse_x, mouse_y = self.parent.parent.get_mouse_position()
+        # mouse_x, mouse_y = self.parent.parent.get_mouse_position()
 
-        move_x = (mouse_x - pawn_location[0])
-        move_y = (mouse_y - pawn_location[1])
+        move_x = (self.last_mouse_x - pawn_location[0])
+        move_y = (self.last_mouse_y - pawn_location[1])
 
         self.move_entity(move_x, move_y)
 

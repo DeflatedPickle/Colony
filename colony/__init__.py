@@ -6,6 +6,7 @@
 
 from .pawn import Pawn
 from .item import Item
+from .scenario import Scenario
 from .references import *
 # TODO: Create Event class
 
