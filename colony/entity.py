@@ -32,6 +32,9 @@ class Entity(object):
         self.entity_name = None
         self.entity_health = None
 
+        self.last_mouse_x = 0
+        self.last_mouse_y = 0
+
         self.menu = tk.Menu(self.parent.parent)
 
         self.parent.parent.update()

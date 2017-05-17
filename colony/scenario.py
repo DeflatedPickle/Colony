@@ -8,7 +8,7 @@ from .entity import Entity
 
 __title__ = "Scenario"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
 class Scenario(object):

@@ -6,12 +6,13 @@
 
 import tkinter as tk
 from tkinter import ttk
+from random import randint
 
 import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.11.0"
+__version__ = "1.12.0"
 
 
 class GameWindow(tk.Tk):
@@ -42,6 +43,26 @@ class GameWindow(tk.Tk):
 
         return mouse_x, mouse_y
 
+    def exit(self, *args):
+        raise SystemExit
+
+
+class TaskBar(ttk.Frame):
+    def __init__(self, parent, *args, **kwargs):
+        ttk.Frame.__init__(self, parent, *args, **kwargs)
+        self.parent = parent
+
+        self.option_menu = tk.Menu(self.parent)
+        self.option_menu.add_command(label="Exit", command=self.parent.exit)
+
+        self.add_button("Options", self.option_menu)
+
+    def add_button(self, text: str="", menu: tk.Menu=None):
+        button = ttk.Menubutton(self, text=text, menu=menu, direction="above")
+        button.pack(side="left", fill="x", expand=True)
+
+        return button
+
 
 class Start(object):
     def __init__(self, parent, *args, **kwargs):
@@ -52,7 +73,7 @@ class Start(object):
 
         self.parent.canvas.create_window(5, 70, window=ttk.Button(self.parent.canvas, text="Start", command=self.start_game), anchor="nw")
         self.parent.canvas.create_window(5, 100, window=ttk.Button(self.parent.canvas, text="Options", command=self.start_options), anchor="nw")
-        self.parent.canvas.create_window(5, 130, window=ttk.Button(self.parent.canvas, text="Exit", command=self.exit), anchor="nw")
+        self.parent.canvas.create_window(5, 130, window=ttk.Button(self.parent.canvas, text="Exit", command=self.parent.exit), anchor="nw")
 
     def start_game(self):
         self.parent.canvas.delete("all")
@@ -61,9 +82,6 @@ class Start(object):
     def start_options(self):
         self.parent.canvas.delete("all")
         Options(self.parent)
-
-    def exit(self):
-        raise SystemExit
 
 
 class Game(object):
@@ -78,6 +96,7 @@ class Game(object):
         self.selected_item = None
 
         debug = DeBug(self)
+        taskbar = TaskBar(self.parent).grid(row=1, column=0, sticky="nesw")
 
         # pawn = colony.Pawn(self, forename="Frank", surname="Lyatut", gender=True, x=90, y=50).draw()
         # pawn_2 = colony.Pawn(self, forename="Ima", surname="Nothrpwn", gender=False, x=130, y=70).draw()
@@ -146,7 +165,13 @@ class Scenarios(object):
     def spawn(self, scenario):
         if "pawns" in scenario.contents:
             for amount in range(scenario.contents["pawns"]):
-                colony.Pawn(self.game, x=270, y=130).generate_random().draw()
+                canvas_x = self.parent.canvas.winfo_x()
+                canvas_y = self.parent.canvas.winfo_y()
+
+                drop_x = randint((canvas_x // 2) + 25, (canvas_x // 2) + 25)
+                drop_y = randint((canvas_y // 2) + 25, (canvas_y // 2) + 25)
+
+                colony.Pawn(self.game, x=drop_x + randint(-25, 25), y=drop_y + randint(-25, 25)).generate_random().draw()
 
 
 class DeBug(object):
@@ -154,19 +179,26 @@ class DeBug(object):
         self.parent = parent
         self.counter = 10
 
+        self.state = True
+        self.parent.parent.bind("<Escape>", self.change_state)
+
         self.update()
 
     def update(self):
-        self.parent.canvas.delete("debug")
-        self.counter = 10
+        if self.state:
+            self.parent.canvas.delete("debug")
+            self.counter = 10
 
-        self.add_debug_line(text="Selected: {}".format(self.find_selected()))
-        self.add_debug_line(text="Selected Location: {}".format(self.find_selected_location()))
-        self.add_debug_line(text="Selected Action: {}".format(None))
-        self.add_debug_line(text="Selected Inventory: {}".format(self.find_selected_inventory()))
-        self.counter += 15
-        self.add_debug_line(text="Pawns: {}".format(len(self.parent.pawns)))
-        self.add_debug_line(text="Items: {}".format(len(self.parent.items)))
+            self.add_debug_line(text="Selected: {}".format(self.find_selected()))
+            self.add_debug_line(text="Selected Location: {}".format(self.find_selected_location()))
+            self.add_debug_line(text="Selected Action: {}".format(None))
+            self.add_debug_line(text="Selected Inventory: {}".format(self.find_selected_inventory()))
+            self.counter += 15
+            self.add_debug_line(text="Pawns: {}".format(len(self.parent.pawns)))
+            self.add_debug_line(text="Items: {}".format(len(self.parent.items)))
+
+        elif not self.state:
+            self.parent.canvas.delete("debug")
 
         self.parent.parent.after(colony.get_interval(), self.update)
 
@@ -199,6 +231,10 @@ class DeBug(object):
                     return item.inventory
                 elif item.entity_type == "item":
                     return None
+
+    def change_state(self, *args):
+        self.state = not self.state
+
 
 class ResizingCanvas(tk.Canvas):
     def __init__(self, parent, **kwargs):
