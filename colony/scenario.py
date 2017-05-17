@@ -13,10 +13,14 @@ __version__ = "1.0.0"
 
 class Scenario(object):
     """Create a new scenario."""
-    def __init__(self, parent, title: str="", description: str="", contents: dict={}):
+    def __init__(self, parent, widget, title: str="", description: str="", contents: dict={}):
         self.parent = parent
+        self.widget = widget
+        self.id = self.parent.current_scenarios
         self.title = title
         self.description = description
         self.contents = contents
 
-        self.parent.insert("", "end", text=self.title, values=[self.description, self.contents])
+        self.widget.insert("", "end", text=self.title, values=[self.description, self.contents])
+        self.parent.scenario_list.append(self)
+        self.parent.current_scenarios += 1

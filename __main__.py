@@ -97,7 +97,10 @@ class Options(object):
 class Scenarios(object):
     def __init__(self, parent, *args, **kwargs):
         self.parent = parent
+
         self.scenario_list = []
+        self.current_scenarios = 0
+        self.selected_scenario = 0
 
         frame_listbox = ttk.Frame(self.parent.canvas)
         self.treeview = ttk.Treeview(frame_listbox, show="tree")
@@ -123,8 +126,8 @@ class Scenarios(object):
         self.default_scenarios()
 
     def default_scenarios(self):
-        colony.Scenario(self.treeview, title="Lonely Bean", description="Just you, yourself and you.", contents={"pawns": 1})
-        colony.Scenario(self.treeview, title="Weekend Camp Gone Wrong", description="You were camping with your friends when suddenly... you were still camping but it was boring.", contents={"pawns": 3})
+        colony.Scenario(self, self.treeview, title="Lonely Bean", description="Just you, yourself and you.", contents={"pawns": 1})
+        colony.Scenario(self, self.treeview, title="Weekend Camp Gone Wrong", description="You were camping with your friends when suddenly... you were still camping but it was boring.", contents={"pawns": 3})
 
     def select_scenario(self, *args):
         self.text.delete(1.0, "end")
@@ -132,10 +135,18 @@ class Scenarios(object):
         self.text.insert("end", "Description: {}\n\n".format(self.treeview.item(self.treeview.focus())["values"][0]))
         self.text.insert("end", "Contents: {}\n\n".format(self.treeview.item(self.treeview.focus())["values"][1]))
 
+        self.selected_scenario = int(self.treeview.selection()[0][-1:]) - 1
+
     def start_game(self):
         if self.treeview.focus() != "":
             self.parent.canvas.delete("all")
-            Game(self.parent)
+            self.game = Game(self.parent)
+            self.spawn(self.scenario_list[self.selected_scenario])
+
+    def spawn(self, scenario):
+        if "pawns" in scenario.contents:
+            for amount in range(scenario.contents["pawns"]):
+                colony.Pawn(self.game, x=270, y=130).generate_random().draw()
 
 
 class DeBug(object):
