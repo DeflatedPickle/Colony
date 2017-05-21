@@ -55,14 +55,17 @@ def get_fonts():
 def get_interval():
     return 100
 
+
 def get_male_names():
     # TODO: Add more names
     return ["Frank", "Dan"]
+
 
 def get_female_names():
     # TODO: Add more names
     return ["Amy", "Shara"]
 
+
 def get_surnames():
     # TODO: Add more names
-    return ["Wright"]
+    return ["Wright", "Smith", "Brown"]

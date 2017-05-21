@@ -15,7 +15,6 @@ __version__ = "1.3.4"
 
 class Entity(object):
     """Creates a pawn."""
-    # TODO: Finish this class
     def __init__(self, parent, x: int=0, y: int=0, entity_type: str=""):
         self.parent = parent
         self.name = ""
@@ -71,12 +70,13 @@ class Entity(object):
         self.last_mouse_x, self.last_mouse_y = self.parent.parent.get_mouse_position()
 
         self.delete_all()
+        # TODO: Have the menu check for pawns under the mouse before showing the menu.
         closest = list(self.parent.canvas.find_closest(event.x_root, event.y_root, halo=1))[0]
         if self.parent.selected_item is not None:
             if background:
                 self.menu.add_command(label="Move Here", command=self.parent.selected_item.move_to_mouse)
             elif not background:
-                # TODO: Figure out why the menu is being shown twice
+                # FIXME: This menu opens twice when clicking on entities
                 if self.entity_type == "pawn":
                     self.menu.add_command(label="Information", command=None)
                 elif self.entity_type == "item":

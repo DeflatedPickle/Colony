@@ -12,7 +12,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.12.0"
+__version__ = "1.13.0"
 
 
 class GameWindow(tk.Tk):
@@ -31,8 +31,13 @@ class GameWindow(tk.Tk):
         self.start_menu_title()
 
     def start_menu_title(self):
+        # TODO: Have the TaskBar be removed upon restart.
         self.canvas.delete("all")
-        Start(self)
+        self.start = Start(self)
+        try:
+            self.start.scenarios.game.taskbar.destroy()
+        except AttributeError:
+            pass
 
     def get_mouse_position(self):
         mouse_x_raw = self.winfo_pointerx()
@@ -53,6 +58,7 @@ class TaskBar(ttk.Frame):
         self.parent = parent
 
         self.option_menu = tk.Menu(self.parent)
+        self.option_menu.add_command(label="Back To Menu", command=self.parent.start_menu_title)
         self.option_menu.add_command(label="Exit", command=self.parent.exit)
 
         self.add_button("Options", self.option_menu)
@@ -77,11 +83,11 @@ class Start(object):
 
     def start_game(self):
         self.parent.canvas.delete("all")
-        Scenarios(self.parent)
+        self.scenarios = Scenarios(self.parent)
 
     def start_options(self):
         self.parent.canvas.delete("all")
-        Options(self.parent)
+        self.options = Options(self.parent)
 
 
 class Game(object):
@@ -95,8 +101,8 @@ class Game(object):
 
         self.selected_item = None
 
-        debug = DeBug(self)
-        taskbar = TaskBar(self.parent).grid(row=1, column=0, sticky="nesw")
+        self.debug = DeBug(self)
+        self.taskbar = TaskBar(self.parent).grid(row=1, column=0, sticky="nesw")
 
         # pawn = colony.Pawn(self, forename="Frank", surname="Lyatut", gender=True, x=90, y=50).draw()
         # pawn_2 = colony.Pawn(self, forename="Ima", surname="Nothrpwn", gender=False, x=130, y=70).draw()
@@ -104,6 +110,10 @@ class Game(object):
 
         # item = colony.Item(self, name="Broken Sword", x=250, y=30).draw()
         # item_2 = colony.Item(self, name="Wood", x=230, y=90).draw()
+
+    def register_items(self):
+        return {"wood": colony.Item(self, name="Wood"),
+                "stone": colony.Item(self, name="Stone")}
 
 
 class Options(object):
@@ -125,6 +135,7 @@ class Scenarios(object):
         self.treeview = ttk.Treeview(frame_listbox, show="tree")
         self.treeview.pack(side="left", fill="both", expand=True)
         self.treeview.bind("<<TreeviewSelect>>", self.select_scenario)
+        self.treeview.bind("<Double-Button-1>", self.start_game)
         scrollbar_treeview = ttk.Scrollbar(frame_listbox, command=self.treeview.yview)
         scrollbar_treeview.pack(side="right", fill="y", expand=True)
         self.treeview.configure(yscrollcommand=scrollbar_treeview.set)
@@ -145,7 +156,7 @@ class Scenarios(object):
         self.default_scenarios()
 
     def default_scenarios(self):
-        colony.Scenario(self, self.treeview, title="Lonely Bean", description="Just you, yourself and you.", contents={"pawns": 1})
+        colony.Scenario(self, self.treeview, title="Lonely Bean", description="Just you, yourself and you.", contents={"pawns": 1, "items": {"wood": 50}})
         colony.Scenario(self, self.treeview, title="Weekend Camp Gone Wrong", description="You were camping with your friends when suddenly... you were still camping but it was boring.", contents={"pawns": 3})
 
     def select_scenario(self, *args):
@@ -156,7 +167,7 @@ class Scenarios(object):
 
         self.selected_scenario = int(self.treeview.selection()[0][-1:]) - 1
 
-    def start_game(self):
+    def start_game(self, *args):
         if self.treeview.focus() != "":
             self.parent.canvas.delete("all")
             self.game = Game(self.parent)
@@ -165,13 +176,18 @@ class Scenarios(object):
     def spawn(self, scenario):
         if "pawns" in scenario.contents:
             for amount in range(scenario.contents["pawns"]):
-                canvas_x = self.parent.canvas.winfo_x()
-                canvas_y = self.parent.canvas.winfo_y()
+                canvas_x = self.parent.canvas.winfo_width()
+                canvas_y = self.parent.canvas.winfo_height()
 
                 drop_x = randint((canvas_x // 2) + 25, (canvas_x // 2) + 25)
                 drop_y = randint((canvas_y // 2) + 25, (canvas_y // 2) + 25)
 
                 colony.Pawn(self.game, x=drop_x + randint(-25, 25), y=drop_y + randint(-25, 25)).generate_random().draw()
+
+        if "items" in scenario.contents:
+            for item in scenario.contents["items"]:
+                for amount in range(scenario.contents["items"][item]):
+                    self.game.register_items()[item].draw()
 
 
 class DeBug(object):
@@ -181,6 +197,7 @@ class DeBug(object):
 
         self.state = True
         self.parent.parent.bind("<Escape>", self.change_state)
+        self.parent.parent.canvas.bind("<Motion>", self.mouse_location)
 
         self.update()
 
@@ -191,7 +208,7 @@ class DeBug(object):
 
             self.add_debug_line(text="Selected: {}".format(self.find_selected()))
             self.add_debug_line(text="Selected Location: {}".format(self.find_selected_location()))
-            self.add_debug_line(text="Selected Action: {}".format(None))
+            self.add_debug_line(text="Selected Action: {}".format(self.find_selected_action()))
             self.add_debug_line(text="Selected Inventory: {}".format(self.find_selected_inventory()))
             self.counter += 15
             self.add_debug_line(text="Pawns: {}".format(len(self.parent.pawns)))
@@ -199,6 +216,7 @@ class DeBug(object):
 
         elif not self.state:
             self.parent.canvas.delete("debug")
+            self.parent.canvas.delete("mouse")
 
         self.parent.parent.after(colony.get_interval(), self.update)
 
@@ -234,6 +252,13 @@ class DeBug(object):
 
     def change_state(self, *args):
         self.state = not self.state
+
+    def mouse_location(self, event):
+        self.parent.canvas.delete("mouse")
+
+        mouse_x = self.parent.parent.canvas.canvasx(event.x)
+        mouse_y = self.parent.parent.canvas.canvasx(event.y)
+        self.parent.canvas.create_text(mouse_x + 10, mouse_y + 25, text="{}, {}".format(mouse_x, mouse_y), tag="mouse")
 
 
 class ResizingCanvas(tk.Canvas):
