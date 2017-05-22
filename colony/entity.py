@@ -30,6 +30,7 @@ class Entity(object):
         self.entity = None
         self.entity_name = None
         self.entity_health = None
+        self.entity_amount = None
 
         self.last_mouse_x = 0
         self.last_mouse_y = 0
@@ -46,6 +47,7 @@ class Entity(object):
             self.entity_health = self.parent.canvas.create_text(self.location["x"], self.location["y"] + 27, text="{}/{}".format(self.health, self.total_health), font=get_fonts()["text"]["normal"], tag="extra")
         elif self.entity_type == "item":
             self.entity_name = self.parent.canvas.create_text(self.location["x"], self.location["y"] + 10, text=self.name, font=get_fonts()["text"]["normal"], tag="extra")
+            self.entity_amount = self.parent.canvas.create_text(self.location["x"], self.location["y"] + 20, text=self.amount, font=get_fonts()["text"]["normal"], tag="extra")
 
         self.parent.canvas.tag_bind(self.entity, "<ButtonRelease-1>", self.select, "+")
         self.parent.canvas.tag_bind(self.entity, "<Enter>", self.enter, "+")
@@ -53,6 +55,8 @@ class Entity(object):
 
         self.parent.canvas.bind("<Button-1>", self.unselect, "+")
         self.parent.canvas.bind("<Button-1>", self.delete_all, "+")
+
+        self.parent.canvas.tag_raise(self)
 
         return self
 
@@ -70,17 +74,15 @@ class Entity(object):
         self.last_mouse_x, self.last_mouse_y = self.parent.parent.get_mouse_position()
 
         self.delete_all()
-        # TODO: Have the menu check for pawns under the mouse before showing the menu.
-        closest = list(self.parent.canvas.find_closest(event.x_root, event.y_root, halo=1))[0]
+
         if self.parent.selected_item is not None:
             if background:
-                self.menu.add_command(label="Move Here", command=self.parent.selected_item.move_to_mouse)
+                self.menu.add_command(label="Move Here", command=lambda: self.parent.selected_item.move_to(self.last_mouse_x, self.last_mouse_y, "moving"))
             elif not background:
-                # FIXME: This menu opens twice when clicking on entities
                 if self.entity_type == "pawn":
                     self.menu.add_command(label="Information", command=None)
                 elif self.entity_type == "item":
-                    self.menu.add_command(label="Pick Up", command=lambda: self.parent.selected_item.move_to(self))
+                    self.menu.add_command(label="Pick Up", command=None)
 
         self.menu.post(event.x_root, event.y_root)
 
@@ -97,7 +99,7 @@ class Entity(object):
         if self.entity_type == "pawn":
             self.parent.canvas.itemconfigure(self.entity_health, font=get_fonts()["text"]["selected"])
         elif self.entity_type == "item":
-            pass
+            self.parent.canvas.itemconfigure(self.entity_amount, font=get_fonts()["text"]["selected"])
 
         self.parent.selected_item = self
         self.selected = True
@@ -108,7 +110,7 @@ class Entity(object):
         if self.entity_type == "pawn":
             self.parent.canvas.itemconfigure(self.entity_health, font=get_fonts()["text"]["normal"])
         elif self.entity_type == "item":
-            pass
+            self.parent.canvas.itemconfigure(self.entity_amount, font=get_fonts()["text"]["normal"])
 
         self.parent.selected_item = None
         self.selected = False
@@ -117,10 +119,10 @@ class Entity(object):
         self.parent.canvas.configure(cursor="hand2")
 
         self.parent.canvas.unbind("<Button-3>")
-        self.parent.canvas.tag_bind(self.entity, "<Button-3>", lambda event: self.show_menu(event, background=False), "+")
+        self.parent.canvas.tag_bind(self.entity, "<ButtonRelease-3>", lambda event: self.show_menu(event, background=False), "+")
 
     def leave(self, event):
         self.parent.canvas.configure(cursor="arrow")
 
         self.parent.canvas.bind("<Button-3>", lambda event: self.show_menu(event, background=True))
-        self.parent.canvas.tag_unbind(self.entity, "<Button-3>")
+        self.parent.canvas.tag_unbind(self.entity, "<ButtonRelease-3>")

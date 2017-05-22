@@ -57,15 +57,20 @@ def get_interval():
 
 
 def get_male_names():
-    # TODO: Add more names
+    # TODO: Add more names.
     return ["Frank", "Dan"]
 
 
 def get_female_names():
-    # TODO: Add more names
+    # TODO: Add more names.
     return ["Amy", "Shara"]
 
 
+def get_middle_names():
+    # TODO: Add more names.
+    return []
+
+
 def get_surnames():
-    # TODO: Add more names
+    # TODO: Add more names.
     return ["Wright", "Smith", "Brown"]
