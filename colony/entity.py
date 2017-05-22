@@ -41,13 +41,14 @@ class Entity(object):
         self.parent.parent.update_idletasks()
 
     def draw(self):
-        self.entity = self.parent.canvas.create_text(self.location["x"], self.location["y"], text=get_references()["icons"][self.entity_type], font=get_fonts()[self.entity_type]["normal"])
+        self.entity = self.parent.canvas.create_text(self.location["x"], self.location["y"], text=get_references()["icons"][self.entity_type], font=get_fonts()[self.entity_type]["normal"], tags=[self])
         if self.entity_type == "pawn":
-            self.entity_name = self.parent.canvas.create_text(self.location["x"], self.location["y"] + 17, text="{} {}".format(self.name["forename"], self.name["surname"]), font=get_fonts()["text"]["normal"], tag="extra")
-            self.entity_health = self.parent.canvas.create_text(self.location["x"], self.location["y"] + 27, text="{}/{}".format(self.health, self.total_health), font=get_fonts()["text"]["normal"], tag="extra")
+            self.entity_name = self.parent.canvas.create_text(self.location["x"], self.location["y"] + 17, text="{} {}".format(self.name["forename"], self.name["surname"]), state="disabled", font=get_fonts()["text"]["normal"], tag="extra")
+            self.entity_health = self.parent.canvas.create_text(self.location["x"], self.location["y"] + 27, text="{}/{}".format(self.health, self.total_health), state="disabled", font=get_fonts()["text"]["normal"], tag="extra")
         elif self.entity_type == "item":
-            self.entity_name = self.parent.canvas.create_text(self.location["x"], self.location["y"] + 10, text=self.name, font=get_fonts()["text"]["normal"], tag="extra")
-            self.entity_amount = self.parent.canvas.create_text(self.location["x"], self.location["y"] + 20, text=self.amount, font=get_fonts()["text"]["normal"], tag="extra")
+            pass
+            # self.entity_name = self.parent.canvas.create_text(self.location["x"], self.location["y"] + 10, text=self.name, state="disabled", font=get_fonts()["text"]["normal"], tag="extra")
+            # self.entity_amount = self.parent.canvas.create_text(self.location["x"], self.location["y"] + 20, text=self.amount, state="disabled", font=get_fonts()["text"]["normal"], tag="extra")
 
         self.parent.canvas.tag_bind(self.entity, "<ButtonRelease-1>", self.select, "+")
         self.parent.canvas.tag_bind(self.entity, "<Enter>", self.enter, "+")
@@ -77,7 +78,8 @@ class Entity(object):
 
         if self.parent.selected_item is not None:
             if background:
-                self.menu.add_command(label="Move Here", command=lambda: self.parent.selected_item.move_to(self.last_mouse_x, self.last_mouse_y, "moving"))
+                if self.entity_type == "pawn":
+                    self.menu.add_command(label="Move Here", command=lambda: self.parent.selected_item.move_to(self.last_mouse_x, self.last_mouse_y, "moving"))
             elif not background:
                 if self.entity_type == "pawn":
                     self.menu.add_command(label="Information", command=None)
@@ -93,7 +95,7 @@ class Entity(object):
         except TypeError:
             pass
 
-    def select(self, event):
+    def select(self, event=None):
         self.parent.canvas.itemconfigure(self.entity, font=get_fonts()[self.entity_type]["selected"])
         self.parent.canvas.itemconfigure(self.entity_name, font=get_fonts()["text"]["selected"])
         if self.entity_type == "pawn":

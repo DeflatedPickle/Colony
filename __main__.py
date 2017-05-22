@@ -5,8 +5,9 @@
 """
 
 import tkinter as tk
+from _tkinter import TclError
 from tkinter import ttk
-from random import randint
+from random import randint, choice
 
 import colony
 
@@ -33,7 +34,6 @@ class GameWindow(tk.Tk):
         self.start_menu_title()
 
     def start_menu_title(self):
-        # TODO: Have the TaskBar be removed upon restart.
         self.canvas.delete("all")
         try:
             self.after_cancel(self.debug_update)
@@ -88,7 +88,8 @@ class Start(object):
 
     def start_game(self):
         self.parent.canvas.delete("all")
-        self.scenarios = Scenarios(self.parent)
+        Game(self.parent)
+        # self.scenarios = Scenarios(self.parent)
 
     def start_options(self):
         self.parent.canvas.delete("all")
@@ -108,20 +109,36 @@ class Game(object):
         self.selected_item = None
 
         self.debug = DeBug(self)
-        self.taskbar = TaskBar(self.parent)
-        self.canvas.create_window(0, self.parent.winfo_height() - 23, window=TaskBar(self.parent), anchor="nw", width=self.canvas.winfo_width(), tags="taskbar")
-        # TODO: Add a lower and upper button to select entities below or above the selected.
+        self.on_resize()
+
+        canvas_x = self.parent.canvas.winfo_width()
+        canvas_y = self.parent.canvas.winfo_height()
+
+        drop_x = randint((canvas_x // 2) + 25, (canvas_x // 2) + 25)
+        drop_y = randint((canvas_y // 2) + 25, (canvas_y // 2) + 25)
+
+        for item in range(5):
+            wood = self.register_items()[choice(list(self.register_items().keys()))]
+            wood.location["x"] = drop_x + randint(-25, 25)
+            wood.location["y"] = drop_y + randint(-25, 25)
+            wood.draw()
 
     def register_items(self):
         # NOTE: Might not be the best idea to register items like this.
         return {"wood": colony.Item(self, name="Wood", stack_size=100),
                 "stone": colony.Item(self, name="Stone", stack_size=100),
-                "iron ore": colony.Item(self, name="Iron Ore", stack_size=100),
-                "iron ingot": colony.Item(self, name="Iron Ingot", stack_size=100)}
+                "ore_iron": colony.Item(self, name="Iron Ore", stack_size=100),
+                "ingot_iron": colony.Item(self, name="Iron Ingot", stack_size=100)}
 
-    def on_resize(self, event):
+    def on_resize(self, event=None):
         self.canvas.delete("taskbar")
         self.canvas.create_window(0, self.parent.winfo_height() - 23, window=TaskBar(self.parent), anchor="nw", width=self.canvas.winfo_width(), tags="taskbar")
+        self.canvas.create_window(0, self.parent.winfo_height() - 48, window=ttk.Button(self.parent, text="/\\", width=3, command=lambda: self.find_around(True)), anchor="nw", tags="taskbar")
+        self.canvas.create_window(28, self.parent.winfo_height() - 48, window=ttk.Button(self.parent, text="\/", width=3, command=lambda: self.find_around(False)), anchor="nw", tags="taskbar")
+
+    def find_around(self, layer):
+        # TODO: Have this function search above or below the selected object based on layer and then select the found object
+        pass
 
 
 class Options(object):

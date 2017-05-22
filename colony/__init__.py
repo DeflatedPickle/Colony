@@ -4,6 +4,7 @@
 
 """
 
+from .entity import Entity
 from .pawn import Pawn
 from .item import Item
 from .scenario import Scenario

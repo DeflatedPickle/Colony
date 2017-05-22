@@ -20,5 +20,7 @@ class Item(Entity):
         self.stack_size = stack_size
         self.amount = amount
 
-        self.parent.parent.start.scenarios.game.entities.append(self)
-        self.parent.parent.start.scenarios.game.items.append(self)
+        # self.parent.parent.start.scenarios.game.entities.append(self)
+        self.parent.entities.append(self)
+        # self.parent.parent.start.scenarios.game.items.append(self)
+        self.parent.items.append(self)
