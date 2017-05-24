@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-
-"""
+""""""
 
 from .entity import Entity
 from .pawn import Pawn
 from .item import Item
+# TODO: Add a Weapon class.
+# TODO: Add an Armour class.
 from .scenario import Scenario
+# TODO: Add an Event class.
+# TODO: Add a Zone class.
 from .references import *
-# TODO: Create Event class
 
 __title__ = "Colony"
 
@@ -18,7 +19,7 @@ __copyright__ = "Copyright (c) 2017 Dibbo"
 __credits__ = ["DeflatedPickle/Dibbo"]
 
 __license__ = "MIT"
-__version__ = "1.7.1"
+__version__ = "1.9.0"
 __maintainer__ = "DeflatedPickle/Dibbo"
 __email__ = "DeflatedPickle@gmail.com"
 __status__ = "Development"

@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-
-"""
+""""""
 
 import tkinter as tk
-from _tkinter import TclError
 from tkinter import ttk
 from random import randint, choice
 
@@ -56,7 +53,7 @@ class GameWindow(tk.Tk):
 
 class TaskBar(ttk.Frame):
     def __init__(self, parent, *args, **kwargs):
-        ttk.Frame.__init__(self, parent, *args, **kwargs)
+        ttk.Frame.__init__(self, parent, **kwargs)
         self.parent = parent
 
         self.option_menu = tk.Menu(self.parent)
@@ -65,7 +62,7 @@ class TaskBar(ttk.Frame):
 
         self.add_button("Options", self.option_menu)
 
-    def add_button(self, text: str="", menu: tk.Menu=None):
+    def add_button(self, text: str = "", menu: tk.Menu = None):
         button = ttk.Menubutton(self, text=text, menu=menu, direction="above")
         button.pack(side="left", fill="x", expand=True)
 
@@ -73,23 +70,30 @@ class TaskBar(ttk.Frame):
 
 
 class Start(object):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent):
         self.parent = parent
 
         self.parent.canvas.create_text(5, 5, text="Colony", anchor="nw", font=colony.get_fonts()["menu"]["title"])
-        self.parent.canvas.create_text(5, 45, text="A simple colony simulator created by Dibbo, inspired by RimWorld and Dwarf Fortress.", anchor="nw", font=colony.get_fonts()["menu"]["subtitle"])
+        self.parent.canvas.create_text(5, 45,
+                                       text="A simple colony simulator created by Dibbo, inspired by RimWorld and Dwarf"
+                                            "Fortress.",
+                                       anchor="nw", font=colony.get_fonts()["menu"]["subtitle"])
 
-        self.parent.canvas.create_window(5, 70, window=ttk.Button(self.parent.canvas, text="Start", command=self.start_game), anchor="nw")
-        self.parent.canvas.create_window(5, 100, window=ttk.Button(self.parent.canvas, text="Options", command=self.start_options), anchor="nw")
-        self.parent.canvas.create_window(5, 130, window=ttk.Button(self.parent.canvas, text="Exit", command=self.parent.exit), anchor="nw")
+        self.parent.canvas.create_window(5, 70,
+                                         window=ttk.Button(self.parent.canvas, text="Start", command=self.start_game),
+                                         anchor="nw")
+        self.parent.canvas.create_window(5, 100, window=ttk.Button(self.parent.canvas, text="Options",
+                                                                   command=self.start_options), anchor="nw")
+        self.parent.canvas.create_window(5, 130,
+                                         window=ttk.Button(self.parent.canvas, text="Exit", command=self.parent.exit),
+                                         anchor="nw")
 
         self.scenarios = None
         self.options = None
 
     def start_game(self):
         self.parent.canvas.delete("all")
-        Game(self.parent)
-        # self.scenarios = Scenarios(self.parent)
+        self.scenarios = Scenarios(self.parent)
 
     def start_options(self):
         self.parent.canvas.delete("all")
@@ -97,7 +101,7 @@ class Start(object):
 
 
 class Game(object):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent):
         self.parent = parent
         self.entities = []
         self.pawns = []
@@ -111,18 +115,6 @@ class Game(object):
         self.debug = DeBug(self)
         self.on_resize()
 
-        canvas_x = self.parent.canvas.winfo_width()
-        canvas_y = self.parent.canvas.winfo_height()
-
-        drop_x = randint((canvas_x // 2) + 25, (canvas_x // 2) + 25)
-        drop_y = randint((canvas_y // 2) + 25, (canvas_y // 2) + 25)
-
-        for item in range(5):
-            wood = self.register_items()[choice(list(self.register_items().keys()))]
-            wood.location["x"] = drop_x + randint(-25, 25)
-            wood.location["y"] = drop_y + randint(-25, 25)
-            wood.draw()
-
     def register_items(self):
         # NOTE: Might not be the best idea to register items like this.
         return {"wood": colony.Item(self, name="Wood", stack_size=100),
@@ -132,26 +124,36 @@ class Game(object):
 
     def on_resize(self, event=None):
         self.canvas.delete("taskbar")
-        self.canvas.create_window(0, self.parent.winfo_height() - 23, window=TaskBar(self.parent), anchor="nw", width=self.canvas.winfo_width(), tags="taskbar")
-        self.canvas.create_window(0, self.parent.winfo_height() - 48, window=ttk.Button(self.parent, text="/\\", width=3, command=lambda: self.find_around(True)), anchor="nw", tags="taskbar")
-        self.canvas.create_window(28, self.parent.winfo_height() - 48, window=ttk.Button(self.parent, text="\/", width=3, command=lambda: self.find_around(False)), anchor="nw", tags="taskbar")
+        self.canvas.create_window(0, self.parent.winfo_height() - 23, window=TaskBar(self.parent), anchor="nw",
+                                  width=self.canvas.winfo_width(), tags="taskbar")
+        self.canvas.create_window(0, self.parent.winfo_height() - 48,
+                                  window=ttk.Button(self.parent, text="/\\", width=3,
+                                                    command=lambda: self.find_around(True)), anchor="nw",
+                                  tags="taskbar")
+        self.canvas.create_window(28, self.parent.winfo_height() - 48,
+                                  window=ttk.Button(self.parent, text="\/", width=3,
+                                                    command=lambda: self.find_around(False)), anchor="nw",
+                                  tags="taskbar")
+
+        del event
 
     def find_around(self, layer):
-        # TODO: Have this function search above or below the selected object based on layer and then select the found object
+        # TODO: Have this function search around the selected object and then select the found object
         pass
 
 
 class Options(object):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent):
         self.parent = parent
 
         # TODO: Add options.
 
-        self.parent.canvas.create_window(5, 130, window=ttk.Button(self.parent.canvas, text="Back", command=self.parent.start_menu_title), anchor="nw")
+        self.parent.canvas.create_window(5, 130, window=ttk.Button(self.parent.canvas, text="Back",
+                                                                   command=self.parent.start_menu_title), anchor="nw")
 
 
 class Scenarios(object):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent):
         self.parent = parent
 
         # TODO: Add an easy way for others to make new scenarios without editing code.
@@ -180,15 +182,25 @@ class Scenarios(object):
 
         self.parent.canvas.create_window(230, 5, window=frame_text, anchor="nw")
 
-        self.parent.canvas.create_window(510, 260, window=ttk.Button(self.parent.canvas, text="Start", command=self.start_game), anchor="nw")
+        self.parent.canvas.create_window(510, 260, window=ttk.Button(self.parent.canvas, text="Start",
+                                                                     command=self.start_game), anchor="nw")
 
         self.game = None
 
         self.default_scenarios()
 
     def default_scenarios(self):
-        colony.Scenario(self, self.treeview, title="Lonely Bean", description="Just you, yourself and you.", contents={"pawns": 1, "items": {"wood": 50, "stone": 20}})
-        colony.Scenario(self, self.treeview, title="Weekend Camp Gone Wrong", description="You were camping with your friends when suddenly... you were still camping but it was boring.", contents={"pawns": 3})
+        colony.Scenario(self,
+                        self.treeview,
+                        title="Lonely Bean",
+                        description="Just you, yourself and you.",
+                        contents={"pawns": 1, "items": {"wood": 50, "stone": 20}})
+        colony.Scenario(self,
+                        self.treeview,
+                        title="Weekend Camp Gone Wrong",
+                        description="You were camping with your friends when suddenly... you were still camping but it"
+                                    "was boring.",
+                        contents={"pawns": 3})
 
     def select_scenario(self, *args):
         self.text.delete(1.0, "end")
@@ -199,11 +211,15 @@ class Scenarios(object):
 
         self.selected_scenario = int(self.treeview.selection()[0][-1:]) - 1
 
+        del args
+
     def start_game(self, *args):
         if self.treeview.focus() != "":
             self.parent.canvas.delete("all")
             self.game = Game(self.parent)
             self.spawn(self.scenario_list[self.selected_scenario])
+
+        del args
 
     def spawn(self, scenario):
         canvas_x = self.parent.canvas.winfo_width()
@@ -215,13 +231,17 @@ class Scenarios(object):
         # NOTE: Scenarios can exist without pawns.
         if "pawns" in scenario.contents:
             for amount in range(scenario.contents["pawns"]):
-
-                colony.Pawn(self.game, x=drop_x + randint(-25, 25), y=drop_y + randint(-25, 25)).generate_random().draw()
+                colony.Pawn(self.game,
+                            x=drop_x + randint(-25, 25),
+                            y=drop_y + randint(-25, 25)).generate_random().draw()
 
         # NOTE: Scenarios can exist without items.
         if "items" in scenario.contents:
             for item in scenario.contents["items"]:
-                reg_item = self.game.register_items()[item]
+                if item == "random":
+                    reg_item = self.game.register_items()[choice(list(self.game.register_items().keys()))]
+                else:
+                    reg_item = self.game.register_items()[item]
 
                 reg_item.amount = scenario.contents["items"][item]
 
@@ -238,7 +258,8 @@ class DeBug(object):
 
         self.state = True
         self.parent.parent.bind("<Escape>", self.change_state)
-        # self.parent.parent.canvas.bind("<Motion>", self.mouse_location)  # This will draw text next to the mouse pointer that contains the mouse position
+        # This will draw text next to the mouse pointer that contains the mouse position
+        # self.parent.parent.canvas.bind("<Motion>", self.mouse_location)
 
         self.update()
 
@@ -261,14 +282,15 @@ class DeBug(object):
 
         self.parent.parent.debug_update = self.parent.parent.after(colony.get_interval(), self.update)
 
-    def add_debug_line(self, text: str=""):
+    def add_debug_line(self, text: str = ""):
         self.parent.canvas.create_text(5, self.counter, anchor="w", text=text, tag="debug")
         self.counter += 15
 
     def find_selected(self):
         for item in self.parent.entities:
             if item.selected:
-                return "{}: {}".format(item.entity_type, item.name if not isinstance(item.name, type(dict())) else item.get_name())
+                return "{}: {}".format(item.entity_type, item.name if not isinstance(item.name,
+                                                                                     type(dict())) else item.get_name())
 
     def find_selected_location(self):
         for item in self.parent.entities:
@@ -294,6 +316,8 @@ class DeBug(object):
     def change_state(self, *args):
         self.state = not self.state
 
+        del args
+
     def mouse_location(self, event):
         self.parent.canvas.delete("mouse")
 
@@ -313,10 +337,13 @@ class ResizingCanvas(tk.Canvas):
     def on_resize(self, event):
         self.configure(width=self.parent.winfo_width(), height=self.parent.winfo_height())
 
+        del event
+
 
 def main():
     app = GameWindow()
     app.mainloop()
+
 
 if __name__ == "__main__":
     main()
