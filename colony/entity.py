@@ -3,6 +3,7 @@
 """"""
 
 import tkinter as tk
+from _tkinter import TclError
 
 import pkinter as pk
 
@@ -15,8 +16,8 @@ __version__ = "1.4.0"
 
 
 class Entity(object):
-    """Creates a pawn."""
-    def __init__(self, parent, x: int=0, y: int=0, entity_type: str=""):
+    """Creates an entity."""
+    def __init__(self, parent, x: int=0, y: int=0, entity_type: str="entity"):
         self.parent = parent
         self.name = None
         self.health = 0
@@ -35,7 +36,7 @@ class Entity(object):
         elif self.entity_type == "item":
             self.amount = None
 
-        self.parent.entities.append(self)
+        self.parent.entities[len(self.parent.entities)] = self
 
         self.entity = None
         self.entity_name = None
@@ -47,8 +48,12 @@ class Entity(object):
 
         self.menu = tk.Menu(self.parent.parent)
 
-        self.parent.parent.update()
-        self.parent.parent.update_idletasks()
+        try:
+            self.parent.parent.update()
+            self.parent.parent.update_idletasks()
+
+        except TclError:
+            pass
 
     def draw(self):
         """Draws the entity on the canvas."""
@@ -66,6 +71,7 @@ class Entity(object):
                                                               state="disabled",
                                                               font=get_fonts()["text"]["normal"],
                                                               tag="extra")
+
             self.entity_health = self.parent.canvas.create_text(self.location["x"],
                                                                 self.location["y"] + 27,
                                                                 text="{}/{}".format(self.health,
@@ -81,6 +87,7 @@ class Entity(object):
                                                               state="disabled",
                                                               font=get_fonts()["text"]["normal"],
                                                               tag="extra")
+
             self.entity_amount = self.parent.canvas.create_text(self.location["x"],
                                                                 self.location["y"] + 20,
                                                                 text=self.amount,
@@ -124,8 +131,10 @@ class Entity(object):
             elif not background:
                 if self.entity_type == "pawn":
                     pass
+
                 elif self.entity_type == "item":
                     self.menu.add_command(label="Pick Up", command=None)
+
                 self.menu.add_command(label="Information", command=self.show_information)
 
         self.menu.post(event.x_root, event.y_root)

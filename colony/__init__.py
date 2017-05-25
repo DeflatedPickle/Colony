@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 """"""
 
-from .entity import Entity
+# from .entity import Entity
+# from .movingentity import MovingEntity
 from .pawn import Pawn
+# TODO: Add an Animal class.
 from .item import Item
 # TODO: Add a Weapon class.
 # TODO: Add an Armour class.
@@ -19,7 +21,7 @@ __copyright__ = "Copyright (c) 2017 Dibbo"
 __credits__ = ["DeflatedPickle/Dibbo"]
 
 __license__ = "MIT"
-__version__ = "1.9.0"
+__version__ = "1.10.0"
 __maintainer__ = "DeflatedPickle/Dibbo"
 __email__ = "DeflatedPickle@gmail.com"
 __status__ = "Development"

@@ -57,20 +57,53 @@ def get_interval():
 
 
 def get_male_names():
-    # TODO: Add more names.
-    return ["Frank", "Dan"]
+    # TODO: Add more male names.
+    return [
+        "Frank", "Dan",  # Random names
+        "Tarn", "Zach",  # Dwarf Fortress references
+        "Tynan"  # RimWorld references
+    ]
 
 
 def get_female_names():
-    # TODO: Add more names.
-    return ["Amy", "Shara"]
+    # TODO: Add more female names.
+    return [
+        "Amy", "Shara", "Rose"  # Random names
+    ]
+
+
+def get_nicknames():
+    # TODO: Add more nicknames.
+    return [
+        ""   # Random names
+    ]
 
 
 def get_middle_names():
-    # TODO: Add more names.
-    return []
+    # TODO: Add more middle names.
+    return [
+        ""   # Random names
+    ]
 
 
 def get_surnames():
-    # TODO: Add more names.
-    return ["Wright", "Smith", "Brown"]
+    # TODO: Add more surnames names.
+    return [
+        "Wright", "Smith", "Brown",  # Random names
+        "Adams",  # Dwarf Fortress references
+        "Sylvester"  # RimWorld references
+    ]
+
+
+def get_male_animal_names():
+    # TODO: Add more animal names.
+    return [
+        "Jayson", "Jack"
+    ]
+
+
+def get_female_animal_names():
+    # TODO: Add more animal names.
+    return [
+        "Bella", "Molly"
+    ]
