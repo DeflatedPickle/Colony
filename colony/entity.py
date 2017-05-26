@@ -12,7 +12,7 @@ from .window import Window
 
 __title__ = "Entity"
 __author__ = "DeflatedPickle"
-__version__ = "1.4.0"
+__version__ = "1.4.1"
 
 
 class Entity(object):
@@ -35,8 +35,6 @@ class Entity(object):
 
         elif self.entity_type == "item":
             self.amount = None
-
-        self.parent.entities[len(self.parent.entities)] = self
 
         self.entity = None
         self.entity_name = None
@@ -61,7 +59,7 @@ class Entity(object):
                                                      self.location["y"],
                                                      text=get_references()["icons"][self.entity_type],
                                                      font=get_fonts()[self.entity_type]["normal"],
-                                                     tags=self)
+                                                     tags="entity")
 
         if self.entity_type == "pawn":
             self.entity_name = self.parent.canvas.create_text(self.location["x"],
@@ -95,12 +93,18 @@ class Entity(object):
                                                                 font=get_fonts()["text"]["normal"],
                                                                 tag="extra")
 
+        self.parent.entities[self.entity] = self
+
         self.parent.canvas.tag_bind(self.entity, "<ButtonRelease-1>", self.select, "+")
         self.parent.canvas.tag_bind(self.entity, "<Enter>", self.enter, "+")
         self.parent.canvas.tag_bind(self.entity, "<Leave>", self.leave, "+")
 
         self.parent.canvas.bind("<Button-1>", self.unselect, "+")
         self.parent.canvas.bind("<Button-1>", self.delete_all, "+")
+
+        self.parent.canvas.bind("<Button-3>", lambda e: self.show_menu(e, background=True))
+        self.parent.canvas.tag_bind(self.entity,
+                                    "<ButtonRelease-3>", lambda e: self.show_menu(e, background=False), "+")
 
         self.parent.canvas.tag_raise(self)
 
@@ -170,7 +174,7 @@ class Entity(object):
 
         del event
 
-    def unselect(self, event):
+    def unselect(self, event=None):
         """Unselects the entity."""
         self.parent.canvas.itemconfigure(self.entity, font=get_fonts()[self.entity_type]["normal"])
         self.parent.canvas.itemconfigure(self.entity_name, font=get_fonts()["text"]["normal"])
@@ -189,16 +193,9 @@ class Entity(object):
     def enter(self, event):
         self.parent.canvas.configure(cursor="hand2")
 
-        self.parent.canvas.unbind("<Button-3>")
-        self.parent.canvas.tag_bind(self.entity,
-                                    "<ButtonRelease-3>", lambda e: self.show_menu(e, background=False), "+")
-
         del event
 
     def leave(self, event):
         self.parent.canvas.configure(cursor="arrow")
-
-        self.parent.canvas.bind("<Button-3>", lambda e: self.show_menu(e, background=True))
-        self.parent.canvas.tag_unbind(self.entity, "<ButtonRelease-3>")
 
         del event

@@ -8,7 +8,7 @@ from tkinter import font
 
 __title__ = "Pawn"
 __author__ = "DeflatedPickle"
-__version__ = "1.5.0"
+__version__ = "1.5.1"
 
 
 def get_frame_rate():
@@ -36,7 +36,7 @@ def get_fonts():
         "pawn": {
             "normal": font.Font(family=family, size=get_size()),
             "selected": font.Font(family=family, size=get_size(), weight="bold"),
-            "pawnbar": font.Font(family=family, size=get_size() - 15)
+            "pawnbar": font.Font(family=family, size=get_size() - 5)
         },
         "item": {
             "normal": font.Font(family=family, size=get_size()),

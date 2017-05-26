@@ -11,7 +11,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.15.0"
+__version__ = "1.16.0"
 
 
 class GameWindow(tk.Tk):
@@ -69,16 +69,25 @@ class TaskBar(ttk.Frame):
 
 class PawnBar(tk.Frame):
     def __init__(self, parent, **kwargs):
-        tk.Frame.__init__(self, parent, **kwargs)
+        tk.Frame.__init__(self, parent.parent, **kwargs)
         self.parent = parent
 
     def add_pawn(self, pawn):
         canvas = tk.Canvas(self, width=50, height=50)
-        canvas.create_text(25, 45, text=pawn.name["forename"], anchor="center",
+        canvas.create_text(25, 20, text=colony.get_references()["icons"]["pawn"], font=colony.get_fonts()["pawn"]["pawnbar"])
+        canvas.create_text(25, 40, text=pawn.name["forename"], anchor="center",
                            font=colony.get_fonts()["text"]["pawnbar"])
         canvas.pack(side="left")
 
+        canvas.bind("<ButtonRelease-1>", pawn.select, "+")
+        canvas.bind("<Button-1>", self.unselect_all, "+")
+
         return canvas
+
+    def unselect_all(self, *args):
+        for pawn in self.parent.canvas.find_withtag("entity"):
+            if self.parent.entities[pawn].entity_type == "pawn":
+                self.parent.entities[pawn].unselect()
 
 
 class Start(object):
@@ -125,7 +134,7 @@ class Game(object):
         self.selected_item = None
 
         self.debug = DeBug(self)
-        self.pawn_bar = PawnBar(self.parent)
+        self.pawn_bar = PawnBar(self)
         self.draw_widgets()
 
     def register_items(self):
@@ -231,6 +240,12 @@ class Scenarios(object):
                         contents={"pawns": 7})
 
         self.scenario_list.append(self.treeview.insert("", "end", text="-----Debug-----"))
+
+        colony.Scenario(self,
+                        self.treeview,
+                        title="Nothing",
+                        description="You spawn with nothing.",
+                        contents={})
 
         colony.Scenario(self,
                         self.treeview,
