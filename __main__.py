@@ -11,7 +11,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.16.0"
+__version__ = "1.17.1"
 
 
 class GameWindow(tk.Tk):
@@ -74,20 +74,16 @@ class PawnBar(tk.Frame):
 
     def add_pawn(self, pawn):
         canvas = tk.Canvas(self, width=50, height=50)
-        canvas.create_text(25, 20, text=colony.get_references()["icons"]["pawn"], font=colony.get_fonts()["pawn"]["pawnbar"])
+        canvas.create_text(25, 20, text=colony.get_references()["icons"]["pawn"],
+                           font=colony.get_fonts()["pawn"]["pawnbar"])
         canvas.create_text(25, 40, text=pawn.name["forename"], anchor="center",
                            font=colony.get_fonts()["text"]["pawnbar"])
         canvas.pack(side="left")
 
         canvas.bind("<ButtonRelease-1>", pawn.select, "+")
-        canvas.bind("<Button-1>", self.unselect_all, "+")
+        canvas.bind("<Button-1>", self.parent.unselect_all, "+")
 
         return canvas
-
-    def unselect_all(self, *args):
-        for pawn in self.parent.canvas.find_withtag("entity"):
-            if self.parent.entities[pawn].entity_type == "pawn":
-                self.parent.entities[pawn].unselect()
 
 
 class Start(object):
@@ -156,18 +152,38 @@ class Game(object):
         # TODO: Move the upper and lower buttons to the previously mentioned frame.
         self.canvas.create_window(0, self.parent.winfo_height() - 48,
                                   window=ttk.Button(self.parent, text="/\\", width=3,
-                                                    command=lambda: self.find_around(True)), anchor="nw",
+                                                    command=lambda: self.select_around(True)), anchor="nw",
                                   tags="HUD")
         self.canvas.create_window(28, self.parent.winfo_height() - 48,
                                   window=ttk.Button(self.parent, text="\/", width=3,
-                                                    command=lambda: self.find_around(False)), anchor="nw",
+                                                    command=lambda: self.select_around(False)), anchor="nw",
                                   tags="HUD")
 
         del event
 
-    def find_around(self, layer):
-        # TODO: Have this function search around the selected object and then select the found object
-        pass
+    def select_around(self, layer):
+        # print(self.entities)
+        for entity in self.parent.canvas.find_withtag("entity"):
+            # print("Entity: {}".format(entity))
+            # print("Selected: {}".format(self.selected_item.entity))
+            if not layer:
+                # print("Below: {}".format(self.parent.canvas.find_below(self.selected_item.entity)[0]))
+                if entity <= self.parent.canvas.find_below(self.selected_item.entity)[0]:
+                    self.unselect_all()
+                    self.entities[entity].select()
+
+            if layer:
+                # print("Above: {}".format(self.parent.canvas.find_above(self.selected_item.entity)[0]))
+                if entity >= self.parent.canvas.find_above(self.selected_item.entity)[0]:
+                    self.unselect_all()
+                    self.entities[entity].select()
+
+    def unselect_all(self, *args):
+        for pawn in self.canvas.find_withtag("entity"):
+            if self.entities[pawn].entity_type == "pawn":
+                self.entities[pawn].unselect()
+
+        del args
 
 
 class Options(object):
