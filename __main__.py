@@ -11,7 +11,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.14.1"
+__version__ = "1.15.0"
 
 
 class GameWindow(tk.Tk):
@@ -67,6 +67,20 @@ class TaskBar(ttk.Frame):
         return button
 
 
+class PawnBar(tk.Frame):
+    def __init__(self, parent, **kwargs):
+        tk.Frame.__init__(self, parent, **kwargs)
+        self.parent = parent
+
+    def add_pawn(self, pawn):
+        canvas = tk.Canvas(self, width=50, height=50)
+        canvas.create_text(25, 45, text=pawn.name["forename"], anchor="center",
+                           font=colony.get_fonts()["text"]["pawnbar"])
+        canvas.pack(side="left")
+
+        return canvas
+
+
 class Start(object):
     def __init__(self, parent):
         self.parent = parent
@@ -111,6 +125,7 @@ class Game(object):
         self.selected_item = None
 
         self.debug = DeBug(self)
+        self.pawn_bar = PawnBar(self.parent)
         self.draw_widgets()
 
     def register_items(self):
@@ -121,21 +136,23 @@ class Game(object):
                 "ingot_iron": colony.Item(self, name="Iron Ingot", stack_size=100)}
 
     def draw_widgets(self, event=None):
-        self.canvas.delete("taskbar")
+        self.canvas.delete("HUD")
+
+        self.canvas.create_window(self.canvas.winfo_width() // 2, 30, window=self.pawn_bar, anchor="center", tags="HUD")
 
         self.canvas.create_window(0, self.parent.winfo_height() - 23, window=TaskBar(self.parent), anchor="nw",
-                                  width=self.canvas.winfo_width(), tags="taskbar")
+                                  width=self.canvas.winfo_width(), tags="HUD")
 
         # TODO: Create a frame to hold information that is shown when an entity is selected.
         # TODO: Move the upper and lower buttons to the previously mentioned frame.
         self.canvas.create_window(0, self.parent.winfo_height() - 48,
                                   window=ttk.Button(self.parent, text="/\\", width=3,
                                                     command=lambda: self.find_around(True)), anchor="nw",
-                                  tags="taskbar")
+                                  tags="HUD")
         self.canvas.create_window(28, self.parent.winfo_height() - 48,
                                   window=ttk.Button(self.parent, text="\/", width=3,
                                                     command=lambda: self.find_around(False)), anchor="nw",
-                                  tags="taskbar")
+                                  tags="HUD")
 
         del event
 
@@ -206,6 +223,13 @@ class Scenarios(object):
                                     "was boring.",
                         contents={"pawns": 3})
 
+        colony.Scenario(self,
+                        self.treeview,
+                        title="Wimps From Yonder",
+                        description="Your previous town was ransacked by pirates, all your friends and family were"
+                                    "murdered, but you and a few others managed to escape.",
+                        contents={"pawns": 7})
+
         self.scenario_list.append(self.treeview.insert("", "end", text="-----Debug-----"))
 
         colony.Scenario(self,
@@ -220,7 +244,8 @@ class Scenarios(object):
         self.text.delete(1.0, "end")
         if not self.treeview.item(self.treeview.focus())["text"].startswith("-"):
             self.text.insert("end", "{}\n\n".format(self.treeview.item(self.treeview.focus())["text"]))
-            self.text.insert("end", "Description: {}\n\n".format(self.treeview.item(self.treeview.focus())["values"][0]))
+            self.text.insert("end",
+                             "Description: {}\n\n".format(self.treeview.item(self.treeview.focus())["values"][0]))
             # TODO: Show contents as string with commas separating each item.
             self.text.insert("end", "Contents: {}\n\n".format(self.treeview.item(self.treeview.focus())["values"][1]))
 
@@ -249,7 +274,7 @@ class Scenarios(object):
             for amount in range(scenario.contents["pawns"]):
                 colony.Pawn(self.game,
                             x=drop_x + randint(-25, 25),
-                            y=drop_y + randint(-25, 25)).generate_random().draw()
+                            y=drop_y + randint(-25, 25)).generate_random().draw().add_to_pawn_bar()
 
         # NOTE: Scenarios can exist without items.
         if "items" in scenario.contents:

@@ -31,22 +31,25 @@ def get_size():
 
 
 def get_fonts():
+    family = "Arial"
     fonts = {
         "pawn": {
-            "normal": font.Font(family="Arial", size=get_size()),
-            "selected": font.Font(family="Arial", size=get_size(), weight="bold")
+            "normal": font.Font(family=family, size=get_size()),
+            "selected": font.Font(family=family, size=get_size(), weight="bold"),
+            "pawnbar": font.Font(family=family, size=get_size() - 15)
         },
         "item": {
-            "normal": font.Font(family="Arial", size=get_size()),
-            "selected": font.Font(family="Arial", size=get_size(), weight="bold")
+            "normal": font.Font(family=family, size=get_size()),
+            "selected": font.Font(family=family, size=get_size(), weight="bold")
         },
         "text": {
-            "normal": font.Font(family="Arial", size=get_size() // 4),
-            "selected": font.Font(family="Arial", size=get_size() // 4, weight="bold")
+            "normal": font.Font(family=family, size=get_size() // 4),
+            "selected": font.Font(family=family, size=get_size() // 4, weight="bold"),
+            "pawnbar": font.Font(family=family, size=get_size() - 15)
         },
         "menu": {
-            "title": font.Font(family="Arial", size=get_size(), weight="bold"),
-            "subtitle": font.Font(family="Arial", size=get_size() - 15),
+            "title": font.Font(family=family, size=get_size(), weight="bold"),
+            "subtitle": font.Font(family=family, size=get_size() - 15),
         }
     }
     return fonts

@@ -9,7 +9,7 @@ from .references import get_interval, get_male_names, get_female_names, get_surn
 
 __title__ = "Pawn"
 __author__ = "DeflatedPickle"
-__version__ = "1.9.2"
+__version__ = "1.10.0"
 
 
 class Pawn(MovingEntity):
@@ -36,6 +36,11 @@ class Pawn(MovingEntity):
 
         self.check_action()
 
+    def add_to_pawn_bar(self):
+        self.parent.pawn_bar.add_pawn(self)
+
+        return self
+
     def get_name(self):
         """Returns the name of the pawn."""
         return "{} {}".format(self.name["forename"], self.name["surname"])
@@ -54,6 +59,8 @@ class Pawn(MovingEntity):
         self.age = randint(14, 90)
 
         return self
+
+    # TODO: Move all action related functions and variables to a new class called "Behaviour" and have it sorted there.
 
     def check_action(self):
         """Checks the pawns current action."""
