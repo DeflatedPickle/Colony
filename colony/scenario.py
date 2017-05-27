@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-
-"""
+""""""
 
 __title__ = "Scenario"
 __author__ = "DeflatedPickle"

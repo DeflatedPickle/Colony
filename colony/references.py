@@ -18,7 +18,7 @@ def get_frame_rate():
 def get_references():
     references = {
         "icons": {
-            "pawn": u"\u25AF",  # WHITE VERTICAL RECTANGLE
+            "colonist": u"\u25AF",  # WHITE VERTICAL RECTANGLE
             "block": u"\u25FB",  # WHITE MEDIUM SQUARE
             "item": u"\u25FD"  # WHITE MEDIUM SMALL SQUARE
         }
@@ -33,10 +33,10 @@ def get_size():
 def get_fonts():
     family = "Arial"
     fonts = {
-        "pawn": {
+        "colonist": {
             "normal": font.Font(family=family, size=get_size()),
             "selected": font.Font(family=family, size=get_size(), weight="bold"),
-            "pawnbar": font.Font(family=family, size=get_size() - 5)
+            "colonistbar": font.Font(family=family, size=get_size() - 5)
         },
         "item": {
             "normal": font.Font(family=family, size=get_size()),
@@ -45,7 +45,7 @@ def get_fonts():
         "text": {
             "normal": font.Font(family=family, size=get_size() // 4),
             "selected": font.Font(family=family, size=get_size() // 4, weight="bold"),
-            "pawnbar": font.Font(family=family, size=get_size() - 15)
+            "colonistbar": font.Font(family=family, size=get_size() - 15)
         },
         "menu": {
             "title": font.Font(family=family, size=get_size(), weight="bold"),

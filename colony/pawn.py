@@ -12,11 +12,11 @@ __author__ = "DeflatedPickle"
 __version__ = "1.10.0"
 
 
-class Pawn(MovingEntity):
-    """Creates a pawn."""
+class Colonist(MovingEntity):
+    """Creates a Colonist."""
     def __init__(self, parent, forename: str="", surname: str="", age: int=0, gender: bool=False, health: int=100,
                  total_health: int=100, x: int=0, y: int=0):
-        MovingEntity.__init__(self, parent, x, y, entity_type="pawn")
+        MovingEntity.__init__(self, parent, x, y, entity_type="colonist")
         self.parent = parent
         # TODO: Add nicknames.
         # TODO: Add middle names.
@@ -28,25 +28,25 @@ class Pawn(MovingEntity):
         self.health = health
         self.total_health = total_health
         self.move_speed = 2
-        # TODO: Add more pawn actions.
+        # TODO: Add more colonist actions.
         self.inventory = []
-        # TODO: Add pawn relationships.
+        # TODO: Add colonist relationships.
 
-        self.parent.pawns.append(self)
+        self.parent.colonists.append(self)
 
         self.check_action()
 
-    def add_to_pawn_bar(self):
-        self.parent.pawn_bar.add_pawn(self)
+    def add_to_colonist_bar(self):
+        self.parent.colonist_bar.add_colonist(self)
 
         return self
 
     def get_name(self):
-        """Returns the name of the pawn."""
+        """Returns the name of the colonist."""
         return "{} {}".format(self.name["forename"], self.name["surname"])
 
     def generate_random(self):
-        """Generates a random pawn."""
+        """Generates a random colonist."""
         self.gender = randint(0, 1)
 
         if self.gender:
@@ -63,7 +63,7 @@ class Pawn(MovingEntity):
     # TODO: Move all action related functions and variables to a new class called "Behaviour" and have it sorted there.
 
     def check_action(self):
-        """Checks the pawns current action."""
+        """Checks the colonists current action."""
         if self.action is None:
             self.action = "standing around"
 
@@ -90,7 +90,7 @@ class Pawn(MovingEntity):
         self.parent.parent.after(get_interval(), self.check_action)
 
     def decide_action(self):
-        """Decides an action for the pawn to perform."""
+        """Decides an action for the colonist to perform."""
         random = randint(0, 100)
 
         if random in range(0, 15):

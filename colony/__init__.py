@@ -4,7 +4,7 @@
 
 # from .entity import Entity
 # from .movingentity import MovingEntity
-from .pawn import Pawn
+from .pawn import Colonist
 # TODO: Add an Animal class.
 from .item import Item
 # TODO: Add a Weapon class.

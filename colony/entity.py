@@ -29,7 +29,7 @@ class Entity(object):
         self.selected = False
         self.entity_type = entity_type
 
-        if self.entity_type == "pawn":
+        if self.entity_type == "colonist":
             self.name = {"forename": None,
                          "surname": None}
 
@@ -61,7 +61,7 @@ class Entity(object):
                                                      font=get_fonts()[self.entity_type]["normal"],
                                                      tags="entity")
 
-        if self.entity_type == "pawn":
+        if self.entity_type == "colonist":
             self.entity_name = self.parent.canvas.create_text(self.location["x"],
                                                               self.location["y"] + 17,
                                                               text="{} {}".format(self.name["forename"],
@@ -127,13 +127,13 @@ class Entity(object):
 
         if self.parent.selected_item is not None:
             if background:
-                if self.entity_type == "pawn":
+                if self.entity_type == "colonist":
                     self.menu.add_command(label="Move Here",
                                           command=lambda: self.parent.selected_item.move_to(self.last_mouse_x,
                                                                                             self.last_mouse_y,
                                                                                             "moving"))
             elif not background:
-                if self.entity_type == "pawn":
+                if self.entity_type == "colonist":
                     pass
 
                 elif self.entity_type == "item":
@@ -164,7 +164,7 @@ class Entity(object):
         """Selects the entity."""
         self.parent.canvas.itemconfigure(self.entity, font=get_fonts()[self.entity_type]["selected"])
         self.parent.canvas.itemconfigure(self.entity_name, font=get_fonts()["text"]["selected"])
-        if self.entity_type == "pawn":
+        if self.entity_type == "colonist":
             self.parent.canvas.itemconfigure(self.entity_health, font=get_fonts()["text"]["selected"])
         elif self.entity_type == "item":
             self.parent.canvas.itemconfigure(self.entity_amount, font=get_fonts()["text"]["selected"])
@@ -179,7 +179,7 @@ class Entity(object):
         self.parent.canvas.itemconfigure(self.entity, font=get_fonts()[self.entity_type]["normal"])
         self.parent.canvas.itemconfigure(self.entity_name, font=get_fonts()["text"]["normal"])
 
-        if self.entity_type == "pawn":
+        if self.entity_type == "colonist":
             self.parent.canvas.itemconfigure(self.entity_health, font=get_fonts()["text"]["normal"])
 
         elif self.entity_type == "item":

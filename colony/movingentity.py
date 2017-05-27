@@ -29,16 +29,16 @@ class MovingEntity(Entity):
 
     def move_to(self, x, y, because):
         self.stop_actions()
-        pawn_location = self.parent.canvas.coords(self.entity)
+        entity_location = self.parent.canvas.coords(self.entity)
 
-        move_x = (x - pawn_location[0])
+        move_x = (x - entity_location[0])
         direction_x = True  # Forwards
 
         if move_x < 0:
             move_x = abs(move_x)
             direction_x = False  # Backwards
 
-        move_y = (y - pawn_location[1])
+        move_y = (y - entity_location[1])
         direction_y = True  # Down
 
         if move_y < 0:
