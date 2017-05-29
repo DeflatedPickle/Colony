@@ -12,7 +12,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.18.0"
+__version__ = "1.19.1"
 
 
 class GameWindow(tk.Tk):
@@ -56,7 +56,7 @@ class TaskBar(ttk.Frame):
         self.parent = parent
 
         self.option_menu = tk.Menu(self.parent)
-        self.option_menu.add_command(label="Back To Menu", command=self.parent.start_menu_title)
+        self.option_menu.add_command(label="Back To Menu", command=self.start_menu)
         self.option_menu.add_command(label="Exit", command=lambda: sys.exit())
 
         self.add_button("Options", self.option_menu)
@@ -67,25 +67,57 @@ class TaskBar(ttk.Frame):
 
         return button
 
+    def start_menu(self):
+        self.parent.canvas.unbind("<Configure>")
+        self.parent.canvas.bind("<Configure>", self.parent.canvas.on_resize)
+        self.parent.start_menu_title()
+
 
 class ColonistBar(tk.Frame):
     def __init__(self, parent, **kwargs):
         tk.Frame.__init__(self, parent.parent, **kwargs)
         self.parent = parent
 
+        self.pawns = {}
+        self.canvas_list = []
+
     def add_colonist(self, colonist):
         canvas = tk.Canvas(self, width=50, height=50)
         canvas.create_text(25, 20, text=colony.get_references()["icons"]["colonist"],
-                           font=colony.get_fonts()["colonist"]["colonistbar"])
+                           font=colony.get_fonts()["colonist"]["bar_normal"], tag="colonist")
         canvas.create_text(25, 40, text=colonist.name["forename"], anchor="center",
-                           font=colony.get_fonts()["text"]["colonistbar"])
+                           font=colony.get_fonts()["text"]["bar_normal"], tag="name")
         canvas.pack(side="left")
 
-        canvas.bind("<ButtonRelease-1>", colonist.select, "+")
-        canvas.bind("<Button-1>", self.parent.unselect_all, "+")
+        canvas.bind("<ButtonRelease-1>", lambda *args: self.select_colonist(colonist), "+")
+        canvas.bind("<Button-1>", self.unselect_colonist, "+")
         # TODO: Make the colonist on the bar that represents the colonist turn bold when the colonist is selected.
 
+        self.pawns[colonist.entity] = canvas
+        self.canvas_list.append(canvas)
+
         return canvas
+
+    def select_colonist(self, colonist):
+        colonist.select()
+        self.select_current_colonist(colonist)
+
+    def unselect_colonist(self, *args):
+        self.parent.unselect_all()
+        self.unselect_all_colonists()
+
+        del args
+
+    def select_current_colonist(self, colonist):
+        self.pawns[colonist.entity].itemconfigure(self.pawns[colonist.entity].find_withtag("colonist"),
+                                                  font=colony.get_fonts()["colonist"]["bar_selected"])
+        self.pawns[colonist.entity].itemconfigure(self.pawns[colonist.entity].find_withtag("name"),
+                                                  font=colony.get_fonts()["text"]["bar_selected"])
+
+    def unselect_all_colonists(self):
+        for canvas in self.canvas_list:
+            canvas.itemconfigure(canvas.find_withtag("colonist"), font=colony.get_fonts()["colonist"]["bar_normal"])
+            canvas.itemconfigure(canvas.find_withtag("name"), font=colony.get_fonts()["text"]["bar_normal"])
 
 
 class Start(object):
@@ -95,7 +127,7 @@ class Start(object):
         self.parent.canvas.create_text(5, 5, text="Colony", anchor="nw", font=colony.get_fonts()["menu"]["title"])
         self.parent.canvas.create_text(5, 45,
                                        text="A simple colony simulator created by Dibbo, inspired by RimWorld and Dwarf"
-                                            "Fortress.",
+                                            " Fortress.",
                                        anchor="nw", font=colony.get_fonts()["menu"]["subtitle"])
 
         self.parent.canvas.create_window(5, 70,
@@ -209,32 +241,45 @@ class Scenarios(object):
         self.current_scenarios = 0
         self.selected_scenario = 0
 
-        frame_listbox = ttk.Frame(self.parent.canvas)
-        self.treeview = ttk.Treeview(frame_listbox, show="tree")
+        self.parent.canvas.bind("<Configure>", self.draw_widgets, "+")
+
+        self.frame_listbox = ttk.Frame(self.parent.canvas)
+
+        self.treeview = ttk.Treeview(self.frame_listbox, show="tree")
         self.treeview.pack(side="left", fill="both", expand=True)
         self.treeview.bind("<<TreeviewSelect>>", self.select_scenario)
         self.treeview.bind("<Double-Button-1>", self.start_game)
-        scrollbar_treeview = ttk.Scrollbar(frame_listbox, command=self.treeview.yview)
+        scrollbar_treeview = ttk.Scrollbar(self.frame_listbox, command=self.treeview.yview)
         scrollbar_treeview.pack(side="right", fill="y", expand=True)
         self.treeview.configure(yscrollcommand=scrollbar_treeview.set)
 
-        self.parent.canvas.create_window(5, 5, window=frame_listbox, anchor="nw")
+        self.frame_text = ttk.Frame(self.parent.canvas)
 
-        frame_text = ttk.Frame(self.parent.canvas)
-        self.text = tk.Text(frame_text, width=30, height=12)
+        self.text = tk.Text(self.frame_text, width=0, height=12)
         self.text.pack(side="left", fill="both", expand=True)
-        scrollbar_text = ttk.Scrollbar(frame_text, command=self.text.yview)
-        scrollbar_text.pack(side="right", fill="y", expand=True)
+        scrollbar_text = ttk.Scrollbar(self.frame_text, command=self.text.yview)
+        scrollbar_text.pack(side="right", fill="y", expand=False)
         self.text.configure(yscrollcommand=scrollbar_text.set)
-
-        self.parent.canvas.create_window(230, 5, window=frame_text, anchor="nw")
-
-        self.parent.canvas.create_window(510, 260, window=ttk.Button(self.parent.canvas, text="Start",
-                                                                     command=self.start_game), anchor="nw")
 
         self.game = None
 
+        self.draw_widgets()
         self.default_scenarios()
+        
+    def draw_widgets(self, event=None):
+        self.parent.canvas.delete("UI")
+
+        self.parent.canvas.create_window(5, 5, window=self.frame_listbox, anchor="nw",
+                                         height=self.parent.winfo_height() - 60, tags="UI")
+        self.parent.canvas.create_window(230, 5, window=self.frame_text, anchor="nw",
+                                         width=self.parent.winfo_width() - 235, height=self.parent.winfo_height() - 60,
+                                         tags="UI")
+
+        self.parent.canvas.create_window(self.parent.winfo_width() - 90, self.parent.winfo_height() - 40,
+                                         window=ttk.Button(self.parent.canvas, text="Start", command=self.start_game),
+                                         anchor="nw", tags="UI")
+
+        del event
 
     def default_scenarios(self):
         self.scenario_list.append(self.treeview.insert("", "end", text="-----Default-----"))
@@ -248,14 +293,14 @@ class Scenarios(object):
                         self.treeview,
                         title="Weekend Camp Gone Wrong",
                         description="You were camping with your friends when suddenly... you were still camping but it"
-                                    "was boring.",
+                                    " was boring.",
                         contents={"colonists": 3})
 
         colony.Scenario(self,
                         self.treeview,
                         title="Wimps From Yonder",
                         description="Your previous town was ransacked by pirates, all your friends and family were"
-                                    "murdered, but you and a few others managed to escape.",
+                                    " murdered, but you and a few others managed to escape.",
                         contents={"colonists": 7})
 
         self.scenario_list.append(self.treeview.insert("", "end", text="-----Debug-----"))
@@ -305,6 +350,10 @@ class Scenarios(object):
         if self.treeview.focus() != "":
             if not self.treeview.item(self.treeview.focus())["text"].startswith("-"):
                 self.parent.canvas.delete("all")
+
+                self.parent.canvas.unbind("<Configure>")
+                self.parent.canvas.bind("<Configure>", self.parent.canvas.on_resize)
+
                 self.game = Game(self.parent)
                 self.spawn(self.scenario_list[self.selected_scenario])
 

@@ -7,7 +7,7 @@ from random import randint
 from .movingentity import MovingEntity
 from .references import get_interval, get_male_names, get_female_names, get_surnames
 
-__title__ = "Pawn"
+__title__ = "Colonist"
 __author__ = "DeflatedPickle"
 __version__ = "1.10.0"
 

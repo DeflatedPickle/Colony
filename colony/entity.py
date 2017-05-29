@@ -166,8 +166,11 @@ class Entity(object):
         self.parent.canvas.itemconfigure(self.entity_name, font=get_fonts()["text"]["selected"])
         if self.entity_type == "colonist":
             self.parent.canvas.itemconfigure(self.entity_health, font=get_fonts()["text"]["selected"])
+            self.parent.colonist_bar.select_current_colonist(self)
+
         elif self.entity_type == "item":
             self.parent.canvas.itemconfigure(self.entity_amount, font=get_fonts()["text"]["selected"])
+            self.parent.colonist_bar.unselect_all_colonists()
 
         self.parent.selected_item = self
         self.selected = True
@@ -185,6 +188,7 @@ class Entity(object):
         elif self.entity_type == "item":
             self.parent.canvas.itemconfigure(self.entity_amount, font=get_fonts()["text"]["normal"])
 
+        self.parent.colonist_bar.unselect_all_colonists()
         self.parent.selected_item = None
         self.selected = False
 
