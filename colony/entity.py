@@ -12,7 +12,7 @@ from .window import Window
 
 __title__ = "Entity"
 __author__ = "DeflatedPickle"
-__version__ = "1.4.1"
+__version__ = "1.4.2"
 
 
 class Entity(object):
@@ -72,6 +72,22 @@ class Entity(object):
 
             self.entity_health = self.parent.canvas.create_text(self.location["x"],
                                                                 self.location["y"] + 27,
+                                                                text="{}/{}".format(self.health,
+                                                                                    self.total_health),
+                                                                state="disabled",
+                                                                font=get_fonts()["text"]["normal"],
+                                                                tag="extra")
+
+        elif self.entity_type == "animal":
+            self.entity_name = self.parent.canvas.create_text(self.location["x"],
+                                                              self.location["y"] + 10,
+                                                              text=self.name,
+                                                              state="disabled",
+                                                              font=get_fonts()["text"]["normal"],
+                                                              tag="extra")
+
+            self.entity_health = self.parent.canvas.create_text(self.location["x"],
+                                                                self.location["y"] + 20,
                                                                 text="{}/{}".format(self.health,
                                                                                     self.total_health),
                                                                 state="disabled",

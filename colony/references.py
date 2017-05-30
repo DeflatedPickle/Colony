@@ -8,7 +8,7 @@ from tkinter import font
 
 __title__ = "Pawn"
 __author__ = "DeflatedPickle"
-__version__ = "1.6.0"
+__version__ = "1.6.1"
 
 
 def get_frame_rate():
@@ -19,6 +19,7 @@ def get_references():
     references = {
         "icons": {
             "colonist": u"\u25AF",  # WHITE VERTICAL RECTANGLE
+            "animal": u"\u25AD",  # WHITE RECTANGLE
             "block": u"\u25FB",  # WHITE MEDIUM SQUARE
             "item": u"\u25FD"  # WHITE MEDIUM SMALL SQUARE
         }
@@ -38,6 +39,10 @@ def get_fonts():
             "selected": font.Font(family=family, size=get_size(), weight="bold"),
             "bar_normal": font.Font(family=family, size=get_size() - 5),
             "bar_selected": font.Font(family=family, size=get_size() - 5, weight="bold")
+        },
+        "animal": {
+            "normal": font.Font(family=family, size=get_size()),
+            "selected": font.Font(family=family, size=get_size(), weight="bold")
         },
         "item": {
             "normal": font.Font(family=family, size=get_size()),

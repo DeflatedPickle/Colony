@@ -12,7 +12,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.19.1"
+__version__ = "1.19.2"
 
 
 class GameWindow(tk.Tk):
@@ -56,10 +56,10 @@ class TaskBar(ttk.Frame):
         self.parent = parent
 
         self.option_menu = tk.Menu(self.parent)
-        self.option_menu.add_command(label="Back To Menu", command=self.start_menu)
+        self.option_menu.add_command(label="Back To Start", command=self.start_menu)
         self.option_menu.add_command(label="Exit", command=lambda: sys.exit())
 
-        self.add_button("Options", self.option_menu)
+        self.add_button("Menu", self.option_menu)
 
     def add_button(self, text: str = "", menu: tk.Menu = None):
         button = ttk.Menubutton(self, text=text, menu=menu, direction="above")
@@ -91,7 +91,6 @@ class ColonistBar(tk.Frame):
 
         canvas.bind("<ButtonRelease-1>", lambda *args: self.select_colonist(colonist), "+")
         canvas.bind("<Button-1>", self.unselect_colonist, "+")
-        # TODO: Make the colonist on the bar that represents the colonist turn bold when the colonist is selected.
 
         self.pawns[colonist.entity] = canvas
         self.canvas_list.append(canvas)
@@ -156,6 +155,7 @@ class Game(object):
         self.parent = parent
         self.entities = {}
         self.colonists = []
+        self.animals = []
         self.items = []
 
         self.canvas = self.parent.canvas
@@ -166,13 +166,6 @@ class Game(object):
         self.debug = DeBug(self)
         self.colonist_bar = ColonistBar(self)
         self.draw_widgets()
-
-    def register_items(self):
-        # NOTE: Might not be the best idea to register items like this.
-        return {"wood": colony.Item(self, name="Wood", stack_size=100),
-                "stone": colony.Item(self, name="Stone", stack_size=100),
-                "ore_iron": colony.Item(self, name="Iron Ore", stack_size=100),
-                "ingot_iron": colony.Item(self, name="Iron Ingot", stack_size=100)}
 
     def draw_widgets(self, event=None):
         self.canvas.delete("HUD")
@@ -201,6 +194,9 @@ class Game(object):
         for entity in self.parent.canvas.find_withtag("entity"):
             # print("Entity: {}".format(entity))
             # print("Selected: {}".format(self.selected_item.entity))
+            if self.selected_item is None:
+                return
+
             if not layer:
                 # print("Below: {}".format(self.parent.canvas.find_below(self.selected_item.entity)[0]))
                 if entity <= self.parent.canvas.find_below(self.selected_item.entity)[0]:
@@ -219,6 +215,17 @@ class Game(object):
                 self.entities[colonist].unselect()
 
         del args
+
+    def register_items(self):
+        # NOTE: Might not be the best idea to register items like this.
+        return {"wood": colony.Item(self, name="Wood", stack_size=100),
+                "stone": colony.Item(self, name="Stone", stack_size=100),
+                "ore_iron": colony.Item(self, name="Iron Ore", stack_size=100),
+                "ingot_iron": colony.Item(self, name="Iron Ingot", stack_size=100)}
+
+    def register_animals(self):
+        # NOTE: Might not be the best idea to register animals like this.
+        return {"cat": colony.Animal(self, species="Cat", highest_age=10, wild=True)}
 
 
 class Options(object):
@@ -289,6 +296,7 @@ class Scenarios(object):
                         title="Lonely Bean",
                         description="Just you, yourself and you.",
                         contents={"colonists": 1, "items": {"wood": 50, "stone": 20}})
+
         colony.Scenario(self,
                         self.treeview,
                         title="Weekend Camp Gone Wrong",
@@ -302,6 +310,12 @@ class Scenarios(object):
                         description="Your previous town was ransacked by pirates, all your friends and family were"
                                     " murdered, but you and a few others managed to escape.",
                         contents={"colonists": 7})
+
+        colony.Scenario(self,
+                        self.treeview,
+                        title="Not Without My Animal",
+                        description="You have an animal. That's it.",
+                        contents={"colonists": 2, "animals": {"cat": 1}})
 
         self.scenario_list.append(self.treeview.insert("", "end", text="-----Debug-----"))
 
@@ -330,13 +344,18 @@ class Scenarios(object):
             contents_show = []
 
             for key, value in contents.items():
-                if key != "items":
+                if key != "items" and key != "animals":
                     if 0 < value <= 1:
                         key = "colonist"
                     contents_show.append("{} {}".format(value, key))
-                else:
+
+                elif key == "items":
                     for items_key, items_value in contents["items"].items():
                         contents_show.append("{} {}".format(items_value, items_key))
+
+                elif key == "animals":
+                    for animal_key, animal_value in contents["animals"].items():
+                        contents_show.append("{} {}".format(animal_value, animal_key))
 
             # print(", ".join(contents_show))
 
@@ -372,6 +391,20 @@ class Scenarios(object):
                 colony.Colonist(self.game,
                                 x=drop_x + randint(-25, 25),
                                 y=drop_y + randint(-25, 25)).generate_random().draw().add_to_colonist_bar()
+
+        # NOTE: Scenarios can exist without animals.
+        if "animals" in scenario.contents:
+            for animal in scenario.contents["animals"]:
+                if animal == "random":
+                    reg_animal = self.game.register_animals()[choice(list(self.game.register_animals().keys()))]
+
+                else:
+                    reg_animal = self.game.register_animals()[animal]
+
+                reg_animal.location["x"] = drop_x + randint(-25, 25)
+                reg_animal.location["y"] = drop_y + randint(-25, 25)
+
+                reg_animal.generate_random().draw()
 
         # NOTE: Scenarios can exist without items.
         if "items" in scenario.contents:
@@ -414,6 +447,7 @@ class DeBug(object):
             self.add_debug_line(text="Selected Inventory: {}".format(self.find_selected_inventory()))
             self.counter += 15
             self.add_debug_line(text="Colonists: {}".format(len(self.parent.colonists)))
+            self.add_debug_line(text="Animals: {}".format(len(self.parent.animals)))
             self.add_debug_line(text="Items: {}".format(len(self.parent.items)))
 
         elif not self.state:
@@ -440,7 +474,7 @@ class DeBug(object):
     def find_selected_action(self):
         for item in self.parent.entities.values():
             if item.selected:
-                if item.entity_type == "colonist":
+                if item.entity_type == "colonist" or item.entity_type == "animal":
                     return item.action
 
                 elif item.entity_type == "item":
@@ -449,7 +483,7 @@ class DeBug(object):
     def find_selected_inventory(self):
         for item in self.parent.entities.values():
             if item.selected:
-                if item.entity_type == "colonist":
+                if item.entity_type == "colonist" or item.entity_type == "animal":
                     return item.inventory
 
                 elif item.entity_type == "item":

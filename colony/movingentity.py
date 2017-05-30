@@ -2,22 +2,22 @@
 # -*- coding: utf-8 -*-
 """"""
 
-from .entity import Entity
+from .actingentity import ActingEntity
 from .references import get_interval
 
 __title__ = "MovingEntity"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 
-class MovingEntity(Entity):
+class MovingEntity(ActingEntity):
     """Creates an entity capable of movement."""
     def __init__(self, parent, x: int=0, y: int=0, entity_type: str="moving entity"):
-        Entity.__init__(self, parent, x, y, entity_type)
+        ActingEntity.__init__(self, parent, x, y, entity_type)
         self.parent = parent
-        self.action = None
 
         self.moving = self.move_until
+        self.after_actions.append(self.moving)
 
     def move_entity(self, x, y):
         """Moves the entity."""
@@ -87,13 +87,7 @@ class MovingEntity(Entity):
             self.action = "standing around"
 
         else:
+            self.after_actions.remove(self.moving)
             self.moving = self.parent.parent.after(get_interval(), lambda: self.move_until(prev_x, prev_y, x, y,
                                                                                            direction_x, direction_y))
-
-    def stop_actions(self):
-        """Stops all current actions."""
-        try:
-            self.parent.parent.after_cancel(self.moving)
-
-        except AttributeError:
-            pass
+            self.after_actions.append(self.moving)

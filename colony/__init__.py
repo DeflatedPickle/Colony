@@ -3,9 +3,10 @@
 """"""
 
 # from .entity import Entity
+# from .actingentity import ActingEntity
 # from .movingentity import MovingEntity
 from .colonist import Colonist
-# TODO: Add an Animal class.
+from .animal import Animal
 from .item import Item
 # TODO: Add a Weapon class.
 # TODO: Add an Armour class.
@@ -21,7 +22,7 @@ __copyright__ = "Copyright (c) 2017 Dibbo"
 __credits__ = ["DeflatedPickle/Dibbo"]
 
 __license__ = "MIT"
-__version__ = "1.10.0"
+__version__ = "1.13.0"
 __maintainer__ = "DeflatedPickle/Dibbo"
 __email__ = "DeflatedPickle@gmail.com"
 __status__ = "Development"

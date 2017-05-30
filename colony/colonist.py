@@ -5,24 +5,28 @@
 from random import randint
 
 from .movingentity import MovingEntity
-from .references import get_interval, get_male_names, get_female_names, get_surnames
+from .references import get_male_names, get_female_names, get_surnames
 
 __title__ = "Colonist"
 __author__ = "DeflatedPickle"
-__version__ = "1.10.0"
+__version__ = "1.10.1"
 
 
 class Colonist(MovingEntity):
-    """Creates a Colonist."""
-    def __init__(self, parent, forename: str="", surname: str="", age: int=0, gender: bool=False, health: int=100,
+    """Creates a colonist."""
+    def __init__(self, parent, species: str="Human", forename: str="", surname: str="", age: int=0, highest_age: int=80,
+                 gender: bool=False, health: int=100,
                  total_health: int=100, x: int=0, y: int=0):
         MovingEntity.__init__(self, parent, x, y, entity_type="colonist")
         self.parent = parent
+        self.species = species
         # TODO: Add nicknames.
         # TODO: Add middle names.
         self.name = {"forename": forename,
                      "surname": surname}
         self.age = age
+        self.lowest_age = 0
+        self.highest_age = highest_age
         # NOTE: Maybe use an Enum class instead of a boolean.
         self.gender = gender  # False: Female, True: Male
         self.health = health
@@ -56,49 +60,6 @@ class Colonist(MovingEntity):
             self.name["forename"] = get_female_names()[randint(0, len(get_female_names()) - 1)]
 
         self.name["surname"] = get_surnames()[randint(0, len(get_surnames()) - 1)]
-        self.age = randint(14, 90)
+        self.age = randint(self.lowest_age, self.highest_age)
 
         return self
-
-    # TODO: Move all action related functions and variables to a new class called "Behaviour" and have it sorted there.
-
-    def check_action(self):
-        """Checks the colonists current action."""
-        if self.action is None:
-            self.action = "standing around"
-
-        elif self.action == "standing around":
-            # print("{} is standing around.".format(self.get_name()))
-            self.last_mouse_x, self.last_mouse_y = self.parent.parent.get_mouse_position()
-            self.decide_action()
-
-        elif self.action == "wandering":
-            # print("{} is wandering.".format(self.get_name()))
-            try:
-                entity_location = self.parent.canvas.coords(self.entity)
-                self.move_to(entity_location[0] + randint(-15, 15), entity_location[1] + randint(-15, 15), "wandering")
-
-            except IndexError:
-                pass
-
-            self.decide_action()
-
-        elif self.action == "moving":
-            # print("{} is moving.".format(self.get_name()))
-            pass
-
-        self.parent.parent.after(get_interval(), self.check_action)
-
-    def decide_action(self):
-        """Decides an action for the colonist to perform."""
-        random = randint(0, 100)
-
-        if random in range(0, 15):
-            # Standing Around
-            self.action = "standing around"
-
-        elif random in range(20, 30):
-            # Wandering
-            self.action = "wandering"
-
-        self.stop_actions()
