@@ -12,7 +12,7 @@ from .window import Window
 
 __title__ = "Entity"
 __author__ = "DeflatedPickle"
-__version__ = "1.4.2"
+__version__ = "1.5.0"
 
 
 class Entity(object):
@@ -125,6 +125,21 @@ class Entity(object):
         self.parent.canvas.tag_raise(self)
 
         return self
+
+    def destroy(self):
+        self.parent.entities.pop(self.entity)
+        # print([i for i in self.parent.entities.keys()])
+        if self.entity_type == "colonist":
+            self.parent.colonists.remove(self)
+            # print([i.get_name() for i in self.parent.colonists])
+        elif self.entity_type == "item":
+            self.parent.items.remove(self)
+            # print([i.name for i in self.parent.items])
+
+        self.parent.canvas.delete(self.entity)
+        self.parent.canvas.delete(self.entity_name)
+        self.parent.canvas.delete(self.entity_health)
+        self.parent.canvas.delete(self.entity_amount)
 
     def find_coordinates_own(self):
         """Returns the coordinates of the entity."""

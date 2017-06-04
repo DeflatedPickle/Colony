@@ -3,6 +3,7 @@
 """"""
 
 import tkinter as tk
+from _tkinter import TclError
 from tkinter import ttk
 from random import randint, choice
 import sys
@@ -61,8 +62,19 @@ class TaskBar(ttk.Frame):
         self.add_button("Wildlife")
 
         self.debug_menu = tk.Menu(self.parent)
-        self.debug_menu.add_command(label="Spawn Colonist",
-                                    command=lambda: self.game.set_tool("spawn:movingentity:colonist"))
+        self.debug_spawn_entity_menu = tk.Menu(self.debug_menu)
+
+        self.debug_spawn_movingentity = tk.Menu(self.debug_spawn_entity_menu)
+        self.debug_spawn_movingentity.add_command(label="Colonist",
+                                                  command=lambda: self.game.set_tool("spawn:movingentity:colonist"))
+
+        self.debug_spawn_entity_menu.add_cascade(label="MovingEntity", menu=self.debug_spawn_movingentity)
+        self.debug_menu.add_cascade(label="Spawn", menu=self.debug_spawn_entity_menu)
+
+        self.debug_destroy_menu = tk.Menu(self.debug_menu)
+        self.debug_destroy_menu.add_command(label="Entity",
+                                            command=lambda: self.game.set_tool("destroy:entity"))
+        self.debug_menu.add_cascade(label="Destroy", menu=self.debug_destroy_menu)
 
         self.add_button("Debug", self.debug_menu)
 
@@ -89,7 +101,9 @@ class ColonistBar(tk.Frame):
         tk.Frame.__init__(self, parent.parent, **kwargs)
         self.parent = parent
 
-        self.pawns = {}
+        # TODO: Make the colonist bar wrap to the next line when the the first line is full of colonists.
+
+        self.colonists = {}
         self.canvas_list = []
 
     def add_colonist(self, colonist):
@@ -103,10 +117,17 @@ class ColonistBar(tk.Frame):
         canvas.bind("<ButtonRelease-1>", lambda *args: self.select_colonist(colonist), "+")
         canvas.bind("<Button-1>", self.unselect_colonist, "+")
 
-        self.pawns[colonist.entity] = canvas
+        self.colonists[colonist.entity] = canvas
         self.canvas_list.append(canvas)
 
         return canvas
+
+    def remove_colonist(self, colonist):
+        self.colonists[colonist.entity].destroy()
+        self.canvas_list.remove(self.colonists[colonist.entity])
+        self.colonists.pop(colonist.entity)
+
+        self.parent.canvas.configure(cursor="arrow")
 
     def select_colonist(self, colonist):
         colonist.select()
@@ -119,15 +140,18 @@ class ColonistBar(tk.Frame):
         del args
 
     def select_current_colonist(self, colonist):
-        self.pawns[colonist.entity].itemconfigure(self.pawns[colonist.entity].find_withtag("colonist"),
-                                                  font=colony.get_fonts()["colonist"]["bar_selected"])
-        self.pawns[colonist.entity].itemconfigure(self.pawns[colonist.entity].find_withtag("name"),
-                                                  font=colony.get_fonts()["text"]["bar_selected"])
+        self.colonists[colonist.entity].itemconfigure(self.colonists[colonist.entity].find_withtag("colonist"),
+                                                      font=colony.get_fonts()["colonist"]["bar_selected"])
+        self.colonists[colonist.entity].itemconfigure(self.colonists[colonist.entity].find_withtag("name"),
+                                                      font=colony.get_fonts()["text"]["bar_selected"])
 
     def unselect_all_colonists(self):
         for canvas in self.canvas_list:
-            canvas.itemconfigure(canvas.find_withtag("colonist"), font=colony.get_fonts()["colonist"]["bar_normal"])
-            canvas.itemconfigure(canvas.find_withtag("name"), font=colony.get_fonts()["text"]["bar_normal"])
+            try:
+                canvas.itemconfigure(canvas.find_withtag("colonist"), font=colony.get_fonts()["colonist"]["bar_normal"])
+                canvas.itemconfigure(canvas.find_withtag("name"), font=colony.get_fonts()["text"]["bar_normal"])
+            except TclError:
+                pass
 
 
 class Start(object):
@@ -174,6 +198,8 @@ class Game(object):
 
         self.selected_entity = None
 
+        # TODO: Make the select tool easier to customize.
+        # NOTE: On check_tool maybe have it spilt the tool into a list and check for different syntax in it.
         self.selected_tool = None
         self.canvas.bind("<Button-1>", self.check_tool, "+")
         self.canvas.bind("<ButtonRelease-3>", self.reset_tool, "+")
@@ -205,13 +231,19 @@ class Game(object):
         del event
 
     def check_tool(self, *args):
+        mouse_x, mouse_y = self.parent.get_mouse_position()
+
         if self.selected_tool is None:
             return
 
         elif self.selected_tool == "spawn:movingentity:colonist":
-            mouse_x, mouse_y = self.parent.get_mouse_position()
-            colony.Colonist(self,
-                            x=mouse_x, y=mouse_y).generate_random().draw().add_to_colonist_bar()
+            colony.Colonist(self, x=mouse_x, y=mouse_y).generate_random().draw().add_to_colonist_bar()
+
+        elif self.selected_tool == "destroy:entity":
+            closest = self.canvas.find_closest(mouse_x, mouse_y, halo=1)[0]
+            if isinstance(self.entities[closest], colony.Entity):
+                self.entities[closest].remove_from_colonist_bar()
+                self.entities[closest].destroy()
 
         del args
 

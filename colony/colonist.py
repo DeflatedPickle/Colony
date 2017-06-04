@@ -31,10 +31,10 @@ class Colonist(MovingEntity):
         self.gender = gender  # False: Female, True: Male
         self.health = health
         self.total_health = total_health
-        self.move_speed = 2
         # TODO: Add more colonist actions.
         self.inventory = []
         # TODO: Add colonist relationships.
+        # TODO: Add colonist buffs and debuffs, such as "Fast Walker" to improve move speed.
 
         self.parent.colonists.append(self)
 
@@ -42,6 +42,11 @@ class Colonist(MovingEntity):
 
     def add_to_colonist_bar(self):
         self.parent.colonist_bar.add_colonist(self)
+
+        return self
+
+    def remove_from_colonist_bar(self):
+        self.parent.colonist_bar.remove_colonist(self)
 
         return self
 

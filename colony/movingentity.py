@@ -15,6 +15,9 @@ class MovingEntity(ActingEntity):
     def __init__(self, parent, x: int=0, y: int=0, entity_type: str="moving entity"):
         ActingEntity.__init__(self, parent, x, y, entity_type)
         self.parent = parent
+        # TODO: Actually use the colonist speed.
+        self.move_speed = 2
+        # TODO: Add body parts that will have effects if lost.
 
         self.moving = self.move_until
         self.after_actions.append(self.moving)

@@ -26,7 +26,6 @@ class Animal(MovingEntity):
         self.gender = gender
         self.health = health
         self.total_health = total_health
-        self.move_speed = 2
         self.wild = wild
         self.inventory = []
         self.owner = owner
