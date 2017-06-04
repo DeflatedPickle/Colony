@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """"""
 
-# from .entity import Entity
+from .entity import Entity
 # from .actingentity import ActingEntity
 # from .movingentity import MovingEntity
 from .colonist import Colonist

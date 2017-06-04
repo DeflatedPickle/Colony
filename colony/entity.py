@@ -141,11 +141,11 @@ class Entity(object):
 
         self.delete_all()
 
-        if self.parent.selected_item is not None:
+        if self.parent.selected_entity is not None:
             if background:
                 if self.entity_type == "colonist":
                     self.menu.add_command(label="Move Here",
-                                          command=lambda: self.parent.selected_item.move_to(self.last_mouse_x,
+                                          command=lambda: self.parent.selected_entity.move_to(self.last_mouse_x,
                                                                                             self.last_mouse_y,
                                                                                             "moving"))
             elif not background:
@@ -163,7 +163,7 @@ class Entity(object):
         """Shows the information window."""
         window = Window(self.parent.parent)
         window.set_up_for("information")
-        window.set_information(self.parent.selected_item)
+        window.set_information(self.parent.selected_entity)
         pk.center_on_parent(window)
 
     def delete_all(self, *args):
@@ -188,7 +188,7 @@ class Entity(object):
             self.parent.canvas.itemconfigure(self.entity_amount, font=get_fonts()["text"]["selected"])
             self.parent.colonist_bar.unselect_all_colonists()
 
-        self.parent.selected_item = self
+        self.parent.selected_entity = self
         self.selected = True
 
         del event
@@ -205,7 +205,7 @@ class Entity(object):
             self.parent.canvas.itemconfigure(self.entity_amount, font=get_fonts()["text"]["normal"])
 
         self.parent.colonist_bar.unselect_all_colonists()
-        self.parent.selected_item = None
+        self.parent.selected_entity = None
         self.selected = False
 
         del event

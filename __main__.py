@@ -12,7 +12,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.19.2"
+__version__ = "1.20.0"
 
 
 class GameWindow(tk.Tk):
@@ -51,9 +51,20 @@ class GameWindow(tk.Tk):
 
 
 class TaskBar(ttk.Frame):
-    def __init__(self, parent, **kwargs):
+    def __init__(self, parent, game, **kwargs):
         ttk.Frame.__init__(self, parent, **kwargs)
         self.parent = parent
+        self.game = game
+
+        self.add_button("Construction")
+        self.add_button("Animals")
+        self.add_button("Wildlife")
+
+        self.debug_menu = tk.Menu(self.parent)
+        self.debug_menu.add_command(label="Spawn Colonist",
+                                    command=lambda: self.game.set_tool("spawn:movingentity:colonist"))
+
+        self.add_button("Debug", self.debug_menu)
 
         self.option_menu = tk.Menu(self.parent)
         self.option_menu.add_command(label="Back To Start", command=self.start_menu)
@@ -161,7 +172,11 @@ class Game(object):
         self.canvas = self.parent.canvas
         self.canvas.bind("<Configure>", self.draw_widgets, "+")
 
-        self.selected_item = None
+        self.selected_entity = None
+
+        self.selected_tool = None
+        self.canvas.bind("<Button-1>", self.check_tool, "+")
+        self.canvas.bind("<ButtonRelease-3>", self.reset_tool, "+")
 
         self.debug = DeBug(self)
         self.colonist_bar = ColonistBar(self)
@@ -173,7 +188,7 @@ class Game(object):
         self.canvas.create_window(self.canvas.winfo_width() // 2, 30, window=self.colonist_bar, anchor="center",
                                   tags="HUD")
 
-        self.canvas.create_window(0, self.parent.winfo_height() - 23, window=TaskBar(self.parent), anchor="nw",
+        self.canvas.create_window(0, self.parent.winfo_height() - 23, window=TaskBar(self.parent, self), anchor="nw",
                                   width=self.canvas.winfo_width(), tags="HUD")
 
         # TODO: Create a frame to hold information that is shown when an entity is selected.
@@ -189,23 +204,42 @@ class Game(object):
 
         del event
 
+    def check_tool(self, *args):
+        if self.selected_tool is None:
+            return
+
+        elif self.selected_tool == "spawn:movingentity:colonist":
+            mouse_x, mouse_y = self.parent.get_mouse_position()
+            colony.Colonist(self,
+                            x=mouse_x, y=mouse_y).generate_random().draw().add_to_colonist_bar()
+
+        del args
+
+    def set_tool(self, tool_type):
+        self.selected_tool = tool_type
+
+    def reset_tool(self, *args):
+        self.selected_tool = None
+
+        del args
+
     def select_around(self, layer):
         # print(self.entities)
         for entity in self.parent.canvas.find_withtag("entity"):
             # print("Entity: {}".format(entity))
-            # print("Selected: {}".format(self.selected_item.entity))
-            if self.selected_item is None:
+            # print("Selected: {}".format(self.selected_entity.entity))
+            if self.selected_entity is None:
                 return
 
             if not layer:
-                # print("Below: {}".format(self.parent.canvas.find_below(self.selected_item.entity)[0]))
-                if entity <= self.parent.canvas.find_below(self.selected_item.entity)[0]:
+                # print("Below: {}".format(self.parent.canvas.find_below(self.selected_entity.entity)[0]))
+                if entity <= self.parent.canvas.find_below(self.selected_entity.entity)[0]:
                     self.unselect_all()
                     self.entities[entity].select()
 
             if layer:
-                # print("Above: {}".format(self.parent.canvas.find_above(self.selected_item.entity)[0]))
-                if entity >= self.parent.canvas.find_above(self.selected_item.entity)[0]:
+                # print("Above: {}".format(self.parent.canvas.find_above(self.selected_entity.entity)[0]))
+                if entity >= self.parent.canvas.find_above(self.selected_entity.entity)[0]:
                     self.unselect_all()
                     self.entities[entity].select()
 
@@ -218,14 +252,19 @@ class Game(object):
 
     def register_items(self):
         # NOTE: Might not be the best idea to register items like this.
-        return {"wood": colony.Item(self, name="Wood", stack_size=100),
-                "stone": colony.Item(self, name="Stone", stack_size=100),
-                "ore_iron": colony.Item(self, name="Iron Ore", stack_size=100),
-                "ingot_iron": colony.Item(self, name="Iron Ingot", stack_size=100)}
+        return {
+            "wood": colony.Item(self, name="Wood", stack_size=100),
+            "stone": colony.Item(self, name="Stone", stack_size=100),
+            "ore_iron": colony.Item(self, name="Iron Ore", stack_size=100),
+            "ingot_iron": colony.Item(self, name="Iron Ingot", stack_size=100)
+        }
 
     def register_animals(self):
         # NOTE: Might not be the best idea to register animals like this.
-        return {"cat": colony.Animal(self, species="Cat", highest_age=10, wild=True)}
+        return {
+            "cat": colony.Animal(self, species="Cat", highest_age=10),
+            "babirusa": colony.Animal(self, species="Babirusa", highest_age=10)
+        }
 
 
 class Options(object):
@@ -272,7 +311,7 @@ class Scenarios(object):
 
         self.draw_widgets()
         self.default_scenarios()
-        
+
     def draw_widgets(self, event=None):
         self.parent.canvas.delete("UI")
 
@@ -446,6 +485,8 @@ class DeBug(object):
             self.add_debug_line(text="Selected Action: {}".format(self.find_selected_action()))
             self.add_debug_line(text="Selected Inventory: {}".format(self.find_selected_inventory()))
             self.counter += 15
+            self.add_debug_line(text="Selected Tool: {}".format(self.parent.selected_tool))
+            self.counter += 15
             self.add_debug_line(text="Colonists: {}".format(len(self.parent.colonists)))
             self.add_debug_line(text="Animals: {}".format(len(self.parent.animals)))
             self.add_debug_line(text="Items: {}".format(len(self.parent.items)))
@@ -460,6 +501,8 @@ class DeBug(object):
         self.parent.canvas.create_text(5, self.counter, anchor="w", text=text, tag="debug")
         self.counter += 15
 
+    # TODO: Move all "find" functions into one function that returns a list or dictionary with all values.
+
     def find_selected(self):
         for item in self.parent.entities.values():
             if item.selected:
@@ -469,24 +512,24 @@ class DeBug(object):
     def find_selected_location(self):
         for item in self.parent.entities.values():
             if item.selected:
-                return "x={0[0]}, y={0[1]}".format(self.parent.selected_item.find_coordinates_own())
+                return "x={0[0]}, y={0[1]}".format(self.parent.selected_entity.find_coordinates_own())
 
     def find_selected_action(self):
-        for item in self.parent.entities.values():
-            if item.selected:
-                if item.entity_type == "colonist" or item.entity_type == "animal":
-                    return item.action
+        for entity in self.parent.entities.values():
+            if entity.selected:
+                if entity.entity_type == "colonist" or entity.entity_type == "animal":
+                    return entity.action
 
-                elif item.entity_type == "item":
+                elif entity.entity_type == "item":
                     return None
 
     def find_selected_inventory(self):
-        for item in self.parent.entities.values():
-            if item.selected:
-                if item.entity_type == "colonist" or item.entity_type == "animal":
-                    return item.inventory
+        for entity in self.parent.entities.values():
+            if entity.selected:
+                if entity.entity_type == "colonist" or entity.entity_type == "animal":
+                    return entity.inventory
 
-                elif item.entity_type == "item":
+                elif entity.entity_type == "item":
                     return None
 
     def change_state(self, *args):
