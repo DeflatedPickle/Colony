@@ -13,7 +13,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.21.1"
+__version__ = "1.21.2"
 
 
 class GameWindow(tk.Tk):
@@ -61,10 +61,10 @@ class TaskBar(ttk.Frame):
         self.add_button("Animals")
         self.add_button("Wildlife")
 
-        self.menu_debug = MenuDebug(self.parent)
+        self.menu_debug = MenuDebug(self)
         self.add_button("Debug", self.menu_debug)
 
-        self.option_menu = MenuOptions(self.parent)
+        self.option_menu = MenuOptions(self)
         self.add_button("Menu", self.option_menu)
 
     def add_button(self, text: str = "", menu: tk.Menu = None):
@@ -157,14 +157,15 @@ class MenuDebug(MenuBase):
 
         self.debug_spawn_movingentity = tk.Menu(self.debug_spawn_entity_menu)
         self.debug_spawn_movingentity.add_command(label="Colonist",
-                                                  command=lambda: self.parent.set_tool("spawn:movingentity:colonist"))
+                                                  command=lambda: self.parent.game.set_tool(
+                                                      "spawn:movingentity:colonist"))
 
         self.debug_spawn_entity_menu.add_cascade(label="MovingEntity", menu=self.debug_spawn_movingentity)
         self.add_cascade(label="Spawn", menu=self.debug_spawn_menu)
 
         self.debug_destroy_menu = tk.Menu(self)
         self.debug_destroy_menu.add_command(label="Entity",
-                                            command=lambda: self.parent.set_tool("destroy:entity"))
+                                            command=lambda: self.parent.game.set_tool("destroy:entity"))
         self.add_cascade(label="Destroy", menu=self.debug_destroy_menu)
 
 
