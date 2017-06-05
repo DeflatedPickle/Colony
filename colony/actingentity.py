@@ -14,7 +14,8 @@ __version__ = "1.0.0"
 
 class ActingEntity(Entity):
     """Creates an entity capable of actions."""
-    def __init__(self, parent, x: int=0, y: int=0, entity_type: str="acting entity"):
+
+    def __init__(self, parent, x: int = 0, y: int = 0, entity_type: str = "acting entity"):
         Entity.__init__(self, parent, x, y, entity_type)
         self.parent = parent
         self.action = None
@@ -40,7 +41,8 @@ class ActingEntity(Entity):
                 # print("{} is wandering.".format(self.get_name()))
                 try:
                     entity_location = self.parent.canvas.coords(self.entity)
-                    self.move_to(entity_location[0] + randint(-15, 15), entity_location[1] + randint(-15, 15), "wandering")
+                    self.move_to(entity_location[0] + randint(-15, 15), entity_location[1] + randint(-15, 15),
+                                 "wandering")
 
                 except IndexError:
                     pass

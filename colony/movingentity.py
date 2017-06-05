@@ -12,7 +12,8 @@ __version__ = "1.0.1"
 
 class MovingEntity(ActingEntity):
     """Creates an entity capable of movement."""
-    def __init__(self, parent, x: int=0, y: int=0, entity_type: str="moving entity"):
+
+    def __init__(self, parent, x: int = 0, y: int = 0, entity_type: str = "moving entity"):
         ActingEntity.__init__(self, parent, x, y, entity_type)
         self.parent = parent
         # TODO: Actually use the colonist speed.

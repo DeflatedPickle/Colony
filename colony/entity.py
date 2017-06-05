@@ -17,7 +17,8 @@ __version__ = "1.5.0"
 
 class Entity(object):
     """Creates an entity."""
-    def __init__(self, parent, x: int=0, y: int=0, entity_type: str="entity"):
+
+    def __init__(self, parent, x: int = 0, y: int = 0, entity_type: str = "entity"):
         self.parent = parent
         self.name = None
         self.health = 0
@@ -150,7 +151,7 @@ class Entity(object):
         self.location["x"] = x
         self.location["y"] = y
 
-    def show_menu(self, event, background: bool=False):
+    def show_menu(self, event, background: bool = False):
         """Shows the menu for the entity."""
         self.last_mouse_x, self.last_mouse_y = self.parent.parent.get_mouse_position()
 
@@ -161,8 +162,8 @@ class Entity(object):
                 if self.entity_type == "colonist":
                     self.menu.add_command(label="Move Here",
                                           command=lambda: self.parent.selected_entity.move_to(self.last_mouse_x,
-                                                                                            self.last_mouse_y,
-                                                                                            "moving"))
+                                                                                              self.last_mouse_y,
+                                                                                              "moving"))
             elif not background:
                 if self.entity_type == "colonist":
                     pass

@@ -14,8 +14,10 @@ __version__ = "1.10.0"
 
 class Animal(MovingEntity):
     """Creates an animal."""
-    def __init__(self, parent, species: str="Human", name: str="", age: int=0, highest_age: int=10, gender: bool=False,
-                 health: int=100, total_health: int=100, wild: bool=True, owner=None, x: int=0, y: int=0):
+
+    def __init__(self, parent, species: str = "Human", name: str = "", age: int = 0, highest_age: int = 10,
+                 gender: bool = False,
+                 health: int = 100, total_health: int = 100, wild: bool = True, owner=None, x: int = 0, y: int = 0):
         MovingEntity.__init__(self, parent, x, y, entity_type="animal")
         self.parent = parent
         self.species = species

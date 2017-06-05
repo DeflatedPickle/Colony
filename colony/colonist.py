@@ -14,9 +14,11 @@ __version__ = "1.10.1"
 
 class Colonist(MovingEntity):
     """Creates a colonist."""
-    def __init__(self, parent, species: str="Human", forename: str="", surname: str="", age: int=0, highest_age: int=80,
-                 gender: bool=False, health: int=100,
-                 total_health: int=100, x: int=0, y: int=0):
+
+    def __init__(self, parent, species: str = "Human", forename: str = "", surname: str = "", age: int = 0,
+                 highest_age: int = 80,
+                 gender: bool = False, health: int = 100,
+                 total_health: int = 100, x: int = 0, y: int = 0):
         MovingEntity.__init__(self, parent, x, y, entity_type="colonist")
         self.parent = parent
         self.species = species

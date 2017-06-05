@@ -13,7 +13,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.20.0"
+__version__ = "1.21.1"
 
 
 class GameWindow(tk.Tk):
@@ -61,27 +61,10 @@ class TaskBar(ttk.Frame):
         self.add_button("Animals")
         self.add_button("Wildlife")
 
-        self.debug_menu = tk.Menu(self.parent)
-        self.debug_spawn_entity_menu = tk.Menu(self.debug_menu)
+        self.menu_debug = MenuDebug(self.parent)
+        self.add_button("Debug", self.menu_debug)
 
-        self.debug_spawn_movingentity = tk.Menu(self.debug_spawn_entity_menu)
-        self.debug_spawn_movingentity.add_command(label="Colonist",
-                                                  command=lambda: self.game.set_tool("spawn:movingentity:colonist"))
-
-        self.debug_spawn_entity_menu.add_cascade(label="MovingEntity", menu=self.debug_spawn_movingentity)
-        self.debug_menu.add_cascade(label="Spawn", menu=self.debug_spawn_entity_menu)
-
-        self.debug_destroy_menu = tk.Menu(self.debug_menu)
-        self.debug_destroy_menu.add_command(label="Entity",
-                                            command=lambda: self.game.set_tool("destroy:entity"))
-        self.debug_menu.add_cascade(label="Destroy", menu=self.debug_destroy_menu)
-
-        self.add_button("Debug", self.debug_menu)
-
-        self.option_menu = tk.Menu(self.parent)
-        self.option_menu.add_command(label="Back To Start", command=self.start_menu)
-        self.option_menu.add_command(label="Exit", command=lambda: sys.exit())
-
+        self.option_menu = MenuOptions(self.parent)
         self.add_button("Menu", self.option_menu)
 
     def add_button(self, text: str = "", menu: tk.Menu = None):
@@ -90,18 +73,13 @@ class TaskBar(ttk.Frame):
 
         return button
 
-    def start_menu(self):
-        self.parent.canvas.unbind("<Configure>")
-        self.parent.canvas.bind("<Configure>", self.parent.canvas.on_resize)
-        self.parent.start_menu_title()
-
 
 class ColonistBar(tk.Frame):
     def __init__(self, parent, **kwargs):
         tk.Frame.__init__(self, parent.parent, **kwargs)
         self.parent = parent
 
-        # TODO: Make the colonist bar wrap to the next line when the the first line is full of colonists.
+        # TODO: Make the colonist bar wrap to the next line when the the previous line is full of colonists.
 
         self.colonists = {}
         self.canvas_list = []
@@ -154,6 +132,55 @@ class ColonistBar(tk.Frame):
                 pass
 
 
+class MenuBase(tk.Menu):
+    def __init__(self, parent, **kwagrs):
+        tk.Menu.__init__(self, parent, **kwagrs)
+        self.parent = parent
+
+    def clear(self):
+        """Deletes all of the menu items."""
+        try:
+            for item in range(self.index("end") + 1):
+                self.delete(item)
+        except TypeError:
+            pass
+
+
+class MenuDebug(MenuBase):
+    def __init__(self, parent, **kwargs):
+        MenuBase.__init__(self, parent, **kwargs)
+
+        self.debug_spawn_menu = tk.Menu(self)
+
+        self.debug_spawn_entity_menu = tk.Menu(self)
+        self.debug_spawn_menu.add_cascade(label="Entity", menu=self.debug_spawn_entity_menu)
+
+        self.debug_spawn_movingentity = tk.Menu(self.debug_spawn_entity_menu)
+        self.debug_spawn_movingentity.add_command(label="Colonist",
+                                                  command=lambda: self.parent.set_tool("spawn:movingentity:colonist"))
+
+        self.debug_spawn_entity_menu.add_cascade(label="MovingEntity", menu=self.debug_spawn_movingentity)
+        self.add_cascade(label="Spawn", menu=self.debug_spawn_menu)
+
+        self.debug_destroy_menu = tk.Menu(self)
+        self.debug_destroy_menu.add_command(label="Entity",
+                                            command=lambda: self.parent.set_tool("destroy:entity"))
+        self.add_cascade(label="Destroy", menu=self.debug_destroy_menu)
+
+
+class MenuOptions(MenuBase):
+    def __init__(self, parent, **kwargs):
+        MenuBase.__init__(self, parent, **kwargs)
+
+        self.add_command(label="Back To Start", command=self.start_menu)
+        self.add_command(label="Exit", command=lambda: sys.exit())
+
+    def start_menu(self):
+        self.parent.canvas.unbind("<Configure>")
+        self.parent.canvas.bind("<Configure>", self.parent.canvas.on_resize)
+        self.parent.start_menu_title()
+
+
 class Start(object):
     def __init__(self, parent):
         self.parent = parent
@@ -204,8 +231,10 @@ class Game(object):
         self.canvas.bind("<Button-1>", self.check_tool, "+")
         self.canvas.bind("<ButtonRelease-3>", self.reset_tool, "+")
 
-        self.debug = DeBug(self)
         self.colonist_bar = ColonistBar(self)
+        self.taskbar = TaskBar(self.parent, self)
+        self.debug = DeBug(self)
+
         self.draw_widgets()
 
     def draw_widgets(self, event=None):
@@ -214,7 +243,7 @@ class Game(object):
         self.canvas.create_window(self.canvas.winfo_width() // 2, 30, window=self.colonist_bar, anchor="center",
                                   tags="HUD")
 
-        self.canvas.create_window(0, self.parent.winfo_height() - 23, window=TaskBar(self.parent, self), anchor="nw",
+        self.canvas.create_window(0, self.parent.winfo_height() - 23, window=self.taskbar, anchor="nw",
                                   width=self.canvas.winfo_width(), tags="HUD")
 
         # TODO: Create a frame to hold information that is shown when an entity is selected.
@@ -241,9 +270,13 @@ class Game(object):
 
         elif self.selected_tool == "destroy:entity":
             closest = self.canvas.find_closest(mouse_x, mouse_y, halo=1)[0]
-            if isinstance(self.entities[closest], colony.Entity):
-                self.entities[closest].remove_from_colonist_bar()
-                self.entities[closest].destroy()
+            try:
+                if isinstance(self.entities[closest], colony.Entity):
+                    self.entities[closest].remove_from_colonist_bar()
+                    self.entities[closest].destroy()
+
+            except KeyError:
+                pass
 
         del args
 
@@ -367,6 +400,14 @@ class Scenarios(object):
                         title="Lonely Bean",
                         description="Just you, yourself and you.",
                         contents={"colonists": 1, "items": {"wood": 50, "stone": 20}})
+
+        colony.Scenario(self,
+                        self.treeview,
+                        title="Partners In Crime",
+                        description="You and your partner are outlaws, on the run. However, you have been on the run"
+                                    " for so long, you two need a break. You find a nice patch of land to settle on for"
+                                    " a while.",
+                        contents={"colonists": 2})
 
         colony.Scenario(self,
                         self.treeview,

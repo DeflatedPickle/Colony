@@ -85,14 +85,14 @@ def get_female_names():
 def get_nicknames():
     # TODO: Add more nicknames.
     return [
-        ""   # Random names
+        ""  # Random names
     ]
 
 
 def get_middle_names():
     # TODO: Add more middle names.
     return [
-        ""   # Random names
+        ""  # Random names
     ]
 
 
