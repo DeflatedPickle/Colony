@@ -65,16 +65,14 @@ class Entity(object):
         if self.entity_type == "colonist":
             self.entity_name = self.parent.canvas.create_text(self.location["x"],
                                                               self.location["y"] + 17,
-                                                              text="{} {}".format(self.name["forename"],
-                                                                                  self.name["surname"]),
+                                                              text="{} {}".format(self.name["forename"], self.name["surname"]),
                                                               state="disabled",
                                                               font=get_fonts()["text"]["normal"],
                                                               tag="extra")
 
             self.entity_health = self.parent.canvas.create_text(self.location["x"],
                                                                 self.location["y"] + 27,
-                                                                text="{}/{}".format(self.health,
-                                                                                    self.total_health),
+                                                                text="{}/{}".format(self.health, self.total_health),
                                                                 state="disabled",
                                                                 font=get_fonts()["text"]["normal"],
                                                                 tag="extra")
@@ -89,8 +87,7 @@ class Entity(object):
 
             self.entity_health = self.parent.canvas.create_text(self.location["x"],
                                                                 self.location["y"] + 20,
-                                                                text="{}/{}".format(self.health,
-                                                                                    self.total_health),
+                                                                text="{}/{}".format(self.health, self.total_health),
                                                                 state="disabled",
                                                                 font=get_fonts()["text"]["normal"],
                                                                 tag="extra")
@@ -120,8 +117,7 @@ class Entity(object):
         self.parent.canvas.bind("<Button-1>", self.delete_all, "+")
 
         self.parent.canvas.bind("<Button-3>", lambda e: self.show_menu(e, background=True))
-        self.parent.canvas.tag_bind(self.entity,
-                                    "<ButtonRelease-3>", lambda e: self.show_menu(e, background=False), "+")
+        self.parent.canvas.tag_bind(self.entity, "<ButtonRelease-3>", lambda e: self.show_menu(e, background=False), "+")
 
         self.parent.canvas.tag_raise(self)
 
@@ -161,9 +157,7 @@ class Entity(object):
             if background:
                 if self.entity_type == "colonist":
                     self.menu.add_command(label="Move Here",
-                                          command=lambda: self.parent.selected_entity.move_to(self.last_mouse_x,
-                                                                                              self.last_mouse_y,
-                                                                                              "moving"))
+                                          command=lambda: self.parent.selected_entity.move_to(self.last_mouse_x, self.last_mouse_y, "moving"))
             elif not background:
                 if self.entity_type == "colonist":
                     pass

@@ -13,7 +13,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.21.2"
+__version__ = "1.22.0"
 
 
 class GameWindow(tk.Tk):
@@ -26,6 +26,7 @@ class GameWindow(tk.Tk):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
+        # TODO: Add a grid to the canvas for structures and such to be placed on.
         self.canvas = ResizingCanvas(self)
         self.canvas.grid(row=0, column=0)
 
@@ -35,6 +36,8 @@ class GameWindow(tk.Tk):
 
     def start_menu_title(self):
         self.canvas.delete("all")
+        self.canvas.unbind("<Configure>")
+        self.canvas.bind("<Configure>", self.canvas.on_resize)
         try:
             self.after_cancel(self.debug_update)
         except AttributeError:
@@ -58,6 +61,7 @@ class TaskBar(ttk.Frame):
         self.game = game
 
         self.add_button("Construction")
+        self.add_button("Colonists")
         self.add_button("Animals")
         self.add_button("Wildlife")
 
@@ -86,10 +90,8 @@ class ColonistBar(tk.Frame):
 
     def add_colonist(self, colonist):
         canvas = tk.Canvas(self, width=50, height=50)
-        canvas.create_text(25, 20, text=colony.get_references()["icons"]["colonist"],
-                           font=colony.get_fonts()["colonist"]["bar_normal"], tag="colonist")
-        canvas.create_text(25, 40, text=colonist.name["forename"], anchor="center",
-                           font=colony.get_fonts()["text"]["bar_normal"], tag="name")
+        canvas.create_text(25, 20, text=colony.get_references()["icons"]["colonist"], font=colony.get_fonts()["colonist"]["bar_normal"], tag="colonist")
+        canvas.create_text(25, 40, text=colonist.name["forename"], anchor="center", font=colony.get_fonts()["text"]["bar_normal"], tag="name")
         canvas.pack(side="left")
 
         canvas.bind("<ButtonRelease-1>", lambda *args: self.select_colonist(colonist), "+")
@@ -118,10 +120,8 @@ class ColonistBar(tk.Frame):
         del args
 
     def select_current_colonist(self, colonist):
-        self.colonists[colonist.entity].itemconfigure(self.colonists[colonist.entity].find_withtag("colonist"),
-                                                      font=colony.get_fonts()["colonist"]["bar_selected"])
-        self.colonists[colonist.entity].itemconfigure(self.colonists[colonist.entity].find_withtag("name"),
-                                                      font=colony.get_fonts()["text"]["bar_selected"])
+        self.colonists[colonist.entity].itemconfigure(self.colonists[colonist.entity].find_withtag("colonist"), font=colony.get_fonts()["colonist"]["bar_selected"])
+        self.colonists[colonist.entity].itemconfigure(self.colonists[colonist.entity].find_withtag("name"), font=colony.get_fonts()["text"]["bar_selected"])
 
     def unselect_all_colonists(self):
         for canvas in self.canvas_list:
@@ -156,9 +156,14 @@ class MenuDebug(MenuBase):
         self.debug_spawn_menu.add_cascade(label="Entity", menu=self.debug_spawn_entity_menu)
 
         self.debug_spawn_movingentity = tk.Menu(self.debug_spawn_entity_menu)
-        self.debug_spawn_movingentity.add_command(label="Colonist",
-                                                  command=lambda: self.parent.game.set_tool(
-                                                      "spawn:movingentity:colonist"))
+        self.debug_spawn_movingentity.add_command(label="Colonist", command=lambda: self.parent.game.set_tool("spawn:entity:movingentity:colonist"))
+
+        self.debug_spawn_movingentity_animal = tk.Menu(self.debug_spawn_movingentity)
+
+        for animal in self.parent.game.type_animals:
+            self.debug_spawn_movingentity_animal.add_command(label=animal, command=lambda current_animal=animal: self.parent.game.set_tool("spawn:entity:movingentity:animal:{}".format(current_animal.lower())))
+
+        self.debug_spawn_movingentity.add_cascade(label="Animal", menu=self.debug_spawn_movingentity_animal)
 
         self.debug_spawn_entity_menu.add_cascade(label="MovingEntity", menu=self.debug_spawn_movingentity)
         self.add_cascade(label="Spawn", menu=self.debug_spawn_menu)
@@ -177,9 +182,9 @@ class MenuOptions(MenuBase):
         self.add_command(label="Exit", command=lambda: sys.exit())
 
     def start_menu(self):
-        self.parent.canvas.unbind("<Configure>")
-        self.parent.canvas.bind("<Configure>", self.parent.canvas.on_resize)
-        self.parent.start_menu_title()
+        self.parent.parent.canvas.unbind("<Configure>")
+        self.parent.parent.canvas.bind("<Configure>", self.parent.parent.canvas.on_resize)
+        self.parent.parent.start_menu_title()
 
 
 class Start(object):
@@ -187,19 +192,11 @@ class Start(object):
         self.parent = parent
 
         self.parent.canvas.create_text(5, 5, text="Colony", anchor="nw", font=colony.get_fonts()["menu"]["title"])
-        self.parent.canvas.create_text(5, 45,
-                                       text="A simple colony simulator created by Dibbo, inspired by RimWorld and Dwarf"
-                                            " Fortress.",
-                                       anchor="nw", font=colony.get_fonts()["menu"]["subtitle"])
+        self.parent.canvas.create_text(5, 45, text="A simple colony simulator created by Dibbo, inspired by RimWorld and Dwarf Fortress.", anchor="nw", font=colony.get_fonts()["menu"]["subtitle"])
 
-        self.parent.canvas.create_window(5, 70,
-                                         window=ttk.Button(self.parent.canvas, text="Start", command=self.start_game),
-                                         anchor="nw")
-        self.parent.canvas.create_window(5, 100, window=ttk.Button(self.parent.canvas, text="Options",
-                                                                   command=self.start_options), anchor="nw")
-        self.parent.canvas.create_window(5, 130,
-                                         window=ttk.Button(self.parent.canvas, text="Exit", command=lambda: sys.exit()),
-                                         anchor="nw")
+        self.parent.canvas.create_window(5, 70, window=ttk.Button(self.parent.canvas, text="Start", command=self.start_game), anchor="nw")
+        self.parent.canvas.create_window(5, 100, window=ttk.Button(self.parent.canvas, text="Options", command=self.start_options), anchor="nw")
+        self.parent.canvas.create_window(5, 130, window=ttk.Button(self.parent.canvas, text="Exit", command=lambda: sys.exit()), anchor="nw")
 
         self.scenarios = None
         self.options = None
@@ -221,6 +218,8 @@ class Game(object):
         self.animals = []
         self.items = []
 
+        self.type_animals = ["Cat", "Babirusa"]
+
         self.canvas = self.parent.canvas
         self.canvas.bind("<Configure>", self.draw_widgets, "+")
 
@@ -241,43 +240,51 @@ class Game(object):
     def draw_widgets(self, event=None):
         self.canvas.delete("HUD")
 
-        self.canvas.create_window(self.canvas.winfo_width() // 2, 30, window=self.colonist_bar, anchor="center",
-                                  tags="HUD")
+        self.canvas.create_window(self.canvas.winfo_width() // 2, 30, window=self.colonist_bar, anchor="center", tags="HUD")
 
-        self.canvas.create_window(0, self.parent.winfo_height() - 23, window=self.taskbar, anchor="nw",
-                                  width=self.canvas.winfo_width(), tags="HUD")
+        self.canvas.create_window(0, self.parent.winfo_height() - 23, window=self.taskbar, anchor="nw", width=self.canvas.winfo_width(), tags="HUD")
 
         # TODO: Create a frame to hold information that is shown when an entity is selected.
         # TODO: Move the upper and lower buttons to the previously mentioned frame.
-        self.canvas.create_window(0, self.parent.winfo_height() - 48,
-                                  window=ttk.Button(self.parent, text="/\\", width=3,
-                                                    command=lambda: self.select_around(True)), anchor="nw",
-                                  tags="HUD")
-        self.canvas.create_window(28, self.parent.winfo_height() - 48,
-                                  window=ttk.Button(self.parent, text="\/", width=3,
-                                                    command=lambda: self.select_around(False)), anchor="nw",
-                                  tags="HUD")
+        self.canvas.create_window(0, self.parent.winfo_height() - 48,  window=ttk.Button(self.parent, text="/\\", width=3, command=lambda: self.select_around(True)), anchor="nw", tags="HUD")
+        self.canvas.create_window(28, self.parent.winfo_height() - 48, window=ttk.Button(self.parent, text="\/", width=3, command=lambda: self.select_around(False)), anchor="nw", tags="HUD")
 
         del event
 
     def check_tool(self, *args):
         mouse_x, mouse_y = self.parent.get_mouse_position()
+        tool = self.selected_tool
 
         if self.selected_tool is None:
             return
 
-        elif self.selected_tool == "spawn:movingentity:colonist":
-            colony.Colonist(self, x=mouse_x, y=mouse_y).generate_random().draw().add_to_colonist_bar()
+        elif self.selected_tool is not None:
+            tool = self.selected_tool.split(":")
 
-        elif self.selected_tool == "destroy:entity":
-            closest = self.canvas.find_closest(mouse_x, mouse_y, halo=1)[0]
-            try:
-                if isinstance(self.entities[closest], colony.Entity):
-                    self.entities[closest].remove_from_colonist_bar()
-                    self.entities[closest].destroy()
+        if "spawn" in tool:
+            if "entity" in tool:
+                if "movingentity" in tool:
+                    if "colonist" in tool:
+                        colony.Colonist(self, x=mouse_x, y=mouse_y).generate_random().draw().add_to_colonist_bar()
 
-            except KeyError:
-                pass
+                    elif "animal" in tool:
+                        animal = self.register_animals()[tool[-1]]
+
+                        animal.location["x"] = mouse_x
+                        animal.location["y"] = mouse_y
+
+                        animal.generate_random().draw()
+
+        elif "destroy" in tool:
+            if "entity" in tool:
+                closest = self.canvas.find_closest(mouse_x, mouse_y, halo=1)[0]
+                try:
+                    if isinstance(self.entities[closest], colony.Entity):
+                        self.entities[closest].remove_from_colonist_bar()
+                        self.entities[closest].destroy()
+
+                except KeyError:
+                    pass
 
         del args
 
@@ -337,10 +344,20 @@ class Options(object):
     def __init__(self, parent):
         self.parent = parent
 
+        self.parent.canvas.bind("<Configure>", self.draw_widgets, "+")
+
+        self.parent.canvas.create_text(5, 5, text="Options", anchor="nw", font=colony.get_fonts()["menu"]["title"])
+
         # TODO: Add options.
 
-        self.parent.canvas.create_window(5, 130, window=ttk.Button(self.parent.canvas, text="Back",
-                                                                   command=self.parent.start_menu_title), anchor="nw")
+        self.draw_widgets()
+
+    def draw_widgets(self, event=None):
+        self.parent.canvas.delete("Widget")
+
+        self.parent.canvas.create_window(5, self.parent.winfo_height() - 30, window=ttk.Button(self.parent.canvas, text="Back", command=self.parent.start_menu_title), anchor="nw", tags="Widget")
+
+        del event
 
 
 class Scenarios(object):
@@ -367,7 +384,7 @@ class Scenarios(object):
 
         self.frame_text = ttk.Frame(self.parent.canvas)
 
-        self.text = tk.Text(self.frame_text, width=0, height=12)
+        self.text = tk.Text(self.frame_text, wrap="word", width=0, height=12)
         self.text.pack(side="left", fill="both", expand=True)
         scrollbar_text = ttk.Scrollbar(self.frame_text, command=self.text.yview)
         scrollbar_text.pack(side="right", fill="y", expand=False)
@@ -381,15 +398,11 @@ class Scenarios(object):
     def draw_widgets(self, event=None):
         self.parent.canvas.delete("UI")
 
-        self.parent.canvas.create_window(5, 5, window=self.frame_listbox, anchor="nw",
-                                         height=self.parent.winfo_height() - 60, tags="UI")
-        self.parent.canvas.create_window(230, 5, window=self.frame_text, anchor="nw",
-                                         width=self.parent.winfo_width() - 235, height=self.parent.winfo_height() - 60,
-                                         tags="UI")
+        self.parent.canvas.create_window(5, 5, window=self.frame_listbox, anchor="nw", height=self.parent.winfo_height() - 60, tags="UI")
+        self.parent.canvas.create_window(230, 5, window=self.frame_text, anchor="nw", width=self.parent.winfo_width() - 235, height=self.parent.winfo_height() - 60, tags="UI")
 
-        self.parent.canvas.create_window(self.parent.winfo_width() - 90, self.parent.winfo_height() - 40,
-                                         window=ttk.Button(self.parent.canvas, text="Start", command=self.start_game),
-                                         anchor="nw", tags="UI")
+        self.parent.canvas.create_window(5, self.parent.winfo_height() - 30, window=ttk.Button(self.parent.canvas, text="Back", command=self.parent.start_menu_title), anchor="nw", tags="UI")
+        self.parent.canvas.create_window(self.parent.winfo_width() - 80, self.parent.winfo_height() - 30, window=ttk.Button(self.parent.canvas, text="Start", command=self.start_game), anchor="nw", tags="UI")
 
         del event
 
@@ -405,23 +418,19 @@ class Scenarios(object):
         colony.Scenario(self,
                         self.treeview,
                         title="Partners In Crime",
-                        description="You and your partner are outlaws, on the run. However, you have been on the run"
-                                    " for so long, you two need a break. You find a nice patch of land to settle on for"
-                                    " a while.",
+                        description="You and your partner are outlaws, on the run. However, you have been on the run for so long, you two need a break. You find a nice patch of land to settle on for a while.",
                         contents={"colonists": 2})
 
         colony.Scenario(self,
                         self.treeview,
                         title="Weekend Camp Gone Wrong",
-                        description="You were camping with your friends when suddenly... you were still camping but it"
-                                    " was boring.",
+                        description="You were camping with your friends when suddenly... you were still camping but it was boring.",
                         contents={"colonists": 3})
 
         colony.Scenario(self,
                         self.treeview,
                         title="Wimps From Yonder",
-                        description="Your previous town was ransacked by pirates, all your friends and family were"
-                                    " murdered, but you and a few others managed to escape.",
+                        description="Your previous town was ransacked by pirates, all your friends and family were murdered, but you and a few others managed to escape.",
                         contents={"colonists": 7})
 
         colony.Scenario(self,
@@ -450,8 +459,7 @@ class Scenarios(object):
         self.text.delete(1.0, "end")
         if not self.treeview.item(self.treeview.focus())["text"].startswith("-"):
             self.text.insert("end", "{}\n\n".format(self.treeview.item(self.treeview.focus())["text"]))
-            self.text.insert("end",
-                             "Description: {}\n\n".format(self.treeview.item(self.treeview.focus())["values"][0]))
+            self.text.insert("end", "Description: {}\n\n".format(self.treeview.item(self.treeview.focus())["values"][0]))
 
             contents = literal_eval(self.treeview.item(self.treeview.focus())["values"][1])
             contents_show = []
@@ -501,9 +509,7 @@ class Scenarios(object):
         # NOTE: Scenarios can exist without colonists.
         if "colonists" in scenario.contents:
             for amount in range(scenario.contents["colonists"]):
-                colony.Colonist(self.game,
-                                x=drop_x + randint(-25, 25),
-                                y=drop_y + randint(-25, 25)).generate_random().draw().add_to_colonist_bar()
+                colony.Colonist(self.game, x=drop_x + randint(-25, 25), y=drop_y + randint(-25, 25)).generate_random().draw().add_to_colonist_bar()
 
         # NOTE: Scenarios can exist without animals.
         if "animals" in scenario.contents:
@@ -580,8 +586,7 @@ class DeBug(object):
     def find_selected(self):
         for item in self.parent.entities.values():
             if item.selected:
-                return "{}: {}".format(item.entity_type, item.name if not isinstance(item.name,
-                                                                                     type(dict())) else item.get_name())
+                return "{}: {}".format(item.entity_type, item.name if not isinstance(item.name, type(dict())) else item.get_name())
 
     def find_selected_location(self):
         for item in self.parent.entities.values():

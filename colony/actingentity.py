@@ -41,8 +41,7 @@ class ActingEntity(Entity):
                 # print("{} is wandering.".format(self.get_name()))
                 try:
                     entity_location = self.parent.canvas.coords(self.entity)
-                    self.move_to(entity_location[0] + randint(-15, 15), entity_location[1] + randint(-15, 15),
-                                 "wandering")
+                    self.move_to(entity_location[0] + randint(-15, 15), entity_location[1] + randint(-15, 15), "wandering")
 
                 except IndexError:
                     pass

@@ -23,7 +23,10 @@ class Window(tk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.close)
 
     def set_up_for(self, window_type: str):
-        if window_type == "information":
+        if window_type == "options":
+            pass
+
+        elif window_type == "information":
             pass
 
         return self
