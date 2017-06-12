@@ -4,15 +4,14 @@
 
 import tkinter as tk
 from _tkinter import TclError
-
-import pkinter as pk
+from collections import OrderedDict
 
 from .references import *
-from .window import Window
+from .window import InformationWindow
 
 __title__ = "Entity"
 __author__ = "DeflatedPickle"
-__version__ = "1.5.0"
+__version__ = "1.6.0"
 
 
 class Entity(object):
@@ -34,8 +33,17 @@ class Entity(object):
             self.name = {"forename": None,
                          "surname": None}
 
+        if self.entity_type in ["colonist", "animal"]:
+            self.species = None
+            self.gender = 0
+            self.age = 0
+
         elif self.entity_type == "item":
             self.amount = None
+
+        self.entity_values = OrderedDict()
+        self.entity_values_basic = OrderedDict()
+        self.entity_values["basic"] = self.entity_values_basic
 
         self.entity = None
         self.entity_name = None
@@ -121,7 +129,21 @@ class Entity(object):
 
         self.parent.canvas.tag_raise(self)
 
+        self.update_values()
+
         return self
+
+    def get_name(self):
+        return self.name
+
+    def update_values(self):
+        self.entity_values_basic["name"] = self.get_name()
+        if self.entity_type in ["colonist", "animal"]:
+            self.entity_values_basic["species"] = self.species
+            self.entity_values_basic["gender"] = self.gender
+            self.entity_values_basic["age"] = self.age
+        self.entity_values_basic["health"] = self.health
+        self.entity_values_basic["total health"] = self.total_health
 
     def destroy(self):
         self.parent.entities.pop(self.entity)
@@ -165,16 +187,9 @@ class Entity(object):
                 elif self.entity_type == "item":
                     self.menu.add_command(label="Pick Up", command=None)
 
-                self.menu.add_command(label="Information", command=self.show_information)
+                self.menu.add_command(label="Information", command=lambda: InformationWindow(self.parent.parent).set_information(self))
 
         self.menu.post(event.x_root, event.y_root)
-
-    def show_information(self):
-        """Shows the information window."""
-        window = Window(self.parent.parent)
-        window.set_up_for("information")
-        window.set_information(self.parent.selected_entity)
-        pk.center_on_parent(window)
 
     def delete_all(self, *args):
         """Deletes all of the menu items."""

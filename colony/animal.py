@@ -9,7 +9,7 @@ from .references import get_male_animal_names, get_female_animal_names
 
 __title__ = "Animal"
 __author__ = "DeflatedPickle"
-__version__ = "1.10.0"
+__version__ = "1.10.1"
 
 
 class Animal(MovingEntity):
@@ -30,9 +30,11 @@ class Animal(MovingEntity):
         self.inventory = []
         self.owner = owner
 
-        self.parent.animals.append(self)
-
         self.check_action()
+
+    def draw(self):
+        MovingEntity.draw(self)
+        self.parent.animals.append(self)
 
     def generate_random(self):
         """Generates a random animal."""

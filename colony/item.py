@@ -19,4 +19,6 @@ class Item(Entity):
         self.stack_size = stack_size
         self.amount = amount
 
+    def draw(self):
+        Entity.draw(self)
         self.parent.items.append(self)

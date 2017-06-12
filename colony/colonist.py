@@ -31,6 +31,7 @@ class Colonist(MovingEntity):
         self.health = health
         self.total_health = total_health
         # TODO: Add more colonist actions.
+        self.joy = 100
         self.inventory = []
         # TODO: Add colonist relationships.
         # TODO: Add colonist buffs and debuffs, such as "Fast Walker" to improve move speed.

@@ -13,7 +13,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.22.0"
+__version__ = "1.23.2"
 
 
 class GameWindow(tk.Tk):
@@ -151,22 +151,23 @@ class MenuDebug(MenuBase):
         MenuBase.__init__(self, parent, **kwargs)
 
         self.debug_spawn_menu = tk.Menu(self)
+        self.add_cascade(label="Spawn", menu=self.debug_spawn_menu)
 
         self.debug_spawn_entity_menu = tk.Menu(self)
         self.debug_spawn_menu.add_cascade(label="Entity", menu=self.debug_spawn_entity_menu)
 
-        self.debug_spawn_movingentity = tk.Menu(self.debug_spawn_entity_menu)
-        self.debug_spawn_movingentity.add_command(label="Colonist", command=lambda: self.parent.game.set_tool("spawn:entity:movingentity:colonist"))
+        self.debug_spawn_entity_actingentity_menu = tk.Menu(self.debug_spawn_entity_menu)
+        self.debug_spawn_entity_menu.add_cascade(label="ActingEntity", menu=self.debug_spawn_entity_actingentity_menu)
 
-        self.debug_spawn_movingentity_animal = tk.Menu(self.debug_spawn_movingentity)
+        self.debug_spawn_entity_actingentity_movingentity_menu = tk.Menu(self.debug_spawn_entity_menu)
+        self.debug_spawn_entity_actingentity_menu.add_cascade(label="MovingEntity", menu=self.debug_spawn_entity_actingentity_movingentity_menu)
+        self.debug_spawn_entity_actingentity_movingentity_menu.add_command(label="Colonist", command=lambda: self.parent.game.set_tool("spawn:entity:actingentity:movingentity:colonist"))
+
+        self.debug_spawn_acting_movingentity_animal_menu = tk.Menu(self.debug_spawn_entity_actingentity_movingentity_menu)
+        self.debug_spawn_entity_actingentity_movingentity_menu.add_cascade(label="Animal", menu=self.debug_spawn_acting_movingentity_animal_menu)
 
         for animal in self.parent.game.type_animals:
-            self.debug_spawn_movingentity_animal.add_command(label=animal, command=lambda current_animal=animal: self.parent.game.set_tool("spawn:entity:movingentity:animal:{}".format(current_animal.lower())))
-
-        self.debug_spawn_movingentity.add_cascade(label="Animal", menu=self.debug_spawn_movingentity_animal)
-
-        self.debug_spawn_entity_menu.add_cascade(label="MovingEntity", menu=self.debug_spawn_movingentity)
-        self.add_cascade(label="Spawn", menu=self.debug_spawn_menu)
+            self.debug_spawn_acting_movingentity_animal_menu.add_command(label=animal, command=lambda current_animal=animal: self.parent.game.set_tool("spawn:entity:actingentity:movingentity:animal:{}".format(current_animal.lower())))
 
         self.debug_destroy_menu = tk.Menu(self)
         self.debug_destroy_menu.add_command(label="Entity",
@@ -218,16 +219,29 @@ class Game(object):
         self.animals = []
         self.items = []
 
+        self.register_items = {
+            "wood": colony.Item(self, name="Wood", stack_size=100),
+            "stone": colony.Item(self, name="Stone", stack_size=100),
+            "ore_iron": colony.Item(self, name="Iron Ore", stack_size=100),
+            "ingot_iron": colony.Item(self, name="Iron Ingot", stack_size=100)
+        }
+
+        self.register_animals = {
+            "cat": colony.Animal(self, species="Cat", highest_age=10),
+            "babirusa": colony.Animal(self, species="Babirusa", highest_age=10)
+        }
+
         self.type_animals = ["Cat", "Babirusa"]
 
+        # TODO: Add a grid to the canvas for structures to be aligned to.
         self.canvas = self.parent.canvas
         self.canvas.bind("<Configure>", self.draw_widgets, "+")
 
+        # FIXME: Change this to a list so that multiple entities can be selected.
         self.selected_entity = None
 
-        # TODO: Make the select tool easier to customize.
-        # NOTE: On check_tool maybe have it spilt the tool into a list and check for different syntax in it.
         self.selected_tool = None
+        self.select_area = None
         self.canvas.bind("<Button-1>", self.check_tool, "+")
         self.canvas.bind("<ButtonRelease-3>", self.reset_tool, "+")
 
@@ -244,47 +258,75 @@ class Game(object):
 
         self.canvas.create_window(0, self.parent.winfo_height() - 23, window=self.taskbar, anchor="nw", width=self.canvas.winfo_width(), tags="HUD")
 
-        # TODO: Create a frame to hold information that is shown when an entity is selected.
-        # TODO: Move the upper and lower buttons to the previously mentioned frame.
         self.canvas.create_window(0, self.parent.winfo_height() - 48,  window=ttk.Button(self.parent, text="/\\", width=3, command=lambda: self.select_around(True)), anchor="nw", tags="HUD")
         self.canvas.create_window(28, self.parent.winfo_height() - 48, window=ttk.Button(self.parent, text="\/", width=3, command=lambda: self.select_around(False)), anchor="nw", tags="HUD")
 
         del event
 
+    def selection_tool(self, x, y, event):
+        self.canvas.delete("Select")
+
+        self.canvas.create_rectangle(x, y, event.x, event.y, tags="Select")
+        self.select_area = [x, y, event.x, event.y]
+
+    def release(self, event):
+        self.canvas.tag_raise("Select")
+
+        try:
+            for entity in self.canvas.find_enclosed(self.select_area[0], self.select_area[1], self.select_area[2], self.select_area[3]):
+                if "entity" in self.canvas.gettags(entity):
+                    self.entities[entity].select()
+
+        except TypeError:
+            pass
+
+        self.canvas.delete("Select")
+
+        self.selected_tool = None
+        self.select_area = None
+
+        del event
+
     def check_tool(self, *args):
         mouse_x, mouse_y = self.parent.get_mouse_position()
-        tool = self.selected_tool
 
         if self.selected_tool is None:
-            return
+            self.selected_tool = "select"
+
+            self.canvas.bind("<B1-Motion>", lambda event: self.selection_tool(mouse_x, mouse_y, event), "+")
+            self.canvas.bind("<ButtonRelease-1>", self.release, "+")
 
         elif self.selected_tool is not None:
             tool = self.selected_tool.split(":")
 
-        if "spawn" in tool:
-            if "entity" in tool:
-                if "movingentity" in tool:
-                    if "colonist" in tool:
-                        colony.Colonist(self, x=mouse_x, y=mouse_y).generate_random().draw().add_to_colonist_bar()
+            self.canvas.unbind("<B1-Motion>")
+            self.canvas.unbind("<ButtonRelease-1>")
 
-                    elif "animal" in tool:
-                        animal = self.register_animals()[tool[-1]]
+            if "spawn" in tool:
+                if "entity" in tool:
+                    if "actingentity" in tool:
+                        if "movingentity" in tool:
+                            if "colonist" in tool:
+                                colony.Colonist(self, x=mouse_x, y=mouse_y).generate_random().draw().add_to_colonist_bar()
 
-                        animal.location["x"] = mouse_x
-                        animal.location["y"] = mouse_y
+                            elif "animal" in tool:
+                                animal = self.register_animals[tool[-1]]
 
-                        animal.generate_random().draw()
+                                animal.location["x"] = mouse_x
+                                animal.location["y"] = mouse_y
 
-        elif "destroy" in tool:
-            if "entity" in tool:
-                closest = self.canvas.find_closest(mouse_x, mouse_y, halo=1)[0]
-                try:
-                    if isinstance(self.entities[closest], colony.Entity):
-                        self.entities[closest].remove_from_colonist_bar()
-                        self.entities[closest].destroy()
+                                animal.generate_random().draw()
 
-                except KeyError:
-                    pass
+            elif "destroy" in tool:
+                if "entity" in tool:
+                    closest = self.canvas.find_closest(mouse_x, mouse_y, halo=1)[0]
+                    try:
+                        if isinstance(self.entities[closest], colony.Entity):
+                            self.entities[closest].remove_from_colonist_bar()
+                            self.entities[closest].destroy()
+
+                    except KeyError:
+                        pass
 
         del args
 
@@ -317,27 +359,10 @@ class Game(object):
                     self.entities[entity].select()
 
     def unselect_all(self, *args):
-        for colonist in self.canvas.find_withtag("entity"):
-            if self.entities[colonist].entity_type == "colonist":
-                self.entities[colonist].unselect()
+        for entity in self.canvas.find_withtag("entity"):
+            self.entities[entity].unselect()
 
         del args
-
-    def register_items(self):
-        # NOTE: Might not be the best idea to register items like this.
-        return {
-            "wood": colony.Item(self, name="Wood", stack_size=100),
-            "stone": colony.Item(self, name="Stone", stack_size=100),
-            "ore_iron": colony.Item(self, name="Iron Ore", stack_size=100),
-            "ingot_iron": colony.Item(self, name="Iron Ingot", stack_size=100)
-        }
-
-    def register_animals(self):
-        # NOTE: Might not be the best idea to register animals like this.
-        return {
-            "cat": colony.Animal(self, species="Cat", highest_age=10),
-            "babirusa": colony.Animal(self, species="Babirusa", highest_age=10)
-        }
 
 
 class Options(object):
@@ -532,7 +557,7 @@ class Scenarios(object):
                     reg_item = self.game.register_items()[choice(list(self.game.register_items().keys()))]
 
                 else:
-                    reg_item = self.game.register_items()[item]
+                    reg_item = self.game.register_items[item]
 
                 reg_item.amount = scenario.contents["items"][item]
 
