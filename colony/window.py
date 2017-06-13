@@ -7,10 +7,11 @@ from tkinter import ttk
 from string import capwords
 
 import pkinter as pk
+from .references import OptionFrame
 
 __title__ = "Window"
 __author__ = "DeflatedPickle"
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 
 
 class BaseWindow(tk.Toplevel):
@@ -18,6 +19,7 @@ class BaseWindow(tk.Toplevel):
         tk.Toplevel.__init__(self, parent, *args, **kwargs)
         self.parent = parent
         self.resizable(False, False)
+        self.geometry("200x250")
         self.transient(parent)
         self.grab_set()
 
@@ -53,11 +55,30 @@ class BaseWindow(tk.Toplevel):
         self.current_row += 1
 
 
+class OptionWindow(BaseWindow):
+    def __init__(self, parent, *args, **kwargs):
+        BaseWindow.__init__(self, parent, *args, **kwargs)
+        self.title("Options")
+
+        self.variable_debug = self.parent.variable_debug
+
+        OptionFrame(self.frame_widget, self).pack(fill="both", expand=True)
+
+        ttk.Button(self.frame_buttons, text="OK", command=self.ok).pack(side="right")
+        ttk.Button(self.frame_buttons, text="Apply", command=self.apply).pack(side="right")
+
+    def apply(self):
+        self.parent.start.scenarios.game.draw_widgets()
+
+    def ok(self):
+        self.apply()
+        self.close()
+
+
 class InformationWindow(BaseWindow):
     def __init__(self, parent, *args, **kwargs):
         BaseWindow.__init__(self, parent, *args, **kwargs)
         self.title("Information")
-        self.geometry("200x250")
 
         self.frame_basic = ttk.LabelFrame(self.frame_widget, text="Basics")
         self.frame_basic.grid(row=0, column=0, padx=3, pady=3, sticky="nesw")
@@ -71,6 +92,7 @@ def main():
     app = tk.Tk()
     # BaseWindow(app)
     InformationWindow(app)
+    OptionWindow(app)
     app.mainloop()
 
 

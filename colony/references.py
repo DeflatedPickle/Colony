@@ -4,11 +4,12 @@
 
 """
 
+from tkinter import ttk
 from tkinter import font
 
 __title__ = "Pawn"
 __author__ = "DeflatedPickle"
-__version__ = "1.6.1"
+__version__ = "1.7.0"
 
 
 def get_frame_rate():
@@ -117,3 +118,14 @@ def get_female_animal_names():
     return [
         "Bella", "Molly"
     ]
+
+
+class OptionFrame(ttk.Frame):
+    def __init__(self, parent, option, **kwargs):
+        ttk.Frame.__init__(self, parent, **kwargs)
+        self.parent = parent
+        self.option = option
+
+        # TODO: Add more options.
+
+        ttk.Checkbutton(self, text="Debugging Mode", variable=self.option.variable_debug).grid(row=0, column=0)

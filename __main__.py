@@ -13,7 +13,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.23.2"
+__version__ = "1.24.0"
 
 
 class GameWindow(tk.Tk):
@@ -23,12 +23,16 @@ class GameWindow(tk.Tk):
         self.geometry("600x300")
         self.option_add('*tearOff', False)
 
+        self.minsize(400, 300)
+
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
         # TODO: Add a grid to the canvas for structures and such to be placed on.
         self.canvas = ResizingCanvas(self)
         self.canvas.grid(row=0, column=0)
+
+        self.variable_debug = tk.BooleanVar(value=0)
 
         self.start = None
 
@@ -65,8 +69,9 @@ class TaskBar(ttk.Frame):
         self.add_button("Animals")
         self.add_button("Wildlife")
 
-        self.menu_debug = MenuDebug(self)
-        self.add_button("Debug", self.menu_debug)
+        if self.parent.variable_debug.get():
+            self.menu_debug = MenuDebug(self)
+            self.add_button("Debug", self.menu_debug)
 
         self.option_menu = MenuOptions(self)
         self.add_button("Menu", self.option_menu)
@@ -78,9 +83,9 @@ class TaskBar(ttk.Frame):
         return button
 
 
-class ColonistBar(tk.Frame):
+class ColonistBar(ttk.Frame):
     def __init__(self, parent, **kwargs):
-        tk.Frame.__init__(self, parent.parent, **kwargs)
+        ttk.Frame.__init__(self, parent.parent, **kwargs)
         self.parent = parent
 
         # TODO: Make the colonist bar wrap to the next line when the the previous line is full of colonists.
@@ -146,6 +151,11 @@ class MenuBase(tk.Menu):
             pass
 
 
+class MenuEntity(MenuBase):
+    def __init__(self, parent, **kwargs):
+        MenuBase.__init__(self, parent, **kwargs)
+
+
 class MenuDebug(MenuBase):
     def __init__(self, parent, **kwargs):
         MenuBase.__init__(self, parent, **kwargs)
@@ -180,6 +190,7 @@ class MenuOptions(MenuBase):
         MenuBase.__init__(self, parent, **kwargs)
 
         self.add_command(label="Back To Start", command=self.start_menu)
+        self.add_command(label="Options", command=lambda: colony.OptionWindow(self.parent.parent))
         self.add_command(label="Exit", command=lambda: sys.exit())
 
     def start_menu(self):
@@ -256,12 +267,23 @@ class Game(object):
 
         self.canvas.create_window(self.canvas.winfo_width() // 2, 30, window=self.colonist_bar, anchor="center", tags="HUD")
 
+        self.recreate_taskbar()
         self.canvas.create_window(0, self.parent.winfo_height() - 23, window=self.taskbar, anchor="nw", width=self.canvas.winfo_width(), tags="HUD")
 
         self.canvas.create_window(0, self.parent.winfo_height() - 48,  window=ttk.Button(self.parent, text="/\\", width=3, command=lambda: self.select_around(True)), anchor="nw", tags="HUD")
         self.canvas.create_window(28, self.parent.winfo_height() - 48, window=ttk.Button(self.parent, text="\/", width=3, command=lambda: self.select_around(False)), anchor="nw", tags="HUD")
 
+        if self.parent.variable_debug.get():
+            self.debug.state = True
+
+        else:
+            self.debug.state = False
+
         del event
+
+    def recreate_taskbar(self):
+        del self.taskbar
+        self.taskbar = TaskBar(self.parent, self)
 
     def selection_tool(self, x, y, event):
         self.canvas.delete("Select")
@@ -368,19 +390,21 @@ class Game(object):
 class Options(object):
     def __init__(self, parent):
         self.parent = parent
+        self.canvas = self.parent.canvas
 
-        self.parent.canvas.bind("<Configure>", self.draw_widgets, "+")
+        self.canvas.bind("<Configure>", self.draw_widgets, "+")
 
-        self.parent.canvas.create_text(5, 5, text="Options", anchor="nw", font=colony.get_fonts()["menu"]["title"])
+        self.canvas.create_text(5, 5, text="Options", anchor="nw", font=colony.get_fonts()["menu"]["title"])
 
-        # TODO: Add options.
+        self.variable_debug = self.parent.variable_debug
+        self.canvas.create_window(5, 50, window=colony.OptionFrame(self.canvas, self), anchor="nw")
 
         self.draw_widgets()
 
     def draw_widgets(self, event=None):
-        self.parent.canvas.delete("Widget")
+        self.canvas.delete("Widget")
 
-        self.parent.canvas.create_window(5, self.parent.winfo_height() - 30, window=ttk.Button(self.parent.canvas, text="Back", command=self.parent.start_menu_title), anchor="nw", tags="Widget")
+        self.canvas.create_window(5, self.parent.winfo_height() - 30, window=ttk.Button(self.canvas, text="Back", command=self.parent.start_menu_title), anchor="nw", tags="Widget")
 
         del event
 
@@ -388,6 +412,7 @@ class Options(object):
 class Scenarios(object):
     def __init__(self, parent):
         self.parent = parent
+        self.canvas = self.parent.canvas
 
         # TODO: Add an easy way for others to make new scenarios without editing code.
 
@@ -396,6 +421,8 @@ class Scenarios(object):
         self.selected_scenario = 0
 
         self.parent.canvas.bind("<Configure>", self.draw_widgets, "+")
+
+        self.canvas.create_text(5, 5, text="Scenarios", anchor="nw", font=colony.get_fonts()["menu"]["title"])
 
         self.frame_listbox = ttk.Frame(self.parent.canvas)
 
@@ -423,11 +450,11 @@ class Scenarios(object):
     def draw_widgets(self, event=None):
         self.parent.canvas.delete("UI")
 
-        self.parent.canvas.create_window(5, 5, window=self.frame_listbox, anchor="nw", height=self.parent.winfo_height() - 60, tags="UI")
-        self.parent.canvas.create_window(230, 5, window=self.frame_text, anchor="nw", width=self.parent.winfo_width() - 235, height=self.parent.winfo_height() - 60, tags="UI")
+        self.canvas.create_window(5, 50, window=self.frame_listbox, anchor="nw", height=self.parent.winfo_height() - 90, tags="UI")
+        self.canvas.create_window(230, 50, window=self.frame_text, anchor="nw", width=self.parent.winfo_width() - 235, height=self.parent.winfo_height() - 90, tags="UI")
 
-        self.parent.canvas.create_window(5, self.parent.winfo_height() - 30, window=ttk.Button(self.parent.canvas, text="Back", command=self.parent.start_menu_title), anchor="nw", tags="UI")
-        self.parent.canvas.create_window(self.parent.winfo_width() - 80, self.parent.winfo_height() - 30, window=ttk.Button(self.parent.canvas, text="Start", command=self.start_game), anchor="nw", tags="UI")
+        self.canvas.create_window(5, self.parent.winfo_height() - 30, window=ttk.Button(self.parent.canvas, text="Back", command=self.parent.start_menu_title), anchor="nw", tags="UI")
+        self.canvas.create_window(self.parent.winfo_width() - 80, self.parent.winfo_height() - 30, window=ttk.Button(self.canvas, text="Start", command=self.start_game), anchor="nw", tags="UI")
 
         del event
 
@@ -572,8 +599,7 @@ class DeBug(object):
         self.parent = parent
         self.counter = 10
 
-        self.state = True
-        self.parent.parent.bind("<Escape>", self.change_state)
+        self.state = False
 
         # This will draw text next to the mouse pointer that contains the mouse position
         # self.parent.parent.canvas.bind("<Motion>", self.mouse_location)
