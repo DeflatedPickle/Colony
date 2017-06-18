@@ -13,7 +13,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.24.0"
+__version__ = "1.25.0"
 
 
 class GameWindow(tk.Tk):
@@ -31,6 +31,7 @@ class GameWindow(tk.Tk):
         # TODO: Add a grid to the canvas for structures and such to be placed on.
         self.canvas = ResizingCanvas(self)
         self.canvas.grid(row=0, column=0)
+        self.background = self.canvas["background"]
 
         self.variable_debug = tk.BooleanVar(value=0)
 
@@ -40,6 +41,7 @@ class GameWindow(tk.Tk):
 
     def start_menu_title(self):
         self.canvas.delete("all")
+        self.canvas.configure(background=self.background)
         self.canvas.unbind("<Configure>")
         self.canvas.bind("<Configure>", self.canvas.on_resize)
         try:
@@ -49,11 +51,11 @@ class GameWindow(tk.Tk):
         self.start = Start(self)
 
     def get_mouse_position(self):
-        mouse_x_raw = self.winfo_pointerx()
-        mouse_y_raw = self.winfo_pointery()
+        mouse_x_raw = self.start.scenarios.game.game_area.winfo_pointerx()
+        mouse_y_raw = self.start.scenarios.game.game_area.winfo_pointery()
 
-        mouse_x = mouse_x_raw - self.winfo_rootx()
-        mouse_y = mouse_y_raw - self.winfo_rooty()
+        mouse_x = mouse_x_raw - self.start.scenarios.game.game_area.winfo_rootx()
+        mouse_y = mouse_y_raw - self.start.scenarios.game.game_area.winfo_rooty()
 
         return mouse_x, mouse_y
 
@@ -112,7 +114,7 @@ class ColonistBar(ttk.Frame):
         self.canvas_list.remove(self.colonists[colonist.entity])
         self.colonists.pop(colonist.entity)
 
-        self.parent.canvas.configure(cursor="arrow")
+        self.parent.game_area.configure(cursor="arrow")
 
     def select_colonist(self, colonist):
         colonist.select()
@@ -246,15 +248,17 @@ class Game(object):
 
         # TODO: Add a grid to the canvas for structures to be aligned to.
         self.canvas = self.parent.canvas
+        self.canvas.configure(background="light gray")
         self.canvas.bind("<Configure>", self.draw_widgets, "+")
+        self.game_area = tk.Canvas(self.canvas, width=500, height=500)
 
         # FIXME: Change this to a list so that multiple entities can be selected.
         self.selected_entity = None
 
         self.selected_tool = None
         self.select_area = None
-        self.canvas.bind("<Button-1>", self.check_tool, "+")
-        self.canvas.bind("<ButtonRelease-3>", self.reset_tool, "+")
+        self.game_area.bind("<Button-1>", self.check_tool, "+")
+        self.game_area.bind("<ButtonRelease-3>", self.reset_tool, "+")
 
         self.colonist_bar = ColonistBar(self)
         self.taskbar = TaskBar(self.parent, self)
@@ -264,6 +268,9 @@ class Game(object):
 
     def draw_widgets(self, event=None):
         self.canvas.delete("HUD")
+        self.canvas.delete("Game")
+
+        self.canvas.create_window(self.canvas.winfo_width() // 2, self.canvas.winfo_height() // 2, window=self.game_area, anchor="center", tags="Game")
 
         self.canvas.create_window(self.canvas.winfo_width() // 2, 30, window=self.colonist_bar, anchor="center", tags="HUD")
 
@@ -286,23 +293,23 @@ class Game(object):
         self.taskbar = TaskBar(self.parent, self)
 
     def selection_tool(self, x, y, event):
-        self.canvas.delete("Select")
+        self.game_area.delete("Select")
 
-        self.canvas.create_rectangle(x, y, event.x, event.y, tags="Select")
+        self.game_area.create_rectangle(x, y, event.x, event.y, tags="Select")
         self.select_area = [x, y, event.x, event.y]
 
     def release(self, event):
-        self.canvas.tag_raise("Select")
+        self.game_area.tag_raise("Select")
 
         try:
-            for entity in self.canvas.find_enclosed(self.select_area[0], self.select_area[1], self.select_area[2], self.select_area[3]):
-                if "entity" in self.canvas.gettags(entity):
+            for entity in self.game_area.find_enclosed(self.select_area[0], self.select_area[1], self.select_area[2], self.select_area[3]):
+                if "entity" in self.game_area.gettags(entity):
                     self.entities[entity].select()
 
         except TypeError:
             pass
 
-        self.canvas.delete("Select")
+        self.game_area.delete("Select")
 
         self.selected_tool = None
         self.select_area = None
@@ -315,14 +322,14 @@ class Game(object):
         if self.selected_tool is None:
             self.selected_tool = "select"
 
-            self.canvas.bind("<B1-Motion>", lambda event: self.selection_tool(mouse_x, mouse_y, event), "+")
-            self.canvas.bind("<ButtonRelease-1>", self.release, "+")
+            self.game_area.bind("<B1-Motion>", lambda event: self.selection_tool(mouse_x, mouse_y, event), "+")
+            self.game_area.bind("<ButtonRelease-1>", self.release, "+")
 
         elif self.selected_tool is not None:
             tool = self.selected_tool.split(":")
 
-            self.canvas.unbind("<B1-Motion>")
-            self.canvas.unbind("<ButtonRelease-1>")
+            self.game_area.unbind("<B1-Motion>")
+            self.game_area.unbind("<ButtonRelease-1>")
 
             if "spawn" in tool:
                 if "entity" in tool:
@@ -341,7 +348,7 @@ class Game(object):
 
             elif "destroy" in tool:
                 if "entity" in tool:
-                    closest = self.canvas.find_closest(mouse_x, mouse_y, halo=1)[0]
+                    closest = self.game_area.find_closest(mouse_x, mouse_y, halo=1)[0]
                     try:
                         if isinstance(self.entities[closest], colony.Entity):
                             self.entities[closest].remove_from_colonist_bar()
@@ -362,7 +369,7 @@ class Game(object):
 
     def select_around(self, layer):
         # print(self.entities)
-        for entity in self.parent.canvas.find_withtag("entity"):
+        for entity in self.parent.game_area.find_withtag("entity"):
             # print("Entity: {}".format(entity))
             # print("Selected: {}".format(self.selected_entity.entity))
             if self.selected_entity is None:
@@ -370,18 +377,18 @@ class Game(object):
 
             if not layer:
                 # print("Below: {}".format(self.parent.canvas.find_below(self.selected_entity.entity)[0]))
-                if entity <= self.parent.canvas.find_below(self.selected_entity.entity)[0]:
+                if entity <= self.parent.game_area.find_below(self.selected_entity.entity)[0]:
                     self.unselect_all()
                     self.entities[entity].select()
 
             if layer:
                 # print("Above: {}".format(self.parent.canvas.find_above(self.selected_entity.entity)[0]))
-                if entity >= self.parent.canvas.find_above(self.selected_entity.entity)[0]:
+                if entity >= self.parent.game_area.find_above(self.selected_entity.entity)[0]:
                     self.unselect_all()
                     self.entities[entity].select()
 
     def unselect_all(self, *args):
-        for entity in self.canvas.find_withtag("entity"):
+        for entity in self.game_area.find_withtag("entity"):
             self.entities[entity].unselect()
 
         del args
@@ -552,11 +559,13 @@ class Scenarios(object):
         del args
 
     def spawn(self, scenario):
-        canvas_x = self.parent.canvas.winfo_width()
-        canvas_y = self.parent.canvas.winfo_height()
+        self.parent.start.scenarios.game.game_area.update()
 
-        drop_x = randint((canvas_x // 2) + 25, (canvas_x // 2) + 25)
-        drop_y = randint((canvas_y // 2) + 25, (canvas_y // 2) + 25)
+        canvas_x = self.parent.start.scenarios.game.game_area.winfo_width()
+        canvas_y = self.parent.start.scenarios.game.game_area.winfo_height()
+
+        drop_x = (canvas_x // 2) + 25
+        drop_y = (canvas_y // 2) + 25
 
         # NOTE: Scenarios can exist without colonists.
         if "colonists" in scenario.contents:

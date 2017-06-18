@@ -10,7 +10,7 @@ from .references import get_interval
 
 __title__ = "ActingEntity"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 
 class ActingEntity(Entity):
@@ -42,7 +42,7 @@ class ActingEntity(Entity):
                 # print("{} is wandering.".format(self.get_name()))
                 try:
                     try:
-                        entity_location = self.parent.canvas.coords(self.entity)
+                        entity_location = self.parent.game_area.coords(self.entity)
                         self.move_to(entity_location[0] + randint(-15, 15), entity_location[1] + randint(-15, 15), "wandering")
                     except TclError:
                         pass

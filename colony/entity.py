@@ -11,7 +11,7 @@ from .window import InformationWindow
 
 __title__ = "Entity"
 __author__ = "DeflatedPickle"
-__version__ = "1.6.0"
+__version__ = "1.6.1"
 
 
 class Entity(object):
@@ -64,70 +64,72 @@ class Entity(object):
 
     def draw(self):
         """Draws the entity on the canvas."""
-        self.entity = self.parent.canvas.create_text(self.location["x"],
-                                                     self.location["y"],
-                                                     text=get_references()["icons"][self.entity_type],
-                                                     font=get_fonts()[self.entity_type]["normal"],
-                                                     tags="entity")
+        self.entity = self.parent.game_area.create_text(self.location["x"],
+                                                        self.location["y"],
+                                                        text=get_references()["icons"][self.entity_type],
+                                                        font=get_fonts()[self.entity_type]["normal"],
+                                                        tags="entity")
 
         if self.entity_type == "colonist":
-            self.entity_name = self.parent.canvas.create_text(self.location["x"],
-                                                              self.location["y"] + 17,
-                                                              text="{} {}".format(self.name["forename"], self.name["surname"]),
-                                                              state="disabled",
-                                                              font=get_fonts()["text"]["normal"],
-                                                              tag="extra")
+            self.entity_name = self.parent.game_area.create_text(self.location["x"],
+                                                                 self.location["y"] + 17,
+                                                                 text="{} {}".format(self.name["forename"],
+                                                                                     self.name["surname"]),
+                                                                 state="disabled",
+                                                                 font=get_fonts()["text"]["normal"],
+                                                                 tag="extra")
 
-            self.entity_health = self.parent.canvas.create_text(self.location["x"],
-                                                                self.location["y"] + 27,
-                                                                text="{}/{}".format(self.health, self.total_health),
-                                                                state="disabled",
-                                                                font=get_fonts()["text"]["normal"],
-                                                                tag="extra")
+            self.entity_health = self.parent.game_area.create_text(self.location["x"],
+                                                                   self.location["y"] + 27,
+                                                                   text="{}/{}".format(self.health, self.total_health),
+                                                                   state="disabled",
+                                                                   font=get_fonts()["text"]["normal"],
+                                                                   tag="extra")
 
         elif self.entity_type == "animal":
-            self.entity_name = self.parent.canvas.create_text(self.location["x"],
-                                                              self.location["y"] + 10,
-                                                              text=self.name,
-                                                              state="disabled",
-                                                              font=get_fonts()["text"]["normal"],
-                                                              tag="extra")
+            self.entity_name = self.parent.game_area.create_text(self.location["x"],
+                                                                 self.location["y"] + 10,
+                                                                 text=self.name,
+                                                                 state="disabled",
+                                                                 font=get_fonts()["text"]["normal"],
+                                                                 tag="extra")
 
-            self.entity_health = self.parent.canvas.create_text(self.location["x"],
-                                                                self.location["y"] + 20,
-                                                                text="{}/{}".format(self.health, self.total_health),
-                                                                state="disabled",
-                                                                font=get_fonts()["text"]["normal"],
-                                                                tag="extra")
+            self.entity_health = self.parent.game_area.create_text(self.location["x"],
+                                                                   self.location["y"] + 20,
+                                                                   text="{}/{}".format(self.health, self.total_health),
+                                                                   state="disabled",
+                                                                   font=get_fonts()["text"]["normal"],
+                                                                   tag="extra")
 
         elif self.entity_type == "item":
-            self.entity_name = self.parent.canvas.create_text(self.location["x"],
-                                                              self.location["y"] + 10,
-                                                              text=self.name,
-                                                              state="disabled",
-                                                              font=get_fonts()["text"]["normal"],
-                                                              tag="extra")
+            self.entity_name = self.parent.game_area.create_text(self.location["x"],
+                                                                 self.location["y"] + 10,
+                                                                 text=self.name,
+                                                                 state="disabled",
+                                                                 font=get_fonts()["text"]["normal"],
+                                                                 tag="extra")
 
-            self.entity_amount = self.parent.canvas.create_text(self.location["x"],
-                                                                self.location["y"] + 20,
-                                                                text=self.amount,
-                                                                state="disabled",
-                                                                font=get_fonts()["text"]["normal"],
-                                                                tag="extra")
+            self.entity_amount = self.parent.game_area.create_text(self.location["x"],
+                                                                   self.location["y"] + 20,
+                                                                   text=self.amount,
+                                                                   state="disabled",
+                                                                   font=get_fonts()["text"]["normal"],
+                                                                   tag="extra")
 
         self.parent.entities[self.entity] = self
 
-        self.parent.canvas.tag_bind(self.entity, "<ButtonRelease-1>", self.select, "+")
-        self.parent.canvas.tag_bind(self.entity, "<Enter>", self.enter, "+")
-        self.parent.canvas.tag_bind(self.entity, "<Leave>", self.leave, "+")
+        self.parent.game_area.tag_bind(self.entity, "<ButtonRelease-1>", self.select, "+")
+        self.parent.game_area.tag_bind(self.entity, "<Enter>", self.enter, "+")
+        self.parent.game_area.tag_bind(self.entity, "<Leave>", self.leave, "+")
 
-        self.parent.canvas.bind("<Button-1>", self.unselect, "+")
-        self.parent.canvas.bind("<Button-1>", self.delete_all, "+")
+        self.parent.game_area.bind("<Button-1>", self.unselect, "+")
+        self.parent.game_area.bind("<Button-1>", self.delete_all, "+")
 
-        self.parent.canvas.bind("<Button-3>", lambda e: self.show_menu(e, background=True))
-        self.parent.canvas.tag_bind(self.entity, "<ButtonRelease-3>", lambda e: self.show_menu(e, background=False), "+")
+        self.parent.game_area.bind("<Button-3>", lambda e: self.show_menu(e, background=True))
+        self.parent.game_area.tag_bind(self.entity, "<ButtonRelease-3>", lambda e: self.show_menu(e, background=False),
+                                       "+")
 
-        self.parent.canvas.tag_raise(self)
+        self.parent.game_area.tag_raise(self)
 
         self.update_values()
 
@@ -155,14 +157,14 @@ class Entity(object):
             self.parent.items.remove(self)
             # print([i.name for i in self.parent.items])
 
-        self.parent.canvas.delete(self.entity)
-        self.parent.canvas.delete(self.entity_name)
-        self.parent.canvas.delete(self.entity_health)
-        self.parent.canvas.delete(self.entity_amount)
+        self.parent.game_area.delete(self.entity)
+        self.parent.game_area.delete(self.entity_name)
+        self.parent.game_area.delete(self.entity_health)
+        self.parent.game_area.delete(self.entity_amount)
 
     def find_coordinates_own(self):
         """Returns the coordinates of the entity."""
-        return self.parent.canvas.coords(self.entity)
+        return self.parent.game_area.coords(self.entity)
 
     def set_coordinates(self, x, y):
         """Sets the coordinates of the entity."""
@@ -179,7 +181,9 @@ class Entity(object):
             if background:
                 if self.entity_type == "colonist":
                     self.menu.add_command(label="Move Here",
-                                          command=lambda: self.parent.selected_entity.move_to(self.last_mouse_x, self.last_mouse_y, "moving"))
+                                          command=lambda: self.parent.selected_entity.move_to(self.last_mouse_x,
+                                                                                              self.last_mouse_y,
+                                                                                              "moving"))
             elif not background:
                 if self.entity_type == "colonist":
                     pass
@@ -187,7 +191,8 @@ class Entity(object):
                 elif self.entity_type == "item":
                     self.menu.add_command(label="Pick Up", command=None)
 
-                self.menu.add_command(label="Information", command=lambda: InformationWindow(self.parent.parent).set_information(self))
+                self.menu.add_command(label="Information",
+                                      command=lambda: InformationWindow(self.parent.parent).set_information(self))
 
         self.menu.post(event.x_root, event.y_root)
 
@@ -203,14 +208,15 @@ class Entity(object):
 
     def select(self, event=None):
         """Selects the entity."""
-        self.parent.canvas.itemconfigure(self.entity, font=get_fonts()[self.entity_type]["selected"])
-        self.parent.canvas.itemconfigure(self.entity_name, font=get_fonts()["text"]["selected"])
+        self.parent.game_area.itemconfigure(self.entity, font=get_fonts()[self.entity_type]["selected"])
+        self.parent.game_area.itemconfigure(self.entity_name, font=get_fonts()["text"]["selected"])
+
         if self.entity_type == "colonist":
-            self.parent.canvas.itemconfigure(self.entity_health, font=get_fonts()["text"]["selected"])
+            self.parent.game_area.itemconfigure(self.entity_health, font=get_fonts()["text"]["selected"])
             self.parent.colonist_bar.select_current_colonist(self)
 
         elif self.entity_type == "item":
-            self.parent.canvas.itemconfigure(self.entity_amount, font=get_fonts()["text"]["selected"])
+            self.parent.game_area.itemconfigure(self.entity_amount, font=get_fonts()["text"]["selected"])
             self.parent.colonist_bar.unselect_all_colonists()
 
         self.parent.selected_entity = self
@@ -220,14 +226,14 @@ class Entity(object):
 
     def unselect(self, event=None):
         """Unselects the entity."""
-        self.parent.canvas.itemconfigure(self.entity, font=get_fonts()[self.entity_type]["normal"])
-        self.parent.canvas.itemconfigure(self.entity_name, font=get_fonts()["text"]["normal"])
+        self.parent.game_area.itemconfigure(self.entity, font=get_fonts()[self.entity_type]["normal"])
+        self.parent.game_area.itemconfigure(self.entity_name, font=get_fonts()["text"]["normal"])
 
         if self.entity_type == "colonist":
-            self.parent.canvas.itemconfigure(self.entity_health, font=get_fonts()["text"]["normal"])
+            self.parent.game_area.itemconfigure(self.entity_health, font=get_fonts()["text"]["normal"])
 
         elif self.entity_type == "item":
-            self.parent.canvas.itemconfigure(self.entity_amount, font=get_fonts()["text"]["normal"])
+            self.parent.game_area.itemconfigure(self.entity_amount, font=get_fonts()["text"]["normal"])
 
         self.parent.colonist_bar.unselect_all_colonists()
         self.parent.selected_entity = None
@@ -236,11 +242,11 @@ class Entity(object):
         del event
 
     def enter(self, event):
-        self.parent.canvas.configure(cursor="hand2")
+        self.parent.game_area.configure(cursor="hand2")
 
         del event
 
     def leave(self, event):
-        self.parent.canvas.configure(cursor="arrow")
+        self.parent.game_area.configure(cursor="arrow")
 
         del event

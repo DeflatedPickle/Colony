@@ -7,7 +7,7 @@ from .references import get_interval
 
 __title__ = "MovingEntity"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 
 class MovingEntity(ActingEntity):
@@ -25,15 +25,15 @@ class MovingEntity(ActingEntity):
 
     def move_entity(self, x, y):
         """Moves the entity."""
-        self.parent.canvas.move(self.entity, x, y)
-        self.parent.canvas.move(self.entity_name, x, y)
-        self.parent.canvas.move(self.entity_health, x, y)
+        self.parent.game_area.move(self.entity, x, y)
+        self.parent.game_area.move(self.entity_name, x, y)
+        self.parent.game_area.move(self.entity_health, x, y)
 
         self.set_coordinates(self.find_coordinates_own()[0], self.find_coordinates_own()[1])
 
     def move_to(self, x, y, because):
         self.stop_actions()
-        entity_location = self.parent.canvas.coords(self.entity)
+        entity_location = self.parent.game_area.coords(self.entity)
 
         move_x = (x - entity_location[0])
         direction_x = True  # Forwards
