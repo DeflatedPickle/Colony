@@ -13,7 +13,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.25.0"
+__version__ = "1.25.2"
 
 
 class GameWindow(tk.Tk):
@@ -28,12 +28,16 @@ class GameWindow(tk.Tk):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
+        self.game_width = 500
+        self.game_height = 500
+
         # TODO: Add a grid to the canvas for structures and such to be placed on.
         self.canvas = ResizingCanvas(self)
         self.canvas.grid(row=0, column=0)
         self.background = self.canvas["background"]
 
         self.variable_debug = tk.BooleanVar(value=0)
+        self.variable_scrollbars = tk.BooleanVar(value=1)
 
         self.start = None
 
@@ -250,7 +254,7 @@ class Game(object):
         self.canvas = self.parent.canvas
         self.canvas.configure(background="light gray")
         self.canvas.bind("<Configure>", self.draw_widgets, "+")
-        self.game_area = tk.Canvas(self.canvas, width=500, height=500)
+        self.game_area = tk.Canvas(self.canvas, width=self.parent.game_width, height=self.parent.game_height, scrollregion=(0, 0, self.parent.game_width, self.parent.game_height))
 
         # FIXME: Change this to a list so that multiple entities can be selected.
         self.selected_entity = None
@@ -259,6 +263,10 @@ class Game(object):
         self.select_area = None
         self.game_area.bind("<Button-1>", self.check_tool, "+")
         self.game_area.bind("<ButtonRelease-3>", self.reset_tool, "+")
+
+        self.game_scrollbar_x = ttk.Scrollbar(self.parent, orient="horizontal", command=self.game_area.xview)
+        self.game_scrollbar_y = ttk.Scrollbar(self.parent, command=self.game_area.yview)
+        self.game_area.configure(xscrollcommand=self.game_scrollbar_x.set, yscrollcommand=self.game_scrollbar_y.set)
 
         self.colonist_bar = ColonistBar(self)
         self.taskbar = TaskBar(self.parent, self)
@@ -272,8 +280,17 @@ class Game(object):
 
         self.canvas.create_window(self.canvas.winfo_width() // 2, self.canvas.winfo_height() // 2, window=self.game_area, anchor="center", tags="Game")
 
+        if self.parent.variable_scrollbars.get():
+            self.canvas.create_window(56, self.canvas.winfo_height() - 40, window=self.game_scrollbar_x, anchor="nw", width=self.canvas.winfo_width() - 73, tags="Game")
+            self.canvas.create_window(self.canvas.winfo_width() - 17, 0, window=self.game_scrollbar_y, anchor="nw", height=self.canvas.winfo_height() - 40, tags="Game")
+
+        else:
+            pass
+
+        # Comment: This creates the colonist bar.
         self.canvas.create_window(self.canvas.winfo_width() // 2, 30, window=self.colonist_bar, anchor="center", tags="HUD")
 
+        # Comment: This creates the taskbar.
         self.recreate_taskbar()
         self.canvas.create_window(0, self.parent.winfo_height() - 23, window=self.taskbar, anchor="nw", width=self.canvas.winfo_width(), tags="HUD")
 
@@ -369,7 +386,7 @@ class Game(object):
 
     def select_around(self, layer):
         # print(self.entities)
-        for entity in self.parent.game_area.find_withtag("entity"):
+        for entity in self.game_area.find_withtag("entity"):
             # print("Entity: {}".format(entity))
             # print("Selected: {}".format(self.selected_entity.entity))
             if self.selected_entity is None:
@@ -377,15 +394,23 @@ class Game(object):
 
             if not layer:
                 # print("Below: {}".format(self.parent.canvas.find_below(self.selected_entity.entity)[0]))
-                if entity <= self.parent.game_area.find_below(self.selected_entity.entity)[0]:
-                    self.unselect_all()
-                    self.entities[entity].select()
+                try:
+                    if entity <= self.game_area.find_below(self.selected_entity.entity)[0]:
+                        self.unselect_all()
+                        self.entities[entity].select()
+
+                except IndexError:
+                    pass
 
             if layer:
                 # print("Above: {}".format(self.parent.canvas.find_above(self.selected_entity.entity)[0]))
-                if entity >= self.parent.game_area.find_above(self.selected_entity.entity)[0]:
-                    self.unselect_all()
-                    self.entities[entity].select()
+                try:
+                    if entity >= self.game_area.find_above(self.selected_entity.entity)[0]:
+                        self.unselect_all()
+                        self.entities[entity].select()
+
+                except IndexError:
+                    pass
 
     def unselect_all(self, *args):
         for entity in self.game_area.find_withtag("entity"):
