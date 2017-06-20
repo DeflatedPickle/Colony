@@ -13,7 +13,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.25.2"
+__version__ = "1.27.0"
 
 
 class GameWindow(tk.Tk):
@@ -38,6 +38,7 @@ class GameWindow(tk.Tk):
 
         self.variable_debug = tk.BooleanVar(value=0)
         self.variable_scrollbars = tk.BooleanVar(value=1)
+        self.variable_grid = tk.BooleanVar(value=0)
 
         self.start = None
 
@@ -48,10 +49,12 @@ class GameWindow(tk.Tk):
         self.canvas.configure(background=self.background)
         self.canvas.unbind("<Configure>")
         self.canvas.bind("<Configure>", self.canvas.on_resize)
+
         try:
             self.after_cancel(self.debug_update)
         except AttributeError:
             pass
+
         self.start = Start(self)
 
     def get_mouse_position(self):
@@ -254,7 +257,9 @@ class Game(object):
         self.canvas = self.parent.canvas
         self.canvas.configure(background="light gray")
         self.canvas.bind("<Configure>", self.draw_widgets, "+")
-        self.game_area = tk.Canvas(self.canvas, width=self.parent.game_width, height=self.parent.game_height, scrollregion=(0, 0, self.parent.game_width, self.parent.game_height))
+        self.game_area = tk.Canvas(self.canvas, width=self.parent.game_width + 1, height=self.parent.game_height + 1, scrollregion=(0, 0, self.parent.game_width, self.parent.game_height))
+
+        self.grid_dictionary = {}
 
         # FIXME: Change this to a list so that multiple entities can be selected.
         self.selected_entity = None
@@ -263,10 +268,13 @@ class Game(object):
         self.select_area = None
         self.game_area.bind("<Button-1>", self.check_tool, "+")
         self.game_area.bind("<ButtonRelease-3>", self.reset_tool, "+")
+        self.game_area.bind("<Motion>", self.select_grid_cell, "+")
 
         self.game_scrollbar_x = ttk.Scrollbar(self.parent, orient="horizontal", command=self.game_area.xview)
         self.game_scrollbar_y = ttk.Scrollbar(self.parent, command=self.game_area.yview)
         self.game_area.configure(xscrollcommand=self.game_scrollbar_x.set, yscrollcommand=self.game_scrollbar_y.set)
+
+        self.grid_drawn = False
 
         self.colonist_bar = ColonistBar(self)
         self.taskbar = TaskBar(self.parent, self)
@@ -276,13 +284,28 @@ class Game(object):
 
     def draw_widgets(self, event=None):
         self.canvas.delete("HUD")
-        self.canvas.delete("Game")
+        self.canvas.delete("game")
+        self.canvas.delete("scrollbar")
 
-        self.canvas.create_window(self.canvas.winfo_width() // 2, self.canvas.winfo_height() // 2, window=self.game_area, anchor="center", tags="Game")
+        self.canvas.create_window(self.canvas.winfo_width() // 2, self.canvas.winfo_height() // 2, window=self.game_area, anchor="center", tags="game")
+
+        if self.parent.variable_grid.get():
+            if not self.grid_drawn:
+                self.draw_grid()
+                self.grid_drawn = True
+
+            elif self.grid_drawn:
+                self.grid_drawn = False
+
+        else:
+            self.game_area.delete("grid")
+            self.grid_drawn = False
 
         if self.parent.variable_scrollbars.get():
-            self.canvas.create_window(56, self.canvas.winfo_height() - 40, window=self.game_scrollbar_x, anchor="nw", width=self.canvas.winfo_width() - 73, tags="Game")
-            self.canvas.create_window(self.canvas.winfo_width() - 17, 0, window=self.game_scrollbar_y, anchor="nw", height=self.canvas.winfo_height() - 40, tags="Game")
+            self.canvas.create_window(56, self.canvas.winfo_height() - 40, window=self.game_scrollbar_x, anchor="nw", width=self.canvas.winfo_width() - 73, tags="scrollbar")
+            self.canvas.create_window(self.canvas.winfo_width() - 17, 0, window=self.game_scrollbar_y, anchor="nw", height=self.canvas.winfo_height() - 40, tags="scrollbar")
+
+            self.canvas.create_rectangle(self.canvas.winfo_width() - 17, self.canvas.winfo_height() - 40, self.canvas.winfo_width() - 1, self.canvas.winfo_height() - 24, outline=self.parent.background, fill=self.parent.background, tags="game")
 
         else:
             pass
@@ -303,30 +326,48 @@ class Game(object):
         else:
             self.debug.state = False
 
+        self.game_area.tag_lower("grid")
+
         del event
 
     def recreate_taskbar(self):
         del self.taskbar
         self.taskbar = TaskBar(self.parent, self)
 
-    def selection_tool(self, x, y, event):
-        self.game_area.delete("Select")
+    def draw_grid(self):
+        self.game_area.update()
+        self.game_area.delete("grid")
+        width = self.game_area.winfo_width()
+        height = self.game_area.winfo_height()
 
-        self.game_area.create_rectangle(x, y, event.x, event.y, tags="Select")
+        for column in range(width // 10):
+            for row in range(height // 10):
+                x1 = column * 10
+                y1 = row * 10
+
+                x2 = x1 + 10
+                y2 = y1 + 10
+
+                self.grid_dictionary[row, column] = self.game_area.create_rectangle(x1, y1, x2, y2, tags="grid")
+
+    def selection_tool(self, x, y, event):
+        self.game_area.delete("select")
+
+        self.game_area.create_rectangle(x, y, event.x, event.y, tags="select")
         self.select_area = [x, y, event.x, event.y]
 
     def release(self, event):
-        self.game_area.tag_raise("Select")
+        self.game_area.tag_raise("select")
 
         try:
-            for entity in self.game_area.find_enclosed(self.select_area[0], self.select_area[1], self.select_area[2], self.select_area[3]):
+            for entity in self.game_area.find_overlapping(self.select_area[0], self.select_area[1], self.select_area[2], self.select_area[3]):
                 if "entity" in self.game_area.gettags(entity):
                     self.entities[entity].select()
 
         except TypeError:
             pass
 
-        self.game_area.delete("Select")
+        self.game_area.delete("select")
 
         self.selected_tool = None
         self.select_area = None
@@ -384,6 +425,20 @@ class Game(object):
 
         del args
 
+    def select_grid_cell(self, event):
+        self.game_area.delete("highlight")
+
+        mouse = self.parent.get_mouse_position()
+        item = self.game_area.find_closest(mouse[0] - 5, mouse[1] - 5)[0]
+
+        if "grid" in self.game_area.gettags(item):
+            # print(self.game_area.coords(item))
+
+            coords = self.game_area.coords(item)
+            self.game_area.create_rectangle(coords[0], coords[1], coords[2], coords[3], fill="white", stipple="gray50", width=0, tags="highlight")
+
+        del event
+
     def select_around(self, layer):
         # print(self.entities)
         for entity in self.game_area.find_withtag("entity"):
@@ -427,9 +482,7 @@ class Options(object):
         self.canvas.bind("<Configure>", self.draw_widgets, "+")
 
         self.canvas.create_text(5, 5, text="Options", anchor="nw", font=colony.get_fonts()["menu"]["title"])
-
-        self.variable_debug = self.parent.variable_debug
-        self.canvas.create_window(5, 50, window=colony.OptionFrame(self.canvas, self), anchor="nw")
+        self.canvas.create_window(5, 50, window=colony.OptionFrame(self.canvas, self.parent), anchor="nw")
 
         self.draw_widgets()
 

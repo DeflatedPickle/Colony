@@ -128,4 +128,6 @@ class OptionFrame(ttk.Frame):
 
         # TODO: Add more options.
 
-        ttk.Checkbutton(self, text="Debugging Mode", variable=self.option.variable_debug).grid(row=0, column=0)
+        ttk.Checkbutton(self, text="Debugging Mode", variable=self.option.variable_debug).grid(row=0, column=0, sticky="we")
+        ttk.Checkbutton(self, text="Scrollbars", variable=self.option.variable_scrollbars).grid(row=1, column=0, sticky="we")
+        ttk.Checkbutton(self, text="Grid", variable=self.option.variable_grid).grid(row=2, column=0, sticky="we")

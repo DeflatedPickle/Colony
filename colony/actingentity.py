@@ -10,7 +10,7 @@ from .references import get_interval
 
 __title__ = "ActingEntity"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 
 
 class ActingEntity(Entity):
@@ -35,7 +35,12 @@ class ActingEntity(Entity):
 
             elif self.action == "standing around":
                 # print("{} is standing around.".format(self.get_name()))
-                self.last_mouse_x, self.last_mouse_y = self.parent.parent.get_mouse_position()
+                try:
+                    self.last_mouse_x, self.last_mouse_y = self.parent.parent.get_mouse_position()
+
+                except AttributeError:
+                    pass
+
                 self.decide_action()
 
             elif self.action == "wandering":

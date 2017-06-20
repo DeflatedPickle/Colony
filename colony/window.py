@@ -61,6 +61,8 @@ class OptionWindow(BaseWindow):
         self.title("Options")
 
         self.variable_debug = self.parent.variable_debug
+        self.variable_scrollbars = self.parent.variable_scrollbars
+        self.variable_grid = self.parent.variable_grid
 
         OptionFrame(self.frame_widget, self).pack(fill="both", expand=True)
 
