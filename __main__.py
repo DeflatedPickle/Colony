@@ -13,7 +13,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.27.0"
+__version__ = "1.28.0"
 
 
 class GameWindow(tk.Tk):
@@ -74,9 +74,14 @@ class TaskBar(ttk.Frame):
         self.game = game
 
         self.add_button("Construction")
-        self.add_button("Colonists")
+
+        self.menu_colonists = MenuColonists(self)
+        self.add_button("Colonists", self.menu_colonists)
+
         self.add_button("Animals")
         self.add_button("Wildlife")
+
+        self.add_button("Relationships")
 
         if self.parent.variable_debug.get():
             self.menu_debug = MenuDebug(self)
@@ -163,6 +168,14 @@ class MenuBase(tk.Menu):
 class MenuEntity(MenuBase):
     def __init__(self, parent, **kwargs):
         MenuBase.__init__(self, parent, **kwargs)
+
+
+class MenuColonists(MenuBase):
+    def __init__(self, parent, **kwargs):
+        MenuBase.__init__(self, parent, **kwargs)
+
+        for colonist in self.parent.game.colonists:
+            self.add_command(label=colonist.get_name(), command=lambda the_colonist=colonist: [self.parent.game.unselect_all(), the_colonist.select()])
 
 
 class MenuDebug(MenuBase):
@@ -274,13 +287,12 @@ class Game(object):
         self.game_scrollbar_y = ttk.Scrollbar(self.parent, command=self.game_area.yview)
         self.game_area.configure(xscrollcommand=self.game_scrollbar_x.set, yscrollcommand=self.game_scrollbar_y.set)
 
-        self.grid_drawn = False
-
         self.colonist_bar = ColonistBar(self)
         self.taskbar = TaskBar(self.parent, self)
         self.debug = DeBug(self)
 
         self.draw_widgets()
+        self.draw_grid()
 
     def draw_widgets(self, event=None):
         self.canvas.delete("HUD")
@@ -290,16 +302,12 @@ class Game(object):
         self.canvas.create_window(self.canvas.winfo_width() // 2, self.canvas.winfo_height() // 2, window=self.game_area, anchor="center", tags="game")
 
         if self.parent.variable_grid.get():
-            if not self.grid_drawn:
-                self.draw_grid()
-                self.grid_drawn = True
-
-            elif self.grid_drawn:
-                self.grid_drawn = False
+            for value in self.grid_dictionary.values():
+                self.game_area.itemconfigure(value, width=1)
 
         else:
-            self.game_area.delete("grid")
-            self.grid_drawn = False
+            for value in self.grid_dictionary.values():
+                self.game_area.itemconfigure(value, width=0)
 
         if self.parent.variable_scrollbars.get():
             self.canvas.create_window(56, self.canvas.winfo_height() - 40, window=self.game_scrollbar_x, anchor="nw", width=self.canvas.winfo_width() - 73, tags="scrollbar")
@@ -326,8 +334,6 @@ class Game(object):
         else:
             self.debug.state = False
 
-        self.game_area.tag_lower("grid")
-
         del event
 
     def recreate_taskbar(self):
@@ -348,7 +354,9 @@ class Game(object):
                 x2 = x1 + 10
                 y2 = y1 + 10
 
-                self.grid_dictionary[row, column] = self.game_area.create_rectangle(x1, y1, x2, y2, tags="grid")
+                self.grid_dictionary[row, column] = self.game_area.create_rectangle(x1, y1, x2, y2, width=0, tags="grid")
+
+        self.game_area.tag_lower("grid")
 
     def selection_tool(self, x, y, event):
         self.game_area.delete("select")
@@ -432,8 +440,6 @@ class Game(object):
         item = self.game_area.find_closest(mouse[0] - 5, mouse[1] - 5)[0]
 
         if "grid" in self.game_area.gettags(item):
-            # print(self.game_area.coords(item))
-
             coords = self.game_area.coords(item)
             self.game_area.create_rectangle(coords[0], coords[1], coords[2], coords[3], fill="white", stipple="gray50", width=0, tags="highlight")
 

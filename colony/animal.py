@@ -36,6 +36,8 @@ class Animal(MovingEntity):
         MovingEntity.draw(self)
         self.parent.animals.append(self)
 
+        return self
+
     def generate_random(self):
         """Generates a random animal."""
         self.gender = randint(0, 1)

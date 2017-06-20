@@ -36,8 +36,6 @@ class Colonist(MovingEntity):
         # TODO: Add colonist relationships.
         # TODO: Add colonist buffs and debuffs, such as "Fast Walker" to improve move speed.
 
-        self.parent.colonists.append(self)
-
         self.check_action()
 
     def add_to_colonist_bar(self):
@@ -53,6 +51,12 @@ class Colonist(MovingEntity):
     def get_name(self):
         """Returns the name of the colonist."""
         return "{} {}".format(self.name["forename"], self.name["surname"])
+
+    def draw(self):
+        MovingEntity.draw(self)
+        self.parent.colonists.append(self)
+
+        return self
 
     def generate_random(self):
         """Generates a random colonist."""
