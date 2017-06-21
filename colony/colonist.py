@@ -9,7 +9,7 @@ from .references import get_male_names, get_female_names, get_surnames
 
 __title__ = "Colonist"
 __author__ = "DeflatedPickle"
-__version__ = "1.10.1"
+__version__ = "1.11.0"
 
 
 class Colonist(MovingEntity):
@@ -34,6 +34,7 @@ class Colonist(MovingEntity):
         self.joy = 100
         self.inventory = []
         # TODO: Add colonist relationships.
+        self.relationships = {"family": {"mother": None, "father": None, "sisters": [], "brothers": []}}
         # TODO: Add colonist buffs and debuffs, such as "Fast Walker" to improve move speed.
 
         self.check_action()

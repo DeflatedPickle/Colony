@@ -6,6 +6,7 @@ import tkinter as tk
 from _tkinter import TclError
 from tkinter import ttk
 from random import randint, choice
+from string import capwords
 import sys
 from ast import literal_eval
 
@@ -13,7 +14,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.28.0"
+__version__ = "1.29.0"
 
 
 class GameWindow(tk.Tk):
@@ -81,7 +82,8 @@ class TaskBar(ttk.Frame):
         self.add_button("Animals")
         self.add_button("Wildlife")
 
-        self.add_button("Relationships")
+        self.menu_relationships = MenuRelationships(self)
+        self.add_button("Relationships", self.menu_relationships)
 
         if self.parent.variable_debug.get():
             self.menu_debug = MenuDebug(self)
@@ -178,6 +180,34 @@ class MenuColonists(MenuBase):
             self.add_command(label=colonist.get_name(), command=lambda the_colonist=colonist: [self.parent.game.unselect_all(), the_colonist.select()])
 
 
+class MenuRelationships(MenuBase):
+    def __init__(self, parent, **kwargs):
+        MenuBase.__init__(self, parent, **kwargs)
+
+        for colonist in self.parent.game.colonists:
+            menu = tk.Menu(self)
+
+            for relationship_type in colonist.relationships:
+                if isinstance(colonist.relationships[relationship_type], dict):
+                    menu_relations = tk.Menu(menu)
+
+                    for relationship in colonist.relationships[relationship_type]:
+                        if isinstance(colonist.relationships[relationship_type][relationship], list):
+                            menu_sibling = tk.Menu(menu_relations)
+
+                            for sibling in colonist.relationships[relationship_type][relationship]:
+                                menu_sibling.add_command(label=capwords(sibling))
+
+                            menu_relations.add_cascade(label=capwords(relationship), menu=menu_sibling)
+
+                        else:
+                            menu_relations.add_command(label=capwords(relationship))
+
+                    menu.add_cascade(label=capwords(relationship_type), menu=menu_relations)
+
+            self.add_cascade(label=colonist.get_name(), menu=menu)
+
+
 class MenuDebug(MenuBase):
     def __init__(self, parent, **kwargs):
         MenuBase.__init__(self, parent, **kwargs)
@@ -251,6 +281,8 @@ class Game(object):
         self.colonists = []
         self.animals = []
         self.items = []
+
+        self.families = []
 
         self.register_items = {
             "wood": colony.Item(self, name="Wood", stack_size=100),
@@ -479,6 +511,17 @@ class Game(object):
 
         del args
 
+    def update_families(self):
+        for colonist in self.colonists:
+            if colonist.name["surname"] not in self.families:
+                self.families.append(colonist.name["surname"])
+
+    def set_relationships(self):
+        # TODO: Finish working out relationships.
+        for family in self.families:
+            for colonist in self.colonists:
+                pass
+
 
 class Options(object):
     def __init__(self, parent):
@@ -639,6 +682,9 @@ class Scenarios(object):
 
                 self.game = Game(self.parent)
                 self.spawn(self.scenario_list[self.selected_scenario])
+                self.game.update_families()
+
+                self.game.recreate_taskbar()
 
         del args
 
