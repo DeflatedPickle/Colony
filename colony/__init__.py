@@ -8,6 +8,7 @@ from .entity import Entity
 from .colonist import Colonist
 from .animal import Animal
 from .item import Item
+from .resource import Resource
 # TODO: Add a Weapon class.
 # TODO: Add an Armour class.
 from .scenario import Scenario
@@ -23,7 +24,7 @@ __copyright__ = "Copyright (c) 2017 Dibbo"
 __credits__ = ["DeflatedPickle/Dibbo"]
 
 __license__ = "MIT"
-__version__ = "1.14.0"
+__version__ = "1.15.0"
 __maintainer__ = "DeflatedPickle/Dibbo"
 __email__ = "DeflatedPickle@gmail.com"
 __status__ = "Development"

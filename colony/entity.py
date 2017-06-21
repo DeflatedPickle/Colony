@@ -3,6 +3,7 @@
 """"""
 
 import tkinter as tk
+from tkinter import ttk
 from _tkinter import TclError
 from collections import OrderedDict
 
@@ -116,6 +117,21 @@ class Entity(object):
                                                                    font=get_fonts()["text"]["normal"],
                                                                    tag="extra")
 
+        elif self.entity_type == "resource":
+            self.entity_name = self.parent.game_area.create_text(self.location["x"],
+                                                                 self.location["y"] + 15,
+                                                                 text=self.name,
+                                                                 state="disabled",
+                                                                 font=get_fonts()["text"]["normal"],
+                                                                 tag="extra")
+
+            self.entity_health = self.parent.game_area.create_text(self.location["x"],
+                                                                   self.location["y"] + 20,
+                                                                   text="{}/{}".format(self.health, self.total_health),
+                                                                   state="disabled",
+                                                                   font=get_fonts()["text"]["normal"],
+                                                                   tag="extra")
+
         self.parent.entities[self.entity] = self
 
         self.parent.game_area.tag_bind(self.entity, "<ButtonRelease-1>", self.select, "+")
@@ -219,6 +235,9 @@ class Entity(object):
             self.parent.game_area.itemconfigure(self.entity_amount, font=get_fonts()["text"]["selected"])
             self.parent.colonist_bar.unselect_all_colonists()
 
+        if self.entity_type == "resource":
+            self.draw_entity_buttons()
+
         self.parent.selected_entity = self
         self.selected = True
 
@@ -234,6 +253,12 @@ class Entity(object):
 
         elif self.entity_type == "item":
             self.parent.game_area.itemconfigure(self.entity_amount, font=get_fonts()["text"]["normal"])
+
+        try:
+            self.remove_entity_buttons()
+
+        except AttributeError:
+            pass
 
         self.parent.colonist_bar.unselect_all_colonists()
         self.parent.selected_entity = None

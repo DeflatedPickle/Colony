@@ -14,7 +14,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.29.0"
+__version__ = "1.30.0"
 
 
 class GameWindow(tk.Tk):
@@ -218,6 +218,18 @@ class MenuDebug(MenuBase):
         self.debug_spawn_entity_menu = tk.Menu(self)
         self.debug_spawn_menu.add_cascade(label="Entity", menu=self.debug_spawn_entity_menu)
 
+        self.debug_spawn_entity_item_menu = tk.Menu(self)
+        self.debug_spawn_entity_menu.add_cascade(label="Item", menu=self.debug_spawn_entity_item_menu)
+
+        for item in self.parent.game.register_items:
+            self.debug_spawn_entity_item_menu.add_command(label=self.parent.game.register_items[item].name, command=lambda current_item=item: self.parent.game.set_tool("spawn:entity:item:{}".format(current_item)))
+
+        self.debug_spawn_entity_resource_menu = tk.Menu(self)
+        self.debug_spawn_entity_menu.add_cascade(label="Resource", menu=self.debug_spawn_entity_resource_menu)
+
+        for resource in self.parent.game.register_resources:
+            self.debug_spawn_entity_resource_menu.add_command(label=self.parent.game.register_resources[resource].name, command=lambda current_resource=resource: self.parent.game.set_tool("spawn:entity:resource:{}".format(current_resource)))
+
         self.debug_spawn_entity_actingentity_menu = tk.Menu(self.debug_spawn_entity_menu)
         self.debug_spawn_entity_menu.add_cascade(label="ActingEntity", menu=self.debug_spawn_entity_actingentity_menu)
 
@@ -228,8 +240,8 @@ class MenuDebug(MenuBase):
         self.debug_spawn_acting_movingentity_animal_menu = tk.Menu(self.debug_spawn_entity_actingentity_movingentity_menu)
         self.debug_spawn_entity_actingentity_movingentity_menu.add_cascade(label="Animal", menu=self.debug_spawn_acting_movingentity_animal_menu)
 
-        for animal in self.parent.game.type_animals:
-            self.debug_spawn_acting_movingentity_animal_menu.add_command(label=animal, command=lambda current_animal=animal: self.parent.game.set_tool("spawn:entity:actingentity:movingentity:animal:{}".format(current_animal.lower())))
+        for animal in self.parent.game.register_animals:
+            self.debug_spawn_acting_movingentity_animal_menu.add_command(label=self.parent.game.register_animals[animal].species, command=lambda current_animal=animal: self.parent.game.set_tool("spawn:entity:actingentity:movingentity:animal:{}".format(current_animal.lower())))
 
         self.debug_destroy_menu = tk.Menu(self)
         self.debug_destroy_menu.add_command(label="Entity",
@@ -287,16 +299,27 @@ class Game(object):
         self.register_items = {
             "wood": colony.Item(self, name="Wood", stack_size=100),
             "stone": colony.Item(self, name="Stone", stack_size=100),
+            # Iron
             "ore_iron": colony.Item(self, name="Iron Ore", stack_size=100),
-            "ingot_iron": colony.Item(self, name="Iron Ingot", stack_size=100)
+            "ingot_iron": colony.Item(self, name="Iron Ingot", stack_size=100),
+            # Marble
+            "crushed_marble": colony.Item(self, name="Crushed Marble", stack_size=100),
+            "brick_marble": colony.Item(self, name="Marble Bricks", stack_size=100),
+            # Limestone
+            "crushed_limestone": colony.Item(self, name="Crushed Limestone", stack_size=100),
+            "brick_limestone": colony.Item(self, name="Limestone Bricks", stack_size=100)
         }
 
         self.register_animals = {
-            "cat": colony.Animal(self, species="Cat", highest_age=10),
-            "babirusa": colony.Animal(self, species="Babirusa", highest_age=10)
+            "cat": colony.Animal(self, species="Cat", tame_chance=80, highest_age=10),
+            "babirusa": colony.Animal(self, species="Babirusa", tame_chance=30, highest_age=10)
         }
 
-        self.type_animals = ["Cat", "Babirusa"]
+        self.register_resources = {
+            "tree": colony.Resource(self, name="Tree", health=50, resource=self.register_items["wood"], resource_amount=50),
+            "marble": colony.Resource(self, name="Marble", health=80, resource=self.register_items["crushed_marble"], resource_amount=1, type_="Rock"),
+            "limestone": colony.Resource(self, name="Limestone", health=80, resource=self.register_items["crushed_limestone"], resource_amount=1, type_="Rock")
+        }
 
         # TODO: Add a grid to the canvas for structures to be aligned to.
         self.canvas = self.parent.canvas
@@ -431,7 +454,26 @@ class Game(object):
 
             if "spawn" in tool:
                 if "entity" in tool:
-                    if "actingentity" in tool:
+                    if "item" in tool:
+                        item = self.register_items[tool[-1]]
+
+                        item.location["x"] = mouse_x
+                        item.location["y"] = mouse_y
+
+                        item.draw()
+
+                    if "resource" in tool:
+                        resource = self.register_resources[tool[-1]]
+
+                        item = self.game_area.find_closest(mouse_x, mouse_y)[0]
+
+                        if "grid" in self.game_area.gettags(item):
+                            resource.location["x"] = self.game_area.coords(item)[0]
+                            resource.location["y"] = self.game_area.coords(item)[1]
+
+                        resource.draw()
+
+                    elif "actingentity" in tool:
                         if "movingentity" in tool:
                             if "colonist" in tool:
                                 colony.Colonist(self, x=mouse_x, y=mouse_y).generate_random().draw().add_to_colonist_bar()
@@ -706,10 +748,10 @@ class Scenarios(object):
         if "animals" in scenario.contents:
             for animal in scenario.contents["animals"]:
                 if animal == "random":
-                    reg_animal = self.game.register_animals()[choice(list(self.game.register_animals().keys()))]
+                    reg_animal = self.game.register_animals[choice(list(self.game.register_animals().keys()))]
 
                 else:
-                    reg_animal = self.game.register_animals()[animal]
+                    reg_animal = self.game.register_animals[animal]
 
                 reg_animal.location["x"] = drop_x + randint(-25, 25)
                 reg_animal.location["y"] = drop_y + randint(-25, 25)

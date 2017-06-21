@@ -21,6 +21,7 @@ def get_references():
         "icons": {
             "colonist": u"\u25AF",  # WHITE VERTICAL RECTANGLE
             "animal": u"\u25AD",  # WHITE RECTANGLE
+            "resource": u"\u25B3", # White Up Pointing Triangle
             "block": u"\u25FB",  # WHITE MEDIUM SQUARE
             "item": u"\u25FD"  # WHITE MEDIUM SMALL SQUARE
         }
@@ -44,6 +45,10 @@ def get_fonts():
         "animal": {
             "normal": font.Font(family=family, size=get_size()),
             "selected": font.Font(family=family, size=get_size(), weight="bold")
+        },
+        "resource": {
+            "normal": font.Font(family=family, size=get_size() - 9),
+            "selected": font.Font(family=family, size=get_size() - 9, weight="bold")
         },
         "item": {
             "normal": font.Font(family=family, size=get_size()),
