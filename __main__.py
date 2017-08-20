@@ -14,7 +14,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.31.0"
+__version__ = "1.33.0"
 
 
 class GameWindow(tk.Tk):
@@ -40,6 +40,8 @@ class GameWindow(tk.Tk):
         self.variable_debug = tk.BooleanVar(value=0)
         self.variable_scrollbars = tk.BooleanVar(value=1)
         self.variable_grid = tk.BooleanVar(value=0)
+        self.variable_grid_highlight = tk.BooleanVar(value=1)
+        self.variable_highlight_colour = tk.StringVar(value="white")
 
         self.start = None
 
@@ -606,14 +608,15 @@ class Game(object):
         del args
 
     def select_grid_cell(self, event):
-        self.game_area.delete("highlight")
+        if self.parent.variable_grid_highlight.get():
+            self.game_area.delete("highlight")
 
-        mouse = self.parent.get_mouse_position()
-        item = self.game_area.find_closest(mouse[0] - 5, mouse[1] - 5)[0]
+            mouse = self.parent.get_mouse_position()
+            item = self.game_area.find_closest(mouse[0] - 5, mouse[1] - 5)[0]
 
-        if "grid" in self.game_area.gettags(item):
-            coords = self.game_area.coords(item)
-            self.game_area.create_rectangle(coords[0], coords[1], coords[2], coords[3], fill="white", stipple="gray50", width=0, tags="highlight")
+            if "grid" in self.game_area.gettags(item):
+                coords = self.game_area.coords(item)
+                self.game_area.create_rectangle(coords[0], coords[1], coords[2], coords[3], fill=self.parent.variable_highlight_colour.get(), stipple="gray50", width=0, tags="highlight")
 
         del event
 
