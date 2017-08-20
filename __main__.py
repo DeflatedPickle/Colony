@@ -14,7 +14,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.30.0"
+__version__ = "1.30.1"
 
 
 class GameWindow(tk.Tk):
@@ -118,6 +118,8 @@ class ColonistBar(ttk.Frame):
         canvas.bind("<ButtonRelease-1>", lambda *args: self.select_colonist(colonist), "+")
         canvas.bind("<Button-1>", self.unselect_colonist, "+")
 
+        self.parent.taskbar.menu_colonists.add_command(label=colonist.get_name(), command=lambda the_colonist=colonist: [self.parent.unselect_all(), the_colonist.select()])
+
         self.colonists[colonist.entity] = canvas
         self.canvas_list.append(canvas)
 
@@ -175,9 +177,6 @@ class MenuEntity(MenuBase):
 class MenuColonists(MenuBase):
     def __init__(self, parent, **kwargs):
         MenuBase.__init__(self, parent, **kwargs)
-
-        for colonist in self.parent.game.colonists:
-            self.add_command(label=colonist.get_name(), command=lambda the_colonist=colonist: [self.parent.game.unselect_all(), the_colonist.select()])
 
 
 class MenuRelationships(MenuBase):
