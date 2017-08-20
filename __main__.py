@@ -14,7 +14,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.30.1"
+__version__ = "1.30.2"
 
 
 class GameWindow(tk.Tk):
@@ -119,6 +119,7 @@ class ColonistBar(ttk.Frame):
         canvas.bind("<Button-1>", self.unselect_colonist, "+")
 
         self.parent.taskbar.menu_colonists.add_command(label=colonist.get_name(), command=lambda the_colonist=colonist: [self.parent.unselect_all(), the_colonist.select()])
+        self.parent.taskbar.menu_relationships.add_relation(colonist)
 
         self.colonists[colonist.entity] = canvas
         self.canvas_list.append(canvas)
@@ -183,28 +184,28 @@ class MenuRelationships(MenuBase):
     def __init__(self, parent, **kwargs):
         MenuBase.__init__(self, parent, **kwargs)
 
-        for colonist in self.parent.game.colonists:
-            menu = tk.Menu(self)
+    def add_relation(self, colonist):
+        menu = tk.Menu(self)
 
-            for relationship_type in colonist.relationships:
-                if isinstance(colonist.relationships[relationship_type], dict):
-                    menu_relations = tk.Menu(menu)
+        for relationship_type in colonist.relationships:
+            if isinstance(colonist.relationships[relationship_type], dict):
+                menu_relations = tk.Menu(menu)
 
-                    for relationship in colonist.relationships[relationship_type]:
-                        if isinstance(colonist.relationships[relationship_type][relationship], list):
-                            menu_sibling = tk.Menu(menu_relations)
+                for relationship in colonist.relationships[relationship_type]:
+                    if isinstance(colonist.relationships[relationship_type][relationship], list):
+                        menu_sibling = tk.Menu(menu_relations)
 
-                            for sibling in colonist.relationships[relationship_type][relationship]:
-                                menu_sibling.add_command(label=capwords(sibling))
+                        for sibling in colonist.relationships[relationship_type][relationship]:
+                            menu_sibling.add_command(label=capwords(sibling))
 
-                            menu_relations.add_cascade(label=capwords(relationship), menu=menu_sibling)
+                        menu_relations.add_cascade(label=capwords(relationship), menu=menu_sibling)
 
-                        else:
-                            menu_relations.add_command(label=capwords(relationship))
+                    else:
+                        menu_relations.add_command(label=capwords(relationship))
 
-                    menu.add_cascade(label=capwords(relationship_type), menu=menu_relations)
+                menu.add_cascade(label=capwords(relationship_type), menu=menu_relations)
 
-            self.add_cascade(label=colonist.get_name(), menu=menu)
+        self.add_cascade(label=colonist.get_name(), menu=menu)
 
 
 class MenuDebug(MenuBase):
