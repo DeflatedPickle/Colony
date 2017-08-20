@@ -3,7 +3,8 @@
 """"""
 
 from .actingentity import ActingEntity
-from .references import get_interval
+# from .references import get_interval
+from .references import interval
 
 __title__ = "MovingEntity"
 __author__ = "DeflatedPickle"
@@ -92,5 +93,5 @@ class MovingEntity(ActingEntity):
 
         else:
             self.after_actions.remove(self.moving)
-            self.moving = self.parent.parent.after(get_interval(), lambda: self.move_until(prev_x, prev_y, x, y, direction_x, direction_y))
+            self.moving = self.parent.parent.after(interval.get_interval(), lambda: self.move_until(prev_x, prev_y, x, y, direction_x, direction_y))
             self.after_actions.append(self.moving)

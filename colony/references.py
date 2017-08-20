@@ -9,7 +9,7 @@ from tkinter import font
 
 __title__ = "Pawn"
 __author__ = "DeflatedPickle"
-__version__ = "1.7.0"
+__version__ = "1.8.0"
 
 
 def get_frame_rate():
@@ -68,8 +68,21 @@ def get_fonts():
     return fonts
 
 
-def get_interval():
-    return 100
+# def get_interval():
+#     return 100
+
+# Note: Could probably have just used a tkinter.IntVar for this.
+class Interval(object):
+    def __init__(self):
+        self._interval = 100
+
+    def set_interval(self, value):
+        self._interval = value
+
+    def get_interval(self):
+        return self._interval
+
+interval = Interval()
 
 
 def get_male_names():

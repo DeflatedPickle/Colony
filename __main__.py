@@ -14,14 +14,14 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.30.2"
+__version__ = "1.31.0"
 
 
 class GameWindow(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         self.title("Colony")
-        self.geometry("600x300")
+        self.geometry("650x300")
         self.option_add('*tearOff', False)
 
         self.minsize(400, 300)
@@ -263,6 +263,100 @@ class MenuOptions(MenuBase):
         self.parent.parent.start_menu_title()
 
 
+class Time(object):
+    def __init__(self, hours: int = 0, minutes: int = 0, seconds: int = 0):
+        self._hours = hours
+        self._minutes = minutes
+        self._seconds = seconds
+
+        self.check_time()
+
+    def get_time(self):
+        return int("".join(map(str, [self._hours, self._minutes, self._seconds])))
+
+    def get_time_formatted(self):
+        return "{}:{}:{}".format(self._hours, self._minutes, self._seconds)
+
+    def set_time(self, hours, minutes, seconds):
+        self._hours = hours
+        self._minutes = minutes
+        self._seconds = seconds
+
+        self.check_time()
+
+    def increase_time(self, hours, minutes, seconds):
+        self._hours += hours
+        self._minutes += minutes
+        self._seconds = seconds
+
+        self.check_time()
+
+    def check_time(self):
+        if self._seconds >= 60:
+            self._seconds = 0
+            self._minutes += 1
+
+        if self._minutes >= 60:
+            self._minutes = 0
+            self._hours += 1
+
+        if self._hours >= 24:
+            self._hours = 0
+
+
+class TimeFrame(ttk.Frame):
+    def __init__(self, parent, **kwargs):
+        ttk.Frame.__init__(self, parent.parent, **kwargs)
+        self.parent = parent
+
+        self.time_formatted_variable = tk.StringVar()
+        ttk.Label(self, textvariable=self.time_formatted_variable).grid(row=0, column=0)
+
+        self.time_world_variable = tk.StringVar()
+        ttk.Label(self, textvariable=self.time_world_variable).grid(row=1, column=0)
+
+        self.frame_buttons = ttk.Frame(self)
+        self.frame_buttons.grid(row=2, column=0, sticky="nesw")
+
+        ttk.Button(self.frame_buttons, text=" < ", command=lambda: colony.interval.set_interval(500), width=3).pack(side="left")
+        ttk.Button(self.frame_buttons, text="< <", command=lambda: colony.interval.set_interval(250), width=3).pack(side="left")
+        ttk.Button(self.frame_buttons, text="| |", command=lambda: colony.interval.set_interval(0), width=3, state="disabled").pack(side="left")
+        ttk.Button(self.frame_buttons, text=" > ", command=lambda: colony.interval.set_interval(100), width=3).pack(side="left")
+        ttk.Button(self.frame_buttons, text="> >", command=lambda: colony.interval.set_interval(50), width=3).pack(side="left")
+
+        ttk.Button(self.frame_buttons, text=">>>", command=lambda: colony.interval.set_interval(25), width=4).pack(side="left")
+        ttk.Button(self.frame_buttons, text=">>>>>", command=lambda: colony.interval.set_interval(15), width=7).pack(side="left")
+        ttk.Button(self.frame_buttons, text=">>>>>>>>>>>>>>", command=lambda: colony.interval.set_interval(1), width=10).pack(side="left")
+
+
+class GameTime(object):
+    def __init__(self, parent):
+        self.parent = parent
+
+        self._time = Time(0, 0, 0)
+
+        self.update_time()
+
+    def get_world_time_string(self):
+        if 0 <= self._time._hours <= 12:
+            return "Morning"
+
+        elif 12 <= self._time._hours <= 18:
+            return "Afternoon"
+
+        elif 18 <= self._time._hours <= 24:
+            return "Evening"
+
+    def update_time(self):
+        self._time._seconds += 1
+        self._time.check_time()
+
+        self.parent.time_frame.time_formatted_variable.set(self._time.get_time_formatted())
+        self.parent.time_frame.time_world_variable.set(self.get_world_time_string())
+
+        self.parent.parent.after(colony.interval.get_interval(), self.update_time)
+
+
 class Start(object):
     def __init__(self, parent):
         self.parent = parent
@@ -321,7 +415,6 @@ class Game(object):
             "limestone": colony.Resource(self, name="Limestone", health=80, resource=self.register_items["crushed_limestone"], resource_amount=1, type_="Rock")
         }
 
-        # TODO: Add a grid to the canvas for structures to be aligned to.
         self.canvas = self.parent.canvas
         self.canvas.configure(background="light gray")
         self.canvas.bind("<Configure>", self.draw_widgets, "+")
@@ -344,6 +437,8 @@ class Game(object):
 
         self.colonist_bar = ColonistBar(self)
         self.taskbar = TaskBar(self.parent, self)
+        self.time_frame = TimeFrame(self)
+        self.time = GameTime(self)
         self.debug = DeBug(self)
 
         self.draw_widgets()
@@ -382,6 +477,8 @@ class Game(object):
 
         self.canvas.create_window(0, self.parent.winfo_height() - 48,  window=ttk.Button(self.parent, text="/\\", width=3, command=lambda: self.select_around(True)), anchor="nw", tags="HUD")
         self.canvas.create_window(28, self.parent.winfo_height() - 48, window=ttk.Button(self.parent, text="\/", width=3, command=lambda: self.select_around(False)), anchor="nw", tags="HUD")
+
+        self.canvas.create_window(0, self.parent.winfo_height() - 120, window=self.time_frame, anchor="nw", tags="HUD")
 
         if self.parent.variable_debug.get():
             self.debug.state = True
@@ -807,7 +904,7 @@ class DeBug(object):
             self.parent.canvas.delete("debug")
             self.parent.canvas.delete("mouse")
 
-        self.parent.parent.debug_update = self.parent.parent.after(colony.get_interval(), self.update)
+        self.parent.parent.debug_update = self.parent.parent.after(colony.interval.get_interval(), self.update)
 
     def add_debug_line(self, text: str = ""):
         self.parent.canvas.create_text(5, self.counter, anchor="w", text=text, tag="debug")

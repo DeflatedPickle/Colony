@@ -15,9 +15,10 @@ __version__ = "1.11.0"
 class Colonist(MovingEntity):
     """Creates a colonist."""
 
-    def __init__(self, parent, species: str = "Human", forename: str = "", surname: str = "", age: int = 0, highest_age: int = 80, gender: bool = False, health: int = 100, total_health: int = 100, x: int = 0, y: int = 0):
+    def __init__(self, parent, species: str = "Human", forename: str = "", surname: str = "", age: int = 0, highest_age: int = 80, gender: bool = False, health: int = 100, total_health: int = 100, faction: str = "colony", x: int = 0, y: int = 0):
         MovingEntity.__init__(self, parent, x, y, entity_type="colonist")
         self.parent = parent
+        # Note: Maybe use an Enum for species instead of a string.
         self.species = species
         # TODO: Add nicknames.
         # TODO: Add middle names.
@@ -26,7 +27,7 @@ class Colonist(MovingEntity):
         self.age = age
         self.lowest_age = 0
         self.highest_age = highest_age
-        # NOTE: Maybe use an Enum class instead of a boolean.
+        # NOTE: Maybe use an Enum instead of a boolean.
         self.gender = gender  # False: Female, True: Male
         self.health = health
         self.total_health = total_health
@@ -35,6 +36,8 @@ class Colonist(MovingEntity):
         self.inventory = []
         # TODO: Add colonist relationships.
         self.relationships = {"family": {"mother": None, "father": None, "sisters": [], "brothers": []}}
+        # Note: Maybe use an Enum for faction instead of a string.
+        self.faction = faction
         # TODO: Add colonist buffs and debuffs, such as "Fast Walker" to improve move speed.
 
         self.check_action()

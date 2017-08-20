@@ -6,7 +6,8 @@ from _tkinter import TclError
 from random import randint
 
 from .entity import Entity
-from .references import get_interval
+# from .references import get_interval
+from .references import interval
 
 __title__ = "ActingEntity"
 __author__ = "DeflatedPickle"
@@ -61,7 +62,7 @@ class ActingEntity(Entity):
                 # print("{} is moving.".format(self.get_name()))
                 pass
 
-        self.parent.parent.after(get_interval(), self.check_action)
+        self.parent.parent.after(interval.get_interval(), self.check_action)
 
     def decide_action(self):
         """Decides an action for the colonist to perform."""
