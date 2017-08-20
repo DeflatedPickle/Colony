@@ -320,13 +320,14 @@ class TimeFrame(ttk.Frame):
 
         ttk.Button(self.frame_buttons, text=" < ", command=lambda: colony.interval.set_interval(500), width=3).pack(side="left")
         ttk.Button(self.frame_buttons, text="< <", command=lambda: colony.interval.set_interval(250), width=3).pack(side="left")
+
         ttk.Button(self.frame_buttons, text="| |", command=lambda: colony.interval.set_interval(0), width=3, state="disabled").pack(side="left")
         ttk.Button(self.frame_buttons, text=" > ", command=lambda: colony.interval.set_interval(100), width=3).pack(side="left")
         ttk.Button(self.frame_buttons, text="> >", command=lambda: colony.interval.set_interval(50), width=3).pack(side="left")
 
-        ttk.Button(self.frame_buttons, text=">>>", command=lambda: colony.interval.set_interval(25), width=4).pack(side="left")
-        ttk.Button(self.frame_buttons, text=">>>>>", command=lambda: colony.interval.set_interval(15), width=7).pack(side="left")
-        ttk.Button(self.frame_buttons, text=">>>>>>>>>>>>>>", command=lambda: colony.interval.set_interval(1), width=10).pack(side="left")
+        # ttk.Button(self.frame_buttons, text=">>>", command=lambda: colony.interval.set_interval(25), width=4).pack(side="left")
+        # ttk.Button(self.frame_buttons, text=">>>>>", command=lambda: colony.interval.set_interval(15), width=7).pack(side="left")
+        # ttk.Button(self.frame_buttons, text=">>>>>>>>>>>>>>", command=lambda: colony.interval.set_interval(1), width=10).pack(side="left")
 
 
 class GameTime(object):
@@ -909,8 +910,6 @@ class DeBug(object):
     def add_debug_line(self, text: str = ""):
         self.parent.canvas.create_text(5, self.counter, anchor="w", text=text, tag="debug")
         self.counter += 15
-
-    # TODO: Move all "find" functions into one function that returns a list or dictionary with all values.
 
     def find_selected(self):
         for item in self.parent.entities.values():
