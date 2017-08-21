@@ -2,14 +2,15 @@
 # -*- coding: utf-8 -*-
 """"""
 
-from random import randint
+import random
 
+from .entity import Entity
 from .movingentity import MovingEntity
 from .references import get_male_names, get_female_names, get_surnames
 
 __title__ = "Colonist"
 __author__ = "DeflatedPickle"
-__version__ = "1.11.0"
+__version__ = "1.12.0"
 
 
 class Colonist(MovingEntity):
@@ -35,7 +36,7 @@ class Colonist(MovingEntity):
         self.joy = 100
         self.inventory = []
         # TODO: Add colonist relationships.
-        self.relationships = {"family": {"mother": None, "father": None, "sisters": [], "brothers": []}}
+        self.relationships = {"family": {"mothers": [], "fathers": [], "sisters": [], "brothers": [], "daughters": [], "sons": []}}
         # Note: Maybe use an Enum for faction instead of a string.
         self.faction = faction
         # TODO: Add colonist buffs and debuffs, such as "Fast Walker" to improve move speed.
@@ -64,15 +65,58 @@ class Colonist(MovingEntity):
 
     def generate_random(self):
         """Generates a random colonist."""
-        self.gender = randint(0, 1)
+        self.gender = random.randint(0, 1)
 
         if self.gender:
-            self.name["forename"] = get_male_names()[randint(0, len(get_male_names()) - 1)]
+            self.name["forename"] = get_male_names()[random.randint(0, len(get_male_names()) - 1)]
 
         elif not self.gender:
-            self.name["forename"] = get_female_names()[randint(0, len(get_female_names()) - 1)]
+            self.name["forename"] = get_female_names()[random.randint(0, len(get_female_names()) - 1)]
 
-        self.name["surname"] = get_surnames()[randint(0, len(get_surnames()) - 1)]
-        self.age = randint(self.lowest_age, self.highest_age)
+        self.name["surname"] = get_surnames()[random.randint(0, len(get_surnames()) - 1)]
+        self.age = random.randint(self.lowest_age, self.highest_age)
 
         return self
+
+    def generate_random_relationship(self):
+        """Generates a random relationship."""
+        for relationship_header in self.relationships:
+            self.relationships[relationship_header][random.choice(list(self.relationships[relationship_header].keys()))].append(random.choice(self.parent.colonists))
+
+        self.parent.taskbar.menu_relationships.add_relation(self)
+
+    def generate_random_relationship_to(self, entity: Entity):
+        """Generates a random relationship to an entity."""
+        for relationship_header in self.relationships:
+            self.relationships[relationship_header][random.choice(list(self.relationships[relationship_header].keys()))].append(entity)
+
+        self.parent.taskbar.menu_relationships.add_relation(self)
+
+    def generate_specific_relationship(self, relationship: str):
+        """Generates a specific relationship."""
+        for relationship_header in self.relationships:
+            if relationship in self.relationships[relationship_header]:
+                self.relationships[relationship_header][relationship].append(random.choice(self.parent.colonists))
+
+        self.parent.taskbar.menu_relationships.add_relation(self)
+
+    def generate_specific_relationship_to(self, relationship: str, entity: Entity):
+        """Generate a specific relationship to an entity."""
+        for relationship_header in self.relationships:
+            if relationship in self.relationships[relationship_header]:
+                self.relationships[relationship_header][relationship].append(entity)
+
+        self.parent.taskbar.menu_relationships.add_relation(self)
+
+    def get_relationships(self):
+        """Gets all the relationships of this pawn."""
+        return self.relationships
+
+    def get_relationship(self, relation: str):
+        """Gets a specific relationship of this pawn."""
+        return self.relationships[relation]
+
+    def get_relation_to(self, entity: Entity):
+        """Gets a relationship to another pawn."""
+        # TODO: Make this function do something.
+        pass

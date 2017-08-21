@@ -61,13 +61,17 @@ class GameWindow(tk.Tk):
         self.start = Start(self)
 
     def get_mouse_position(self):
-        mouse_x_raw = self.start.scenarios.game.game_area.winfo_pointerx()
-        mouse_y_raw = self.start.scenarios.game.game_area.winfo_pointery()
+        try:
+            mouse_x_raw = self.start.scenarios.game.game_area.winfo_pointerx()
+            mouse_y_raw = self.start.scenarios.game.game_area.winfo_pointery()
 
-        mouse_x = mouse_x_raw - self.start.scenarios.game.game_area.winfo_rootx()
-        mouse_y = mouse_y_raw - self.start.scenarios.game.game_area.winfo_rooty()
+            mouse_x = mouse_x_raw - self.start.scenarios.game.game_area.winfo_rootx()
+            mouse_y = mouse_y_raw - self.start.scenarios.game.game_area.winfo_rooty()
 
-        return mouse_x, mouse_y
+            return mouse_x, mouse_y
+
+        except AttributeError:
+            return "", ""
 
 
 class TaskBar(ttk.Frame):
@@ -121,7 +125,7 @@ class ColonistBar(ttk.Frame):
         canvas.bind("<Button-1>", self.unselect_colonist, "+")
 
         self.parent.taskbar.menu_colonists.add_command(label=colonist.get_name(), command=lambda the_colonist=colonist: [self.parent.unselect_all(), the_colonist.select()])
-        self.parent.taskbar.menu_relationships.add_relation(colonist)
+        # self.parent.taskbar.menu_relationships.add_relation(colonist)
 
         self.colonists[colonist.entity] = canvas
         self.canvas_list.append(canvas)
@@ -198,7 +202,7 @@ class MenuRelationships(MenuBase):
                         menu_sibling = tk.Menu(menu_relations)
 
                         for sibling in colonist.relationships[relationship_type][relationship]:
-                            menu_sibling.add_command(label=capwords(sibling))
+                            menu_sibling.add_command(label=capwords(sibling.get_name()))
 
                         if colonist.relationships[relationship_type][relationship]:
                             menu_relations.add_cascade(label=capwords(relationship), menu=menu_sibling)
@@ -847,6 +851,9 @@ class Scenarios(object):
         if "colonists" in scenario.contents:
             for amount in range(scenario.contents["colonists"]):
                 colony.Colonist(self.game, x=drop_x + randint(-25, 25), y=drop_y + randint(-25, 25)).generate_random().draw().add_to_colonist_bar()
+
+            for colonist in self.parent.start.scenarios.game.colonists:
+                colonist.generate_random_relationship()
 
         # NOTE: Scenarios can exist without animals.
         if "animals" in scenario.contents:

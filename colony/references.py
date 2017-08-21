@@ -131,10 +131,22 @@ def get_male_animal_names():
     ]
 
 
+def get_male_relationship_types():
+    return [
+        "fathers", "brothers", "sons"
+    ]
+
+
 def get_female_animal_names():
     # TODO: Add more animal names.
     return [
         "Bella", "Molly"
+    ]
+
+
+def get_female_relationship_types():
+    return [
+        "mothers", "sisters", "daughters"
     ]
 
 
