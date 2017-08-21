@@ -14,7 +14,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.34.1"
+__version__ = "1.34.2"
 
 
 class GameWindow(tk.Tk):
@@ -200,10 +200,12 @@ class MenuRelationships(MenuBase):
                         for sibling in colonist.relationships[relationship_type][relationship]:
                             menu_sibling.add_command(label=capwords(sibling))
 
-                        menu_relations.add_cascade(label=capwords(relationship), menu=menu_sibling)
+                        if colonist.relationships[relationship_type][relationship]:
+                            menu_relations.add_cascade(label=capwords(relationship), menu=menu_sibling)
 
                     else:
-                        menu_relations.add_command(label=capwords(relationship))
+                        if colonist.relationships[relationship_type][relationship]:
+                            menu_relations.add_command(label=capwords(relationship))
 
                 menu.add_cascade(label=capwords(relationship_type), menu=menu_relations)
 
