@@ -150,6 +150,24 @@ def get_female_relationship_types():
     ]
 
 
+def get_parent_types():
+    return [
+        "mothers", "fathers"
+    ]
+
+
+def get_sibling_types():
+    return [
+        "sisters", "brothers"
+    ]
+
+
+def get_child_types():
+    return [
+        "daughters", "sons"
+    ]
+
+
 class OptionFrame(ttk.Frame):
     def __init__(self, parent, option, **kwargs):
         ttk.Frame.__init__(self, parent, **kwargs)

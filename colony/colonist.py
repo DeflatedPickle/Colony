@@ -6,11 +6,11 @@ import random
 
 from .entity import Entity
 from .movingentity import MovingEntity
-from .references import get_male_names, get_female_names, get_surnames
+from .references import get_male_names, get_female_names, get_surnames, get_male_relationship_types, get_female_relationship_types, get_parent_types, get_child_types
 
 __title__ = "Colonist"
 __author__ = "DeflatedPickle"
-__version__ = "1.12.0"
+__version__ = "1.12.1"
 
 
 class Colonist(MovingEntity):
@@ -81,9 +81,22 @@ class Colonist(MovingEntity):
     def generate_random_relationship(self):
         """Generates a random relationship."""
         for relationship_header in self.relationships:
-            self.relationships[relationship_header][random.choice(list(self.relationships[relationship_header].keys()))].append(random.choice(self.parent.colonists))
+            relationship = random.choice(list(self.relationships[relationship_header].keys()))
+            colonist = random.choice(self.parent.colonists)
+            this = self.parent.colonists[self.parent.colonists.index(self)]
 
-        self.parent.taskbar.menu_relationships.add_relation(self)
+            if not colonist.gender and relationship in get_female_relationship_types() or colonist.gender and relationship in get_male_relationship_types() and colonist != this:
+                if relationship in get_parent_types() and colonist.age < this.age or relationship in get_child_types() and colonist.age > this.age:
+                    self.relationships[relationship_header][relationship].append(colonist)
+                    self.parent.taskbar.menu_relationships.add_relation(self)
+
+                else:
+                    # print(relationship, colonist.get_name())
+                    self.generate_random_relationship()
+
+            else:
+                # print(relationship, colonist.get_name())
+                self.generate_random_relationship()
 
     def generate_random_relationship_to(self, entity: Entity):
         """Generates a random relationship to an entity."""
