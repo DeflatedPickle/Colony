@@ -197,9 +197,11 @@ class Entity(object):
             if background:
                 if self.entity_type == "colonist":
                     self.menu.add_command(label="Move Here",
-                                          command=lambda: self.parent.selected_entity.move_to(self.last_mouse_x,
-                                                                                              self.last_mouse_y,
-                                                                                              "moving"))
+                                          command=lambda: [self.parent.selected_entity[
+                                                               self.parent.selected_entity.index(item)].move_to(
+                                              self.last_mouse_x,
+                                              self.last_mouse_y,
+                                              "moving") for item in self.parent.selected_entity])
             elif not background:
                 if self.entity_type == "colonist":
                     pass
@@ -238,7 +240,8 @@ class Entity(object):
         if self.entity_type == "resource":
             self.draw_entity_buttons()
 
-        self.parent.selected_entity = self
+        # self.parent.selected_entity = self
+        self.parent.selected_entity.append(self)
         self.selected = True
 
         del event
@@ -261,7 +264,11 @@ class Entity(object):
             pass
 
         self.parent.colonist_bar.unselect_all_colonists()
-        self.parent.selected_entity = None
+        # self.parent.selected_entity = None
+        try:
+            self.parent.selected_entity.remove(self)
+        except ValueError:
+            pass
         self.selected = False
 
         del event

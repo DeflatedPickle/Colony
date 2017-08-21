@@ -14,7 +14,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.33.0"
+__version__ = "1.34.0"
 
 
 class GameWindow(tk.Tk):
@@ -426,7 +426,8 @@ class Game(object):
         self.grid_dictionary = {}
 
         # FIXME: Change this to a list so that multiple entities can be selected.
-        self.selected_entity = None
+        # self.selected_entity = None
+        self.selected_entity = []
 
         self.selected_tool = None
         self.select_area = None
@@ -631,7 +632,7 @@ class Game(object):
             if not layer:
                 # print("Below: {}".format(self.parent.canvas.find_below(self.selected_entity.entity)[0]))
                 try:
-                    if entity <= self.game_area.find_below(self.selected_entity.entity)[0]:
+                    if entity <= self.game_area.find_below(self.selected_entity[0].entity)[0]:
                         self.unselect_all()
                         self.entities[entity].select()
 
@@ -641,7 +642,7 @@ class Game(object):
             if layer:
                 # print("Above: {}".format(self.parent.canvas.find_above(self.selected_entity.entity)[0]))
                 try:
-                    if entity >= self.game_area.find_above(self.selected_entity.entity)[0]:
+                    if entity >= self.game_area.find_above(self.selected_entity[0].entity)[0]:
                         self.unselect_all()
                         self.entities[entity].select()
 
