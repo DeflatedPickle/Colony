@@ -14,7 +14,7 @@ import colony
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
-__version__ = "1.34.0"
+__version__ = "1.34.1"
 
 
 class GameWindow(tk.Tk):
@@ -320,8 +320,8 @@ class TimeFrame(ttk.Frame):
         self.frame_buttons = ttk.Frame(self)
         self.frame_buttons.grid(row=2, column=0, sticky="nesw")
 
-        ttk.Button(self.frame_buttons, text=" < ", command=lambda: colony.interval.set_interval(500), width=3).pack(side="left")
-        ttk.Button(self.frame_buttons, text="< <", command=lambda: colony.interval.set_interval(250), width=3).pack(side="left")
+        ttk.Button(self.frame_buttons, text="< <", command=lambda: colony.interval.set_interval(500), width=3).pack(side="left")
+        ttk.Button(self.frame_buttons, text=" < ", command=lambda: colony.interval.set_interval(250), width=3).pack(side="left")
 
         ttk.Button(self.frame_buttons, text="| |", command=lambda: colony.interval.set_interval(0), width=3, state="disabled").pack(side="left")
         ttk.Button(self.frame_buttons, text=" > ", command=lambda: colony.interval.set_interval(100), width=3).pack(side="left")
