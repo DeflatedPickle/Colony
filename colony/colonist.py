@@ -12,7 +12,7 @@ from .references import get_male_names, get_female_names, get_surnames, get_male
 
 __title__ = "Colonist"
 __author__ = "DeflatedPickle"
-__version__ = "1.12.2"
+__version__ = "1.12.3"
 
 
 class Colonist(MovingEntity):
@@ -100,20 +100,22 @@ class Colonist(MovingEntity):
                         # This colonist is a parent of the random colonist.
                         colonist.relationships[relationship_header][get_child_types()[int(self.gender)]].append(self)
 
-                    elif relationship in get_sibling_types():
-                        # This colonist is a sibling of the random colonist.
-                        colonist.relationships[relationship_header][get_sibling_types()[int(self.gender)]].append(self)
-
                     elif relationship in get_child_types():
                         # This colonist is a child of the random colonist.
                         colonist.relationships[relationship_header][get_parent_types()[int(self.gender)]].append(self)
 
+                elif relationship in get_sibling_types():
+                    self.relationships[relationship_header][relationship].append(colonist)
+                    self.parent.taskbar.menu_relationships.add_relation(self)
+
+                    colonist.relationships[relationship_header][get_sibling_types()[int(self.gender)]].append(self)
+
                 else:
-                    # print(relationship, colonist.get_name())
+                    # print("Thrown Out: " + relationship + " relationship |", "Between: " + colonist.get_name() + " And " + self.get_name())
                     self.generate_random_relationship()
 
             else:
-                # print(relationship, colonist.get_name())
+                # print("Thrown Out: " + relationship + " relationship |", "Between: " + colonist.get_name() + " And " + self.get_name())
                 self.generate_random_relationship()
 
     def generate_random_relationship_to(self, entity: Entity):
