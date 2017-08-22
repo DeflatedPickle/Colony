@@ -91,31 +91,34 @@ class Colonist(MovingEntity):
             colonist = random.choice(self.parent.colonists)
             this = self.parent.colonists[self.parent.colonists.index(self)]
 
-            if not colonist.gender and relationship in get_female_relationship_types() or colonist.gender and relationship in get_male_relationship_types() and colonist != this:
-                if relationship in get_parent_types() and colonist.age > this.age or relationship in get_child_types() and colonist.age < this.age:
-                    self.relationships[relationship_header][relationship].append(colonist)
-                    self.parent.taskbar.menu_relationships.add_relation(self)
+            if colonist != this:
+                if not colonist.gender and relationship in get_female_relationship_types() or colonist.gender and relationship in get_male_relationship_types():
+                    if relationship in get_parent_types() and colonist.age > this.age or relationship in get_child_types() and colonist.age < this.age or relationship in get_sibling_types():
+                        self.relationships[relationship_header][relationship].append(colonist)
+                        self.parent.taskbar.menu_relationships.add_relation(self)
 
-                    if relationship in get_parent_types():
-                        # This colonist is a parent of the random colonist.
-                        colonist.relationships[relationship_header][get_child_types()[int(self.gender)]].append(self)
+                        if relationship in get_parent_types():
+                            # This colonist is a parent of the random colonist.
+                            colonist.relationships[relationship_header][get_child_types()[int(self.gender)]].append(self)
 
-                    elif relationship in get_child_types():
-                        # This colonist is a child of the random colonist.
-                        colonist.relationships[relationship_header][get_parent_types()[int(self.gender)]].append(self)
+                        elif relationship in get_sibling_types():
 
-                elif relationship in get_sibling_types():
-                    self.relationships[relationship_header][relationship].append(colonist)
-                    self.parent.taskbar.menu_relationships.add_relation(self)
+                            colonist.relationships[relationship_header][get_sibling_types()[int(this.gender)]].append(self)
 
-                    colonist.relationships[relationship_header][get_sibling_types()[int(self.gender)]].append(self)
+                        elif relationship in get_child_types():
+                            # This colonist is a child of the random colonist.
+                            colonist.relationships[relationship_header][get_parent_types()[int(self.gender)]].append(self)
+
+                    else:
+                        print("Thrown Out: " + relationship + " relationship |", "Between: " + colonist.get_name() + " And " + self.get_name() + " - Reason: Too young or too old.")
+                        self.generate_random_relationship()
 
                 else:
-                    # print("Thrown Out: " + relationship + " relationship |", "Between: " + colonist.get_name() + " And " + self.get_name())
+                    print("Thrown Out: " + relationship + " relationship |", "Between: " + colonist.get_name() + " And " + self.get_name() + " - Reason: Wrong genders.")
                     self.generate_random_relationship()
 
             else:
-                # print("Thrown Out: " + relationship + " relationship |", "Between: " + colonist.get_name() + " And " + self.get_name())
+                print("Thrown Out: " + relationship + " relationship |", "Between: " + colonist.get_name() + " And " + self.get_name() + " - Reason: Same Colonist")
                 self.generate_random_relationship()
 
     def generate_random_relationship_to(self, entity: Entity):
