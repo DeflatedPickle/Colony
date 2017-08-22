@@ -14,7 +14,7 @@ from .resource import Resource
 from .scenario import Scenario
 # TODO: Add an Event class.
 # TODO: Add a Zone class.
-from .window import OptionWindow, InformationWindow
+from .window import OptionWindow, InformationWindow, RelationshipsWindow
 from .references import *
 
 __title__ = "Colony"

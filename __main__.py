@@ -71,7 +71,7 @@ class GameWindow(tk.Tk):
             return mouse_x, mouse_y
 
         except AttributeError:
-            return "", ""
+            return 0, 0
 
 
 class TaskBar(ttk.Frame):
@@ -189,6 +189,8 @@ class MenuColonists(MenuBase):
 class MenuRelationships(MenuBase):
     def __init__(self, parent, **kwargs):
         MenuBase.__init__(self, parent, **kwargs)
+
+        self.add_command(label="Show All Relationships", command=lambda: colony.RelationshipsWindow(self.parent.parent))
 
     def add_relation(self, colonist):
         menu = tk.Menu(self)
@@ -904,6 +906,7 @@ class DeBug(object):
             self.counter = 10
 
             self.add_debug_line(text="Selected: {}".format(self.find_selected()))
+            self.add_debug_line(text="Selected Gender: {}".format(self.find_selected_gender()))
             self.add_debug_line(text="Selected Location: {}".format(self.find_selected_location()))
             self.add_debug_line(text="Selected Action: {}".format(self.find_selected_action()))
             self.add_debug_line(text="Selected Inventory: {}".format(self.find_selected_inventory()))
@@ -929,10 +932,15 @@ class DeBug(object):
             if item.selected:
                 return "{}: {}".format(item.entity_type, item.name if not isinstance(item.name, type(dict())) else item.get_name())
 
+    def find_selected_gender(self):
+        for item in self.parent.entities.values():
+            if item.selected:
+                return item.gender
+
     def find_selected_location(self):
         for item in self.parent.entities.values():
             if item.selected:
-                return "x={0[0]}, y={0[1]}".format(self.parent.selected_entity.find_coordinates_own())
+                return "x={0[0]}, y={0[1]}".format(self.parent.selected_entity[0].find_coordinates_own())
 
     def find_selected_action(self):
         for entity in self.parent.entities.values():

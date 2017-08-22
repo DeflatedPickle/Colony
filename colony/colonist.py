@@ -3,14 +3,16 @@
 """"""
 
 import random
+from textwrap import indent
+from string import capwords
 
 from .entity import Entity
 from .movingentity import MovingEntity
-from .references import get_male_names, get_female_names, get_surnames, get_male_relationship_types, get_female_relationship_types, get_parent_types, get_child_types
+from .references import get_male_names, get_female_names, get_surnames, get_male_relationship_types, get_female_relationship_types, get_parent_types, get_sibling_types, get_child_types
 
 __title__ = "Colonist"
 __author__ = "DeflatedPickle"
-__version__ = "1.12.1"
+__version__ = "1.12.2"
 
 
 class Colonist(MovingEntity):
@@ -36,7 +38,7 @@ class Colonist(MovingEntity):
         self.joy = 100
         self.inventory = []
         # TODO: Add colonist relationships.
-        self.relationships = {"family": {"mothers": [], "fathers": [], "sisters": [], "brothers": [], "daughters": [], "sons": []}}
+        self.relationships = {"family": {"mothers": [], "fathers": [], "sisters": [], "brothers": [], "daughters": [], "sons": []}}  # , "wives": [], "husbands": []}}
         # Note: Maybe use an Enum for faction instead of a string.
         self.faction = faction
         # TODO: Add colonist buffs and debuffs, such as "Fast Walker" to improve move speed.
@@ -56,6 +58,10 @@ class Colonist(MovingEntity):
     def get_name(self):
         """Returns the name of the colonist."""
         return "{} {}".format(self.name["forename"], self.name["surname"])
+
+    def get_gender(self):
+        """Returns the gender of the colonist as "Female" or "Male"."""
+        return "Female" if not self.gender else "Male"
 
     def draw(self):
         MovingEntity.draw(self)
@@ -86,9 +92,21 @@ class Colonist(MovingEntity):
             this = self.parent.colonists[self.parent.colonists.index(self)]
 
             if not colonist.gender and relationship in get_female_relationship_types() or colonist.gender and relationship in get_male_relationship_types() and colonist != this:
-                if relationship in get_parent_types() and colonist.age < this.age or relationship in get_child_types() and colonist.age > this.age:
+                if relationship in get_parent_types() and colonist.age > this.age or relationship in get_child_types() and colonist.age < this.age:
                     self.relationships[relationship_header][relationship].append(colonist)
                     self.parent.taskbar.menu_relationships.add_relation(self)
+
+                    if relationship in get_parent_types():
+                        # This colonist is a parent of the random colonist.
+                        colonist.relationships[relationship_header][get_child_types()[int(self.gender)]].append(self)
+
+                    elif relationship in get_sibling_types():
+                        # This colonist is a sibling of the random colonist.
+                        colonist.relationships[relationship_header][get_sibling_types()[int(self.gender)]].append(self)
+
+                    elif relationship in get_child_types():
+                        # This colonist is a child of the random colonist.
+                        colonist.relationships[relationship_header][get_parent_types()[int(self.gender)]].append(self)
 
                 else:
                     # print(relationship, colonist.get_name())
@@ -133,3 +151,24 @@ class Colonist(MovingEntity):
         """Gets a relationship to another pawn."""
         # TODO: Make this function do something.
         pass
+
+    def get_pretty_relationships(self):
+        string = list()
+
+        for relationship_header in self.relationships:
+            string.append(capwords(relationship_header) + ":")
+            for relationship_type in self.relationships[relationship_header]:
+                string.append(indent(capwords(relationship_type) + ":", " " * 4))
+                string.append(indent("\n".join([colonist.get_name() for colonist in self.relationships[relationship_header][relationship_type]]), " " * 8))
+
+        return "\n".join(string)
+
+    def get_pretty_information(self):
+        string = list()
+
+        string.append(self.get_name() + ":")
+        for item in ["Species: " + self.species, "Age: " + str(self.age), "Gender: " + self.get_gender(), "Faction: " + self.faction]:
+            string.append(indent(item, " " * 4))
+        string.append(indent(self.get_pretty_relationships(), " " * 4))
+
+        return "\n".join(string)

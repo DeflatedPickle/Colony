@@ -92,6 +92,18 @@ class InformationWindow(BaseWindow):
             self.create_label(self.frame_basic, value, entity.entity_values["basic"][value])
 
 
+class RelationshipsWindow(BaseWindow):
+    def __init__(self, parent, *args, **kwargs):
+        BaseWindow.__init__(self, parent, *args, **kwargs)
+        self.title("Relationships")
+
+        self.text = tk.Text(self.frame_widget, wrap="none")
+        self.text.grid(row=0, column=0, padx=3, pady=3, sticky="nesw")
+
+        for colonist in self.parent.start.scenarios.game.colonists:
+            self.text.insert(1.0, colonist.get_pretty_information() + "\n")
+
+
 def main():
     app = tk.Tk()
     # BaseWindow(app)
