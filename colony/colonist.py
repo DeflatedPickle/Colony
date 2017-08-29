@@ -8,6 +8,7 @@ from string import capwords
 
 from .entity import Entity
 from .movingentity import MovingEntity
+from .age import Age
 from .references import get_male_names, get_female_names, get_surnames, get_male_relationship_types, get_female_relationship_types, get_parent_types, get_sibling_types, get_child_types
 
 __title__ = "Colonist"
@@ -15,11 +16,12 @@ __author__ = "DeflatedPickle"
 __version__ = "1.13.1"
 
 
-class Colonist(MovingEntity):
+class Colonist(MovingEntity, Age):
     """Creates a colonist."""
 
     def __init__(self, parent, species: str = "Human", forename: str = "", surname: str = "", age: int = 0, highest_age: int = 80, gender: bool = False, health: int = 100, total_health: int = 100, faction: str = "colony", x: int = 0, y: int = 0):
         MovingEntity.__init__(self, parent, x, y, entity_type="colonist")
+        Age.__init__(self, parent.time, age, 0, highest_age)
         self.parent = parent
         # Note: Maybe use an Enum for species instead of a string.
         self.species = species
@@ -30,9 +32,6 @@ class Colonist(MovingEntity):
                      "middle names": [],
                      "nickname": None,
                      "surname": surname}
-        self.age = age
-        self.lowest_age = 0
-        self.highest_age = highest_age
         # NOTE: Maybe use an Enum instead of a boolean.
         self.gender = gender  # False: Female, True: Male
         self.health = health

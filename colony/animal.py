@@ -5,6 +5,7 @@
 from random import randint
 
 from .movingentity import MovingEntity
+from .age import Age
 from .references import get_male_animal_names, get_female_animal_names
 
 __title__ = "Animal"
@@ -12,17 +13,15 @@ __author__ = "DeflatedPickle"
 __version__ = "1.10.1"
 
 
-class Animal(MovingEntity):
+class Animal(MovingEntity, Age):
     """Creates an animal."""
 
     def __init__(self, parent, species: str = "", name: str = "", age: int = 0, highest_age: int = 10, gender: bool = False, health: int = 100, total_health: int = 100, wild: bool = True, tame_chance: float = 100.0, owner=None, x: int = 0, y: int = 0):
         MovingEntity.__init__(self, parent, x, y, entity_type="animal")
+        Age.__init__(self, parent.time, age, 0, highest_age)
         self.parent = parent
         self.species = species
         self.name = name
-        self.age = age
-        self.lowest_age = 0
-        self.highest_age = highest_age
         self.gender = gender
         self.health = health
         self.total_health = total_health

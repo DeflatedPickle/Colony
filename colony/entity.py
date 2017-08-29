@@ -42,6 +42,8 @@ class Entity(object):
         elif self.entity_type == "item":
             self.amount = None
 
+        self.relationships = {}
+
         self.entity_values = OrderedDict()
         self.entity_values_basic = OrderedDict()
         self.entity_values["basic"] = self.entity_values_basic

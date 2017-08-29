@@ -9,6 +9,7 @@ from .colonist import Colonist
 from .animal import Animal
 from .item import Item
 from .resource import Resource
+from .time import Time
 # TODO: Add a Weapon class.
 # TODO: Add an Armour class.
 from .scenario import Scenario

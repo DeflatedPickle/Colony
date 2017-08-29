@@ -273,47 +273,6 @@ class MenuOptions(MenuBase):
         self.parent.parent.start_menu_title()
 
 
-class Time(object):
-    def __init__(self, hours: int = 0, minutes: int = 0, seconds: int = 0):
-        self._hours = hours
-        self._minutes = minutes
-        self._seconds = seconds
-
-        self.check_time()
-
-    def get_time(self):
-        return int("".join(map(str, [self._hours, self._minutes, self._seconds])))
-
-    def get_time_formatted(self):
-        return "{}:{}:{}".format(self._hours, self._minutes, self._seconds)
-
-    def set_time(self, hours, minutes, seconds):
-        self._hours = hours
-        self._minutes = minutes
-        self._seconds = seconds
-
-        self.check_time()
-
-    def increase_time(self, hours, minutes, seconds):
-        self._hours += hours
-        self._minutes += minutes
-        self._seconds = seconds
-
-        self.check_time()
-
-    def check_time(self):
-        if self._seconds >= 60:
-            self._seconds = 0
-            self._minutes += 1
-
-        if self._minutes >= 60:
-            self._minutes = 0
-            self._hours += 1
-
-        if self._hours >= 24:
-            self._hours = 0
-
-
 class TimeFrame(ttk.Frame):
     def __init__(self, parent, **kwargs):
         ttk.Frame.__init__(self, parent.parent, **kwargs)
@@ -344,7 +303,7 @@ class GameTime(object):
     def __init__(self, parent):
         self.parent = parent
 
-        self._time = Time(0, 0, 0)
+        self._time = colony.Time(0, 0, 0)
 
         self.update_time()
 
@@ -398,8 +357,11 @@ class Game(object):
         self.colonists = []
         self.animals = []
         self.items = []
-
         self.families = []
+        self.event_hours = [8, 20]
+
+        self.time_frame = TimeFrame(self)
+        self.time = GameTime(self)
 
         self.register_items = {
             "wood": colony.Item(self, name="Wood", stack_size=100),
@@ -417,7 +379,11 @@ class Game(object):
 
         self.register_animals = {
             "cat": colony.Animal(self, species="Cat", tame_chance=80, highest_age=10),
-            "babirusa": colony.Animal(self, species="Babirusa", tame_chance=30, highest_age=10)
+            "babirusa": colony.Animal(self, species="Babirusa", tame_chance=30, highest_age=10),
+
+            # Extinct
+            "castoroides": colony.Animal(self, species="Castoroides", tame_chance=20, highest_age=23),
+            "dodo": colony.Animal(self, species="Dodo", tame_chance=20, highest_age=7)
         }
 
         self.register_resources = {
@@ -433,7 +399,6 @@ class Game(object):
 
         self.grid_dictionary = {}
 
-        # FIXME: Change this to a list so that multiple entities can be selected.
         # self.selected_entity = None
         self.selected_entity = []
 
@@ -449,8 +414,6 @@ class Game(object):
 
         self.colonist_bar = ColonistBar(self)
         self.taskbar = TaskBar(self.parent, self)
-        self.time_frame = TimeFrame(self)
-        self.time = GameTime(self)
         self.debug = DeBug(self)
 
         self.draw_widgets()
@@ -906,7 +869,8 @@ class DeBug(object):
             self.counter = 10
 
             self.add_debug_line(text="Selected: {}".format(self.find_selected()))
-            self.add_debug_line(text="Selected Gender: {}".format(self.find_selected_gender()))
+            if not self.parent.entities and self.parent.entities[0].entity_type == "resource":
+                self.add_debug_line(text="Selected Gender: {}".format(self.find_selected_gender()))
             self.add_debug_line(text="Selected Location: {}".format(self.find_selected_location()))
             self.add_debug_line(text="Selected Action: {}".format(self.find_selected_action()))
             self.add_debug_line(text="Selected Inventory: {}".format(self.find_selected_inventory()))

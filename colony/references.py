@@ -21,7 +21,7 @@ def get_references():
         "icons": {
             "colonist": u"\u25AF",  # WHITE VERTICAL RECTANGLE
             "animal": u"\u25AD",  # WHITE RECTANGLE
-            "resource": u"\u25B3", # White Up Pointing Triangle
+            "resource": u"\u25B3",  # White Up Pointing Triangle
             "block": u"\u25FB",  # WHITE MEDIUM SQUARE
             "item": u"\u25FD"  # WHITE MEDIUM SMALL SQUARE
         }
@@ -131,16 +131,16 @@ def get_male_animal_names():
     ]
 
 
-def get_male_relationship_types():
-    return [
-        "fathers", "brothers", "sons"
-    ]
-
-
 def get_female_animal_names():
     # TODO: Add more animal names.
     return [
         "Bella", "Molly"
+    ]
+
+
+def get_male_relationship_types():
+    return [
+        "fathers", "brothers", "sons"
     ]
 
 
