@@ -12,7 +12,7 @@ from .references import get_male_names, get_female_names, get_surnames, get_male
 
 __title__ = "Colonist"
 __author__ = "DeflatedPickle"
-__version__ = "1.12.3"
+__version__ = "1.13.1"
 
 
 class Colonist(MovingEntity):
@@ -25,7 +25,10 @@ class Colonist(MovingEntity):
         self.species = species
         # TODO: Add nicknames.
         # TODO: Add middle names.
-        self.name = {"forename": forename,
+        self.name = {"title": None,
+                     "forename": forename,
+                     "middle names": [],
+                     "nickname": None,
                      "surname": surname}
         self.age = age
         self.lowest_age = 0
@@ -41,6 +44,7 @@ class Colonist(MovingEntity):
         self.relationships = {"family": {"mothers": [], "fathers": [], "sisters": [], "brothers": [], "daughters": [], "sons": []}}  # , "wives": [], "husbands": []}}
         # Note: Maybe use an Enum for faction instead of a string.
         self.faction = faction
+        # TODO: Add colonist stats.
         # TODO: Add colonist buffs and debuffs, such as "Fast Walker" to improve move speed.
 
         self.check_action()
@@ -58,6 +62,10 @@ class Colonist(MovingEntity):
     def get_name(self):
         """Returns the name of the colonist."""
         return "{} {}".format(self.name["forename"], self.name["surname"])
+
+    def get_forename_or_nickname(self):
+        """Returns the nickname if their is one, and if not, the forename"""
+        return self.name["nickname"] if self.name["nickname"] else self.name["forename"]
 
     def get_gender(self):
         """Returns the gender of the colonist as "Female" or "Male"."""
@@ -102,7 +110,7 @@ class Colonist(MovingEntity):
                             colonist.relationships[relationship_header][get_child_types()[int(self.gender)]].append(self)
 
                         elif relationship in get_sibling_types():
-
+                            # This colonist is a sibling of the random colonist.
                             colonist.relationships[relationship_header][get_sibling_types()[int(this.gender)]].append(self)
 
                         elif relationship in get_child_types():
@@ -110,15 +118,15 @@ class Colonist(MovingEntity):
                             colonist.relationships[relationship_header][get_parent_types()[int(self.gender)]].append(self)
 
                     else:
-                        print("Thrown Out: " + relationship + " relationship |", "Between: " + colonist.get_name() + " And " + self.get_name() + " - Reason: Too young or too old.")
+                        # print("Thrown Out: " + relationship + " relationship |", "Between: " + colonist.get_name() + " And " + self.get_name() + " - Reason: Too young or too old.")
                         self.generate_random_relationship()
 
                 else:
-                    print("Thrown Out: " + relationship + " relationship |", "Between: " + colonist.get_name() + " And " + self.get_name() + " - Reason: Wrong genders.")
+                    # print("Thrown Out: " + relationship + " relationship |", "Between: " + colonist.get_name() + " And " + self.get_name() + " - Reason: Wrong genders.")
                     self.generate_random_relationship()
 
             else:
-                print("Thrown Out: " + relationship + " relationship |", "Between: " + colonist.get_name() + " And " + self.get_name() + " - Reason: Same Colonist")
+                # print("Thrown Out: " + relationship + " relationship |", "Between: " + colonist.get_name() + " And " + self.get_name() + " - Reason: Same Colonist")
                 self.generate_random_relationship()
 
     def generate_random_relationship_to(self, entity: Entity):

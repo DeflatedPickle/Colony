@@ -71,7 +71,7 @@ class GameWindow(tk.Tk):
             return mouse_x, mouse_y
 
         except AttributeError:
-            return 0, 0
+            return [0, 0], [0, 0]
 
 
 class TaskBar(ttk.Frame):
@@ -118,7 +118,7 @@ class ColonistBar(ttk.Frame):
     def add_colonist(self, colonist):
         canvas = tk.Canvas(self, width=50, height=50)
         canvas.create_text(25, 20, text=colony.get_references()["icons"]["colonist"], font=colony.get_fonts()["colonist"]["bar_normal"], tag="colonist")
-        canvas.create_text(25, 40, text=colonist.name["forename"], anchor="center", font=colony.get_fonts()["text"]["bar_normal"], tag="name")
+        canvas.create_text(25, 40, text=colonist.get_forename_or_nickname(), anchor="center", font=colony.get_fonts()["text"]["bar_normal"], tag="name")
         canvas.pack(side="left")
 
         canvas.bind("<ButtonRelease-1>", lambda *args: self.select_colonist(colonist), "+")
