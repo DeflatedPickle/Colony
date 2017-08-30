@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """"""
 
-from .actingentity import ActingEntity
+from colony.entities.actingentity import ActingEntity
 # from .references import get_interval
-from .references import interval
+from colony.references import interval
 
 __title__ = "MovingEntity"
 __author__ = "DeflatedPickle"

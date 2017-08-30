@@ -2,21 +2,21 @@
 # -*- coding: utf-8 -*-
 """"""
 
-from .entity import Entity
+from colony.entities.entity import Entity
+from .animal import Animal
 # from .actingentity import ActingEntity
 # from .movingentity import MovingEntity
 from .colonist import Colonist
-from .animal import Animal
 from .item import Item
+from .references import *
 from .resource import Resource
-from .time import Time
 # TODO: Add a Weapon class.
 # TODO: Add an Armour class.
 from .scenario import Scenario
+from .time import Time
 # TODO: Add an Event class.
 # TODO: Add a Zone class.
 from .window import OptionWindow, InformationWindow, RelationshipsWindow
-from .references import *
 
 __title__ = "Colony"
 

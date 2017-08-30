@@ -7,8 +7,8 @@ from tkinter import ttk
 from _tkinter import TclError
 from collections import OrderedDict
 
-from .references import *
-from .window import InformationWindow
+from colony.references import *
+from colony.window import InformationWindow
 
 __title__ = "Entity"
 __author__ = "DeflatedPickle"

@@ -5,9 +5,9 @@
 from _tkinter import TclError
 from random import randint
 
-from .entity import Entity
+from colony.entities.entity import Entity
 # from .references import get_interval
-from .references import interval
+from colony.references import interval
 
 __title__ = "ActingEntity"
 __author__ = "DeflatedPickle"

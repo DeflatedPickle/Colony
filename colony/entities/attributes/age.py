@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """"""
 
-from .time import Time
+from colony.time import Time
 
 __title__ = "Age"
 __author__ = "DeflatedPickle"
@@ -10,7 +10,7 @@ __version__ = "1.0.0"
 
 
 class Age(object):
-    """Creates a colonist."""
+    """Gives an entity the ability to age."""
 
     def __init__(self, time: Time, age: int=0, lowest_age: int=0, highest_age: int=0):
         self.time = time

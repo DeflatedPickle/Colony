@@ -7,7 +7,7 @@ from tkinter import ttk
 from string import capwords
 
 import pkinter as pk
-from .references import OptionFrame
+from colony.references import OptionFrame
 
 __title__ = "Window"
 __author__ = "DeflatedPickle"

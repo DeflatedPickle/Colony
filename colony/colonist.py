@@ -3,25 +3,29 @@
 """"""
 
 import random
-from textwrap import indent
 from string import capwords
+from textwrap import indent
 
-from .entity import Entity
-from .movingentity import MovingEntity
-from .age import Age
-from .references import get_male_names, get_female_names, get_surnames, get_male_relationship_types, get_female_relationship_types, get_parent_types, get_sibling_types, get_child_types
+from colony.entities.attributes import Age
+from colony.entities.attributes import Limbs
+from colony.entities import Entity
+from colony.entities import MovingEntity
+from colony.references import get_male_names, get_female_names, get_surnames, get_male_relationship_types, \
+    get_female_relationship_types, get_parent_types, get_sibling_types, get_child_types
 
 __title__ = "Colonist"
 __author__ = "DeflatedPickle"
 __version__ = "1.13.1"
 
 
-class Colonist(MovingEntity, Age):
+class Colonist(MovingEntity, Age, Limbs):
     """Creates a colonist."""
 
-    def __init__(self, parent, species: str = "Human", forename: str = "", surname: str = "", age: int = 0, highest_age: int = 80, gender: bool = False, health: int = 100, total_health: int = 100, faction: str = "colony", x: int = 0, y: int = 0):
+    def __init__(self, parent, species: str = "Human", forename: str = "", surname: str = "", gender: bool = False,
+                 health: int = 100, total_health: int = 100, faction: str = "colony", x: int = 0, y: int = 0):
         MovingEntity.__init__(self, parent, x, y, entity_type="colonist")
-        Age.__init__(self, parent.time, age, 0, highest_age)
+        Age.__init__(self, parent.time, 1, 0, 100)
+        Limbs.__init__(self)
         self.parent = parent
         # Note: Maybe use an Enum for species instead of a string.
         self.species = species
@@ -40,7 +44,8 @@ class Colonist(MovingEntity, Age):
         self.joy = 100
         self.inventory = []
         # TODO: Add colonist relationships.
-        self.relationships = {"family": {"mothers": [], "fathers": [], "sisters": [], "brothers": [], "daughters": [], "sons": []}}  # , "wives": [], "husbands": []}}
+        self.relationships = {"family": {"mothers": [], "fathers": [], "sisters": [], "brothers": [], "daughters": [],
+                                         "sons": []}}  # , "wives": [], "husbands": []}}
         # Note: Maybe use an Enum for faction instead of a string.
         self.faction = faction
         # TODO: Add colonist stats.
@@ -106,15 +111,18 @@ class Colonist(MovingEntity, Age):
 
                         if relationship in get_parent_types():
                             # This colonist is a parent of the random colonist.
-                            colonist.relationships[relationship_header][get_child_types()[int(self.gender)]].append(self)
+                            colonist.relationships[relationship_header][get_child_types()[int(self.gender)]].append(
+                                self)
 
                         elif relationship in get_sibling_types():
                             # This colonist is a sibling of the random colonist.
-                            colonist.relationships[relationship_header][get_sibling_types()[int(this.gender)]].append(self)
+                            colonist.relationships[relationship_header][get_sibling_types()[int(this.gender)]].append(
+                                self)
 
                         elif relationship in get_child_types():
                             # This colonist is a child of the random colonist.
-                            colonist.relationships[relationship_header][get_parent_types()[int(self.gender)]].append(self)
+                            colonist.relationships[relationship_header][get_parent_types()[int(self.gender)]].append(
+                                self)
 
                     else:
                         # print("Thrown Out: " + relationship + " relationship |", "Between: " + colonist.get_name() + " And " + self.get_name() + " - Reason: Too young or too old.")
@@ -131,7 +139,8 @@ class Colonist(MovingEntity, Age):
     def generate_random_relationship_to(self, entity: Entity):
         """Generates a random relationship to an entity."""
         for relationship_header in self.relationships:
-            self.relationships[relationship_header][random.choice(list(self.relationships[relationship_header].keys()))].append(entity)
+            self.relationships[relationship_header][
+                random.choice(list(self.relationships[relationship_header].keys()))].append(entity)
 
         self.parent.taskbar.menu_relationships.add_relation(self)
 
@@ -171,7 +180,9 @@ class Colonist(MovingEntity, Age):
             string.append(capwords(relationship_header) + ":")
             for relationship_type in self.relationships[relationship_header]:
                 string.append(indent(capwords(relationship_type) + ":", " " * 4))
-                string.append(indent("\n".join([colonist.get_name() for colonist in self.relationships[relationship_header][relationship_type]]), " " * 8))
+                string.append(indent("\n".join(
+                    [colonist.get_name() for colonist in self.relationships[relationship_header][relationship_type]]),
+                                     " " * 8))
 
         return "\n".join(string)
 
@@ -179,7 +190,8 @@ class Colonist(MovingEntity, Age):
         string = list()
 
         string.append(self.get_name() + ":")
-        for item in ["Species: " + self.species, "Age: " + str(self.age), "Gender: " + self.get_gender(), "Faction: " + self.faction]:
+        for item in ["Species: " + self.species, "Age: " + str(self.age), "Gender: " + self.get_gender(),
+                     "Faction: " + self.faction]:
             string.append(indent(item, " " * 4))
         string.append(indent(self.get_pretty_relationships(), " " * 4))
 

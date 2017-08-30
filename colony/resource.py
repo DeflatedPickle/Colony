@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """"""
 
-from .item import Item
-from .entity import Entity
-from .references import *
+from colony.entities import Entity
+from colony.item import Item
+from colony.references import *
 
 __title__ = "Resource"
 __author__ = "DeflatedPickle"

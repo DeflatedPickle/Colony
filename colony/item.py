@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """"""
 
-from .entity import Entity
+from colony.entities import Entity
 
 __title__ = "Item"
 __author__ = "DeflatedPickle"

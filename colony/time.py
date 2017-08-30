@@ -4,7 +4,7 @@
 
 __title__ = "Time"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 
 class Time(object):
@@ -31,7 +31,7 @@ class Time(object):
     def increase_time(self, hours, minutes, seconds):
         self._hours += hours
         self._minutes += minutes
-        self._seconds = seconds
+        self._seconds += seconds
 
         self.check_time()
 
