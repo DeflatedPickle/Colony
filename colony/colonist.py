@@ -7,7 +7,6 @@ from string import capwords
 from textwrap import indent
 
 from colony.entities.attributes import Age
-from colony.entities.attributes import Limbs
 from colony.entities import Entity
 from colony.entities import MovingEntity
 from colony.references import get_male_names, get_female_names, get_surnames, get_male_relationship_types, \
@@ -18,14 +17,13 @@ __author__ = "DeflatedPickle"
 __version__ = "1.13.1"
 
 
-class Colonist(MovingEntity, Age, Limbs):
+class Colonist(MovingEntity, Age):
     """Creates a colonist."""
 
     def __init__(self, parent, species: str = "Human", forename: str = "", surname: str = "", gender: bool = False,
                  health: int = 100, total_health: int = 100, faction: str = "colony", x: int = 0, y: int = 0):
         MovingEntity.__init__(self, parent, x, y, entity_type="colonist")
         Age.__init__(self, parent.time, 1, 0, 100)
-        Limbs.__init__(self)
         self.parent = parent
         # Note: Maybe use an Enum for species instead of a string.
         self.species = species

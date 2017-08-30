@@ -3,6 +3,7 @@
 """"""
 
 from colony.entities.actingentity import ActingEntity
+from colony.entities.attributes import Limbs
 # from .references import get_interval
 from colony.references import interval
 
@@ -11,11 +12,12 @@ __author__ = "DeflatedPickle"
 __version__ = "1.0.2"
 
 
-class MovingEntity(ActingEntity):
+class MovingEntity(ActingEntity, Limbs):
     """Creates an entity capable of movement."""
 
     def __init__(self, parent, x: int = 0, y: int = 0, entity_type: str = "moving entity"):
         ActingEntity.__init__(self, parent, x, y, entity_type)
+        Limbs.__init__(self)
         self.parent = parent
         # TODO: Actually use the colonist speed.
         self.move_speed = 2
