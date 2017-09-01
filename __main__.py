@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """"""
 
@@ -9,6 +9,9 @@ from random import randint, choice
 from string import capwords
 import sys
 from ast import literal_eval
+import io
+
+from PIL import Image
 
 import colony
 
@@ -264,6 +267,7 @@ class MenuOptions(MenuBase):
         MenuBase.__init__(self, parent, **kwargs)
 
         self.add_command(label="Back To Start", command=self.start_menu)
+        self.add_command(label="Take Screenshot", command=self.take_screenshot)
         self.add_command(label="Options", command=lambda: colony.OptionWindow(self.parent.parent))
         self.add_command(label="Exit", command=lambda: sys.exit())
 
@@ -271,6 +275,13 @@ class MenuOptions(MenuBase):
         self.parent.parent.canvas.unbind("<Configure>")
         self.parent.parent.canvas.bind("<Configure>", self.parent.parent.canvas.on_resize)
         self.parent.parent.start_menu_title()
+
+    def take_screenshot(self):
+        postscript = self.parent.game.game_area.postscript(colormode="color")
+
+        with Image.open(io.BytesIO(postscript.encode("utf-8"))) as image:
+            image.save("./image.jpg")
+            image.close()
 
 
 class TimeFrame(ttk.Frame):
