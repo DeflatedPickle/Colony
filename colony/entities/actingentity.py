@@ -93,12 +93,13 @@ class ActingEntity(Entity):
                 # print(self.parent.game_area.gettags(closest))
                 # print(closest)
 
-                if closest is not None:
+                if closest is not None and "taken by {}".format(self.entity) not in self.parent.game_area.gettags(closest):
                     coords = self.parent.game_area.coords(closest)
 
                     x, y = coords
                     if self.entity is not None:
                         self.move_to(x, y, "working")
+                        self.parent.game_area.itemconfig(closest, tags=self.parent.game_area.itemcget(closest, "tags") + "taken by {}".format(self.entity))
 
                 else:
                     self.decide_action()
