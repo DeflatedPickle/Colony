@@ -7,6 +7,7 @@ from tkinter import ttk
 from _tkinter import TclError
 from collections import OrderedDict
 
+from colony.entities.attributes import Health
 from colony.references import *
 from colony.window import InformationWindow
 
@@ -21,8 +22,6 @@ class Entity(object):
     def __init__(self, parent, x: int = 0, y: int = 0, entity_type: str = "entity"):
         self.parent = parent
         self.name = None
-        self.health = 0
-        self.total_health = 0
 
         self.location = {"x": x,
                          "y": y}
@@ -84,7 +83,7 @@ class Entity(object):
 
             self.entity_health = self.parent.game_area.create_text(self.location["x"],
                                                                    self.location["y"] + 27,
-                                                                   text="{}/{}".format(self.health, self.total_health),
+                                                                   text="{}/{}".format(self.get_health(), self.get_highest_health()),
                                                                    state="disabled",
                                                                    font=get_fonts()["text"]["normal"],
                                                                    tag="extra")
@@ -99,7 +98,7 @@ class Entity(object):
 
             self.entity_health = self.parent.game_area.create_text(self.location["x"],
                                                                    self.location["y"] + 20,
-                                                                   text="{}/{}".format(self.health, self.total_health),
+                                                                   text="{}/{}".format(self.get_health(), self.get_highest_health()),
                                                                    state="disabled",
                                                                    font=get_fonts()["text"]["normal"],
                                                                    tag="extra")
@@ -129,7 +128,7 @@ class Entity(object):
 
             self.entity_health = self.parent.game_area.create_text(self.location["x"],
                                                                    self.location["y"] + 20,
-                                                                   text="{}/{}".format(self.health, self.total_health),
+                                                                   text="{}/{}".format(self.get_health(), self.get_highest_health()),
                                                                    state="disabled",
                                                                    font=get_fonts()["text"]["normal"],
                                                                    tag="extra")
@@ -162,8 +161,10 @@ class Entity(object):
             self.entity_values_basic["species"] = self.species
             self.entity_values_basic["gender"] = self.gender
             self.entity_values_basic["age"] = self.age
-        self.entity_values_basic["health"] = self.health
-        self.entity_values_basic["total health"] = self.total_health
+
+        if issubclass(self.__class__, Health):
+            self.entity_values_basic["health"] = self.get_health()
+            self.entity_values_basic["total health"] = self.get_highest_health()
 
     def destroy(self):
         self.parent.entities.pop(self.entity)
