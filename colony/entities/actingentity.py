@@ -1,9 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """"""
 
+import tkinter as tk
 from _tkinter import TclError
-from random import randint
+import random
 
 from colony.entities.entity import Entity
 # from .references import get_interval
@@ -25,8 +26,37 @@ class ActingEntity(Entity):
         self.actions = []
         self.after_actions = []
 
+        self.waiting_actions = ["standing around", "wandering"]
+        self.looking_actions = ["looking for work"]
+        self.doing_actions = ["chopping a tree", "mining a rock"]
+
     def move_to(self, x, y, because):
         pass
+
+    def look_for_closest(self, x, y, tag):
+        # Credit: User9123 on StackOverflow
+        canvas = tk.Canvas(self.parent.parent)
+
+        for entity in self.parent.game_area.find_withtag(tag):
+            if self.parent.game_area.type(entity) == "text":
+                text = canvas.create_text
+
+                config = {opt: self.parent.game_area.itemcget(entity, opt) for opt in self.parent.game_area.itemconfig(entity)}
+                config["tags"] = str(entity)
+                text(*self.parent.game_area.coords(entity), **config)
+
+                item = canvas.find_closest(x, y)
+
+                if item:
+                    item = int(canvas.gettags(*item)[0])
+
+                else:
+                    item = None
+
+                return item
+
+            else:
+                continue
 
     def check_action(self):
         """Checks the colonists current action."""
@@ -49,7 +79,7 @@ class ActingEntity(Entity):
                 try:
                     try:
                         entity_location = self.parent.game_area.coords(self.entity)
-                        self.move_to(entity_location[0] + randint(-15, 15), entity_location[1] + randint(-15, 15), "wandering")
+                        self.move_to(entity_location[0] + random.randint(-15, 15), entity_location[1] + random.randint(-15, 15), "wandering")
                     except TclError:
                         pass
 
@@ -57,6 +87,23 @@ class ActingEntity(Entity):
                     pass
 
                 self.decide_action()
+
+            elif self.action == "looking for work":
+                closest = self.look_for_closest(self.location["x"], self.location["y"], "deconstruct")
+                # print(self.parent.game_area.gettags(closest))
+                # print(closest)
+
+                if closest is not None:
+                    coords = self.parent.game_area.coords(closest)
+
+                    x, y = coords
+                    if self.entity is not None:
+                        self.move_to(x, y, "working")
+
+                else:
+                    self.decide_action()
+
+                # self.decide_action()
 
             elif self.action == "moving":
                 # print("{} is moving.".format(self.get_name()))
@@ -66,14 +113,17 @@ class ActingEntity(Entity):
 
     def decide_action(self):
         """Decides an action for the colonist to perform."""
-        random = randint(0, 100)
+        random_number = random.randint(0, 100)
 
         if self.entity_type == "colonist" or self.entity_type == "animal":
-            if random in range(0, 15):
+            if self.action in self.waiting_actions:
+                self.action = "looking for work"
+
+            elif random_number in range(0, 15):
                 # Standing Around
                 self.action = "standing around"
 
-            elif random in range(20, 30):
+            elif random_number in range(20, 30):
                 # Wandering
                 self.action = "wandering"
 

@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """"""
 
 from random import randint
 
-from colony.entities.attributes import Age
+from colony.entities.attributes import Age, Health
 from colony.entities import MovingEntity
 from colony.references import get_male_animal_names, get_female_animal_names
 
@@ -13,18 +13,19 @@ __author__ = "DeflatedPickle"
 __version__ = "1.10.1"
 
 
-class Animal(MovingEntity, Age):
+class Animal(MovingEntity, Age, Health):
     """Creates an animal."""
 
-    def __init__(self, parent, species: str = "", name: str = "", age: int = 0, highest_age: int = 10, gender: bool = False, health: int = 100, total_health: int = 100, wild: bool = True, tame_chance: float = 100.0, owner=None, x: int = 0, y: int = 0):
+    def __init__(self, parent, species: str = "", name: str = "", age: int = 0, highest_age: int = 10,
+                 gender: bool = False, wild: bool = True, tame_chance: float = 100.0, owner=None, x: int = 0,
+                 y: int = 0):
         MovingEntity.__init__(self, parent, x, y, entity_type="animal")
         Age.__init__(self, parent.time, age, 0, highest_age)
+        Health.__init__(self)
         self.parent = parent
         self.species = species
         self.name = name
         self.gender = gender
-        self.health = health
-        self.total_health = total_health
         self.wild = wild
         self.tame_chance = tame_chance
         self.inventory = []
@@ -48,6 +49,6 @@ class Animal(MovingEntity, Age):
         elif not self.gender:
             self.name = get_female_animal_names()[randint(0, len(get_female_animal_names()) - 1)]
 
-        self.age = randint(self.lowest_age, self.highest_age)
+        self._age = randint(self.get_lowest_age(), self.get_highest_age())
 
         return self

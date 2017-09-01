@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """"""
 
@@ -31,6 +31,8 @@ class Resource(Entity):
                                           state="disabled",
                                           font=get_fonts()["text"]["normal"],
                                           tag="extra")
+
+        self.parent.game_area.itemconfigure(self.entity, tag="deconstruct")
 
     def deconstruct(self):
         self.destroy()

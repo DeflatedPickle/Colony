@@ -1,9 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """"""
 
 from .age import Age
 from .limbs import Limbs
+from .joy import Joy
+from .health import Health
 
 __title__ = "Attributes"
 __author__ = "DeflatedPickle"

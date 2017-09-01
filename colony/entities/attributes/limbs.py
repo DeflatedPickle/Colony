@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """"""
 
@@ -14,7 +14,7 @@ class Limbs(object):
         self.limbs = {}
 
     def add_limb(self, limb: str):
-        self.limbs[limb] = {}
+        self.limbs[limb] = {"damage": 0, "state": 0}
 
     def damage_limb(self, limb: str, amount: int):
         self.limbs[limb]["damage"] = amount

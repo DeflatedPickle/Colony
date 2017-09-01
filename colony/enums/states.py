@@ -4,10 +4,11 @@
 
 from enum import Enum
 
-__title__ = "Species"
+__title__ = "States"
 __author__ = "DeflatedPickle"
 __version__ = "1.0.0"
 
 
-class Species(Enum):
-    HUMAN = "human"
+class States(Enum):
+    BROKEN = "broken"
+    WORKING = "working"
