@@ -7,6 +7,7 @@ from .limbs import Limbs
 from .joy import Joy
 from .health import Health
 from .inventory import Inventory
+from .gender import Gender
 
 __title__ = "Attributes"
 __author__ = "DeflatedPickle"

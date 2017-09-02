@@ -3,11 +3,10 @@
 """"""
 
 import tkinter as tk
-from tkinter import ttk
 from _tkinter import TclError
 from collections import OrderedDict
 
-from colony.entities.attributes import Health
+from colony.entities.attributes import Health, Gender
 from colony.references import *
 from colony.window import InformationWindow
 
@@ -35,7 +34,6 @@ class Entity(object):
 
         if self.entity_type in ["colonist", "animal"]:
             self.species = None
-            self.gender = 0
             self.age = 0
 
         elif self.entity_type == "item":
@@ -159,7 +157,8 @@ class Entity(object):
         self.entity_values_basic["name"] = self.get_name()
         if self.entity_type in ["colonist", "animal"]:
             self.entity_values_basic["species"] = self.species
-            self.entity_values_basic["gender"] = self.gender
+            if issubclass(self.__class__, Gender):
+                self.entity_values_basic["gender"] = self.get_gender()
             self.entity_values_basic["age"] = self.age
 
         if issubclass(self.__class__, Health):
