@@ -6,14 +6,11 @@ import tkinter as tk
 from _tkinter import TclError
 from tkinter import ttk
 from random import randint, choice
-from string import capwords
 import sys
 from ast import literal_eval
-import io
-
-from PIL import Image
 
 import colony
+from taskbar import TaskBar
 
 __title__ = "Colony"
 __author__ = "DeflatedPickle"
@@ -43,7 +40,7 @@ class GameWindow(tk.Tk):
         self.variable_debug = tk.BooleanVar(value=0)
         self.variable_scrollbars = tk.BooleanVar(value=1)
         self.variable_grid = tk.BooleanVar(value=0)
-        self.variable_grid_highlight = tk.BooleanVar(value=1)
+        self.variable_grid_highlight = tk.BooleanVar(value=0)
         self.variable_highlight_colour = tk.StringVar(value="white")
 
         self.start = None
@@ -75,37 +72,6 @@ class GameWindow(tk.Tk):
 
         except AttributeError:
             return [0, 0], [0, 0]
-
-
-class TaskBar(ttk.Frame):
-    def __init__(self, parent, game, **kwargs):
-        ttk.Frame.__init__(self, parent, **kwargs)
-        self.parent = parent
-        self.game = game
-
-        self.add_button("Construction")
-
-        self.menu_colonists = MenuColonists(self)
-        self.add_button("Colonists", self.menu_colonists)
-
-        self.add_button("Animals")
-        self.add_button("Wildlife")
-
-        self.menu_relationships = MenuRelationships(self)
-        self.add_button("Relationships", self.menu_relationships)
-
-        if self.parent.variable_debug.get():
-            self.menu_debug = MenuDebug(self)
-            self.add_button("Debug", self.menu_debug)
-
-        self.option_menu = MenuOptions(self)
-        self.add_button("Menu", self.option_menu)
-
-    def add_button(self, text: str = "", menu: tk.Menu = None):
-        button = ttk.Menubutton(self, text=text, menu=menu, direction="above")
-        button.pack(side="left", fill="x", expand=True)
-
-        return button
 
 
 class ColonistBar(ttk.Frame):
@@ -163,125 +129,6 @@ class ColonistBar(ttk.Frame):
                 canvas.itemconfigure(canvas.find_withtag("name"), font=colony.get_fonts()["text"]["bar_normal"])
             except TclError:
                 pass
-
-
-class MenuBase(tk.Menu):
-    def __init__(self, parent, **kwagrs):
-        tk.Menu.__init__(self, parent, **kwagrs)
-        self.parent = parent
-
-    def clear(self):
-        """Deletes all of the menu items."""
-        try:
-            for item in range(self.index("end") + 1):
-                self.delete(item)
-        except TypeError:
-            pass
-
-
-class MenuEntity(MenuBase):
-    def __init__(self, parent, **kwargs):
-        MenuBase.__init__(self, parent, **kwargs)
-
-
-class MenuColonists(MenuBase):
-    def __init__(self, parent, **kwargs):
-        MenuBase.__init__(self, parent, **kwargs)
-
-
-class MenuRelationships(MenuBase):
-    def __init__(self, parent, **kwargs):
-        MenuBase.__init__(self, parent, **kwargs)
-
-        self.add_command(label="Show All Relationships", command=lambda: colony.RelationshipsWindow(self.parent.parent))
-
-    def add_relation(self, colonist):
-        menu = tk.Menu(self)
-
-        for relationship_type in colonist.relationships:
-            if isinstance(colonist.relationships[relationship_type], dict):
-                menu_relations = tk.Menu(menu)
-
-                for relationship in colonist.relationships[relationship_type]:
-                    if isinstance(colonist.relationships[relationship_type][relationship], list):
-                        menu_sibling = tk.Menu(menu_relations)
-
-                        for sibling in colonist.relationships[relationship_type][relationship]:
-                            menu_sibling.add_command(label=capwords(sibling.get_name()))
-
-                        if colonist.relationships[relationship_type][relationship]:
-                            menu_relations.add_cascade(label=capwords(relationship), menu=menu_sibling)
-
-                    else:
-                        if colonist.relationships[relationship_type][relationship]:
-                            menu_relations.add_command(label=capwords(relationship))
-
-                menu.add_cascade(label=capwords(relationship_type), menu=menu_relations)
-
-        self.add_cascade(label=colonist.get_name(), menu=menu)
-
-
-class MenuDebug(MenuBase):
-    def __init__(self, parent, **kwargs):
-        MenuBase.__init__(self, parent, **kwargs)
-
-        self.debug_spawn_menu = tk.Menu(self)
-        self.add_cascade(label="Spawn", menu=self.debug_spawn_menu)
-
-        self.debug_spawn_entity_menu = tk.Menu(self)
-        self.debug_spawn_menu.add_cascade(label="Entity", menu=self.debug_spawn_entity_menu)
-
-        self.debug_spawn_entity_item_menu = tk.Menu(self)
-        self.debug_spawn_entity_menu.add_cascade(label="Item", menu=self.debug_spawn_entity_item_menu)
-
-        for item in self.parent.game.register_items:
-            self.debug_spawn_entity_item_menu.add_command(label=self.parent.game.register_items[item].name, command=lambda current_item=item: self.parent.game.set_tool("spawn:entity:item:{}".format(current_item)))
-
-        self.debug_spawn_entity_resource_menu = tk.Menu(self)
-        self.debug_spawn_entity_menu.add_cascade(label="Resource", menu=self.debug_spawn_entity_resource_menu)
-
-        for resource in self.parent.game.register_resources:
-            self.debug_spawn_entity_resource_menu.add_command(label=self.parent.game.register_resources[resource].name, command=lambda current_resource=resource: self.parent.game.set_tool("spawn:entity:resource:{}".format(current_resource)))
-
-        self.debug_spawn_entity_actingentity_menu = tk.Menu(self.debug_spawn_entity_menu)
-        self.debug_spawn_entity_menu.add_cascade(label="ActingEntity", menu=self.debug_spawn_entity_actingentity_menu)
-
-        self.debug_spawn_entity_actingentity_movingentity_menu = tk.Menu(self.debug_spawn_entity_menu)
-        self.debug_spawn_entity_actingentity_menu.add_cascade(label="MovingEntity", menu=self.debug_spawn_entity_actingentity_movingentity_menu)
-        self.debug_spawn_entity_actingentity_movingentity_menu.add_command(label="Colonist", command=lambda: self.parent.game.set_tool("spawn:entity:actingentity:movingentity:colonist"))
-
-        self.debug_spawn_acting_movingentity_animal_menu = tk.Menu(self.debug_spawn_entity_actingentity_movingentity_menu)
-        self.debug_spawn_entity_actingentity_movingentity_menu.add_cascade(label="Animal", menu=self.debug_spawn_acting_movingentity_animal_menu)
-
-        for animal in self.parent.game.register_animals:
-            self.debug_spawn_acting_movingentity_animal_menu.add_command(label=self.parent.game.register_animals[animal].species, command=lambda current_animal=animal: self.parent.game.set_tool("spawn:entity:actingentity:movingentity:animal:{}".format(current_animal.lower())))
-
-        self.debug_destroy_menu = tk.Menu(self)
-        self.debug_destroy_menu.add_command(label="Entity",
-                                            command=lambda: self.parent.game.set_tool("destroy:entity"))
-        self.add_cascade(label="Destroy", menu=self.debug_destroy_menu)
-
-
-class MenuOptions(MenuBase):
-    def __init__(self, parent, **kwargs):
-        MenuBase.__init__(self, parent, **kwargs)
-
-        self.add_command(label="Back To Start", command=self.start_menu)
-        self.add_command(label="Take Screenshot", command=self.take_screenshot)
-        self.add_command(label="Options", command=lambda: colony.OptionWindow(self.parent.parent))
-        self.add_command(label="Exit", command=lambda: sys.exit())
-
-    def start_menu(self):
-        self.parent.parent.canvas.unbind("<Configure>")
-        self.parent.parent.canvas.bind("<Configure>", self.parent.parent.canvas.on_resize)
-        self.parent.parent.start_menu_title()
-
-    def take_screenshot(self):
-        postscript = self.parent.game.game_area.postscript(colormode="color")
-
-        with Image.open(io.BytesIO(postscript.encode("utf-8"))) as image:
-            image.save("./image.jpg")
-            image.close()
 
 
 class TimeFrame(ttk.Frame):
