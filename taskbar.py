@@ -18,13 +18,13 @@ class TaskBar(ttk.Frame):
         self.parent = parent
         self.game = game
 
-        # self.add_button("Construction")
+        self.add_button("Construction")
 
         self.menu_colonists = menus.MenuColonists(self)
         self.add_button("Colonists", self.menu_colonists)
 
-        # self.add_button("Animals")
-        # self.add_button("Wildlife")
+        self.add_button("Animals")
+        self.add_button("Wildlife")
 
         self.menu_relationships = menus.MenuRelationships(self)
         self.add_button("Relationships", self.menu_relationships)
