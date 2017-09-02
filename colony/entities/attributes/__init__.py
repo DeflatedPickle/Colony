@@ -6,6 +6,7 @@ from .age import Age
 from .limbs import Limbs
 from .joy import Joy
 from .health import Health
+from .inventory import Inventory
 
 __title__ = "Attributes"
 __author__ = "DeflatedPickle"

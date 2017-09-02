@@ -4,7 +4,7 @@
 
 from random import randint
 
-from colony.entities.attributes import Age, Health
+from colony.entities.attributes import Age, Health, Inventory
 from colony.entities import MovingEntity
 from colony.references import get_male_animal_names, get_female_animal_names
 
@@ -13,7 +13,7 @@ __author__ = "DeflatedPickle"
 __version__ = "1.10.1"
 
 
-class Animal(MovingEntity, Age, Health):
+class Animal(MovingEntity, Age, Health, Inventory):
     """Creates an animal."""
 
     def __init__(self, parent, species: str = "", name: str = "", age: int = 0, highest_age: int = 10,
@@ -22,13 +22,13 @@ class Animal(MovingEntity, Age, Health):
         MovingEntity.__init__(self, parent, x, y, entity_type="animal")
         Age.__init__(self, parent.time, age, 0, highest_age)
         Health.__init__(self)
+        Inventory.__init__(self)
         self.parent = parent
         self.species = species
         self.name = name
         self.gender = gender
         self.wild = wild
         self.tame_chance = tame_chance
-        self.inventory = []
         self.owner = owner
 
         self.check_action()
