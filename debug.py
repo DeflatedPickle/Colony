@@ -3,10 +3,11 @@
 """"""
 
 import colony
+from colony.entities.attributes import Inventory
 
 __title__ = "ResizingCanvas"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 
 class DeBug(object):
@@ -76,11 +77,8 @@ class DeBug(object):
     def find_selected_inventory(self):
         for entity in self.parent.entities.values():
             if entity.selected:
-                if entity.entity_type == "colonist" or entity.entity_type == "animal":
-                    return entity.inventory
-
-                elif entity.entity_type == "item":
-                    return None
+                if issubclass(entity.__class__, Inventory):
+                    return entity.get_inventory()
 
     def change_state(self, *args):
         self.state = not self.state
