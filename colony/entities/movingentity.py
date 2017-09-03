@@ -56,6 +56,8 @@ class MovingEntity(ActingEntity, Limbs):
         self.move_until(x, y, move_x, move_y, direction_x, direction_y)
 
     def move_until(self, prev_x, prev_y, x, y, direction_x, direction_y):
+        self.reached_destination = False
+
         try:
             if self.find_coordinates_own()[0] != prev_x:
                 # print("X: {}\nPrev X: {}".format(x, prev_x))
@@ -92,6 +94,8 @@ class MovingEntity(ActingEntity, Limbs):
             # print("Stopped!")
             self.parent.parent.after_cancel(self.moving)
             self.action = "standing around"
+
+            self.reached_destination = True
 
         else:
             self.after_actions.remove(self.moving)

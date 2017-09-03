@@ -71,7 +71,7 @@ class Scenarios(object):
                         self.treeview,
                         title="Lonely Bean",
                         description="Just you, yourself and you.",
-                        contents={"colonists": 1, "items": {"wood": 50, "stone": 20}})
+                        contents={"colonists": 1})  # , "items": {"wood": 50, "stone": 20}})
 
         colony.Scenario(self,
                         self.treeview,

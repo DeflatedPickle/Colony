@@ -23,6 +23,9 @@ class ActingEntity(Entity):
         self.parent = parent
         self.action = None
 
+        self.reached_destination = False
+        self._move_direction = False
+
         self.actions = []
         self.after_actions = []
 
@@ -88,6 +91,10 @@ class ActingEntity(Entity):
 
                 self.decide_action()
 
+            elif self.action == "moving":
+                # print("{} is moving.".format(self.get_name()))
+                pass
+
             elif self.action == "looking for work":
                 closest = self.look_for_closest(self.location["x"], self.location["y"], "deconstruct")
                 # print(self.parent.game_area.gettags(closest))
@@ -104,10 +111,7 @@ class ActingEntity(Entity):
                 else:
                     self.decide_action()
 
-                # self.decide_action()
-
-            elif self.action == "moving":
-                # print("{} is moving.".format(self.get_name()))
+            elif self.action == "working":
                 pass
 
         self.parent.parent.after(interval.get_interval(), self.check_action)
