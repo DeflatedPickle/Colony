@@ -20,6 +20,8 @@ class Entity(object):
 
     def __init__(self, parent, x: int = 0, y: int = 0, entity_type: str = "entity"):
         self.parent = parent
+        self.id = self.parent.generate_id(self)
+        self.canvas_id = None
         self.name = None
 
         self.location = {"x": x,
@@ -69,6 +71,9 @@ class Entity(object):
                                                         text=get_references()["icons"][self.entity_type],
                                                         font=get_fonts()[self.entity_type]["normal"],
                                                         tags="entity")
+
+        self.canvas_id = self.entity
+        self.parent.canvas_ids[self.entity] = self
 
         if self.entity_type == "colonist":
             self.entity_name = self.parent.game_area.create_text(self.location["x"],

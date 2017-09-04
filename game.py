@@ -20,12 +20,17 @@ __version__ = "1.0.0"
 class Game(object):
     def __init__(self, parent):
         self.parent = parent
+        self.ids = {}
+        self.canvas_ids = {}
+
         self.entities = {}
         self.colonists = []
         self.animals = []
         self.items = []
         self.families = []
         self.event_hours = [8, 20]
+
+        self.highest_id = 0
 
         self.time_frame = TimeFrame(self)
         self.time = GameTime(self)
@@ -303,3 +308,13 @@ class Game(object):
         for family in self.families:
             for colonist in self.colonists:
                 pass
+
+    def get_selected(self):
+        for entity in self.entities.values():
+            if entity.selected:
+                return entity
+
+    def generate_id(self, instance):
+        self.highest_id += 1
+        self.ids[self.highest_id] = instance
+        return self.highest_id

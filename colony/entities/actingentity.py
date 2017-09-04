@@ -12,7 +12,7 @@ from colony.references import interval
 
 __title__ = "ActingEntity"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.3"
+__version__ = "1.1.3"
 
 
 class ActingEntity(Entity):
@@ -108,7 +108,7 @@ class ActingEntity(Entity):
                     if self.entity is not None:
                         self.move_to(x, y, "going to work")
                         self.parent.game_area.itemconfig(closest, tags=self.parent.game_area.itemcget(closest, "tags") + "taken by {}".format(self.entity))
-                        self.working_on = closest
+                        self.working_on = self.parent.canvas_ids[closest]
 
                 else:
                     self.decide_action()
@@ -117,6 +117,7 @@ class ActingEntity(Entity):
                 if self._move_direction:
                     # print("Forwards")
                     self.move_to(self.location["x"] + 5, self.location["y"], "going to work")
+                    self.working_on.decrease_health(5)
                     self._move_direction = False
 
                 elif not self._move_direction:
