@@ -44,7 +44,7 @@ class Resource(Entity, Age, Health):
 
         self.resource.location = {"x": self.location["x"],
                                   "y": self.location["y"]}
-        
+
         self.resource.draw()
 
     def draw_entity_buttons(self):
@@ -58,5 +58,6 @@ class Resource(Entity, Age, Health):
 
     def decrease_health(self, amount):
         Health.decrease_health(self, amount)
+        self.parent.game_area.itemconfig(self.entity_health, text="{}/{}".format(self.get_health(), self.get_highest_health()))
         if self.get_health() <= 0:
             self.deconstruct()
