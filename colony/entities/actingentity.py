@@ -22,6 +22,7 @@ class ActingEntity(Entity):
         Entity.__init__(self, parent, x, y, entity_type)
         self.parent = parent
         self.action = None
+        self.working_on = None
 
         self.reached_destination = False
         self._move_direction = False
@@ -105,14 +106,21 @@ class ActingEntity(Entity):
 
                     x, y = coords
                     if self.entity is not None:
-                        self.move_to(x, y, "working")
+                        self.move_to(x, y, "going to work")
                         self.parent.game_area.itemconfig(closest, tags=self.parent.game_area.itemcget(closest, "tags") + "taken by {}".format(self.entity))
+                        self.working_on = closest
 
                 else:
                     self.decide_action()
 
             elif self.action == "working":
-                pass
+                if self._move_direction:
+                    # print("Forwards")
+                    self._move_direction = False
+
+                elif not self._move_direction:
+                    # print("Backwards")
+                    self._move_direction = True
 
         self.parent.parent.after(interval.get_interval(), self.check_action)
 

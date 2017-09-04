@@ -93,7 +93,11 @@ class MovingEntity(ActingEntity, Limbs):
         if self.find_coordinates_own() == [prev_x, prev_y]:
             # print("Stopped!")
             self.parent.parent.after_cancel(self.moving)
-            self.action = "standing around"
+            if self.action == "going to work":
+                self.action = "working"
+
+            else:
+                self.action = "standing around"
 
             self.reached_destination = True
 
