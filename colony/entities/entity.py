@@ -51,6 +51,7 @@ class Entity(object):
         self.entity_name = None
         self.entity_health = None
         self.entity_amount = None
+        self.entity_deconstruct = None
 
         self.last_mouse_x = 0
         self.last_mouse_y = 0
@@ -184,6 +185,7 @@ class Entity(object):
         self.parent.game_area.delete(self.entity_name)
         self.parent.game_area.delete(self.entity_health)
         self.parent.game_area.delete(self.entity_amount)
+        self.parent.game_area.delete(self.entity_deconstruct)
 
     def find_coordinates_own(self):
         """Returns the coordinates of the entity."""

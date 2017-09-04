@@ -63,7 +63,10 @@ class DeBug(object):
     def find_selected_location(self):
         for item in self.parent.entities.values():
             if item.selected:
-                return "x={0[0]}, y={0[1]}".format(self.parent.selected_entity[0].find_coordinates_own())
+                try:
+                    return "x={0[0]}, y={0[1]}".format(self.parent.selected_entity[0].find_coordinates_own())
+                except IndexError:
+                    pass
 
     def find_selected_action(self):
         for entity in self.parent.entities.values():

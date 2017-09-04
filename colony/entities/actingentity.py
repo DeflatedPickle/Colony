@@ -117,7 +117,12 @@ class ActingEntity(Entity):
                 if self._move_direction:
                     # print("Forwards")
                     self.move_to(self.location["x"] + 5, self.location["y"], "going to work")
-                    self.working_on.decrease_health(5)
+
+                    if self.working_on.get_health() > 0:
+                        self.working_on.decrease_health(5)
+                    else:
+                        self.action = "standing around"
+
                     self._move_direction = False
 
                 elif not self._move_direction:
