@@ -238,15 +238,16 @@ class Entity(object):
         self.parent.game_area.itemconfigure(self.entity, font=get_fonts()[self.entity_type]["selected"])
         self.parent.game_area.itemconfigure(self.entity_name, font=get_fonts()["text"]["selected"])
 
+        self.parent.colonist_bar.unselect_all_colonists()
+
         if self.entity_type == "colonist":
             self.parent.game_area.itemconfigure(self.entity_health, font=get_fonts()["text"]["selected"])
             self.parent.colonist_bar.select_current_colonist(self)
 
         elif self.entity_type == "item":
             self.parent.game_area.itemconfigure(self.entity_amount, font=get_fonts()["text"]["selected"])
-            self.parent.colonist_bar.unselect_all_colonists()
 
-        if self.entity_type == "resource":
+        elif self.entity_type == "resource":
             self.draw_entity_buttons()
 
         # self.parent.selected_entity = self
@@ -260,19 +261,17 @@ class Entity(object):
         self.parent.game_area.itemconfigure(self.entity, font=get_fonts()[self.entity_type]["normal"])
         self.parent.game_area.itemconfigure(self.entity_name, font=get_fonts()["text"]["normal"])
 
+        self.parent.colonist_bar.unselect_all_colonists()
+
         if self.entity_type == "colonist":
             self.parent.game_area.itemconfigure(self.entity_health, font=get_fonts()["text"]["normal"])
 
         elif self.entity_type == "item":
             self.parent.game_area.itemconfigure(self.entity_amount, font=get_fonts()["text"]["normal"])
 
-        try:
+        elif self.entity_type == "resource":
             self.remove_entity_buttons()
 
-        except AttributeError:
-            pass
-
-        self.parent.colonist_bar.unselect_all_colonists()
         # self.parent.selected_entity = None
         try:
             self.parent.selected_entity.remove(self)
