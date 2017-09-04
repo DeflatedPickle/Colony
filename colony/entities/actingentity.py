@@ -116,10 +116,12 @@ class ActingEntity(Entity):
             elif self.action == "working":
                 if self._move_direction:
                     # print("Forwards")
+                    self.move_to(self.location["x"] + 5, self.location["y"], "going to work")
                     self._move_direction = False
 
                 elif not self._move_direction:
                     # print("Backwards")
+                    self.move_to(self.location["x"] - 5, self.location["y"], "going to work")
                     self._move_direction = True
 
         self.parent.parent.after(interval.get_interval(), self.check_action)
