@@ -3,7 +3,7 @@
 """"""
 
 import colony
-from colony.entities.attributes import Inventory
+from colony.entities.attributes import Inventory, Gender
 
 __title__ = "ResizingCanvas"
 __author__ = "DeflatedPickle"
@@ -28,8 +28,7 @@ class DeBug(object):
             self.counter = 10
 
             self.add_debug_line(text="Selected: {}".format(self.find_selected()))
-            if not self.parent.entities and self.parent.entities[0].entity_type == "resource":
-                self.add_debug_line(text="Selected Gender: {}".format(self.find_selected_gender()))
+            self.add_debug_line(text="Selected Gender: {}".format(self.find_selected_gender()))
             self.add_debug_line(text="Selected Location: {}".format(self.find_selected_location()))
             self.add_debug_line(text="Selected Action: {}".format(self.find_selected_action()))
             self.add_debug_line(text="Selected Inventory: {}".format(self.find_selected_inventory()))
@@ -58,7 +57,11 @@ class DeBug(object):
     def find_selected_gender(self):
         for item in self.parent.entities.values():
             if item.selected:
-                return item.gender
+                if issubclass(item.__class__, Gender):
+                    return "Male" if item.get_gender() else "Female"
+
+                else:
+                    return None
 
     def find_selected_location(self):
         for item in self.parent.entities.values():
