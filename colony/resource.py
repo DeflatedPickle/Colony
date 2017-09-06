@@ -25,7 +25,10 @@ class Resource(Entity, Age, Health):
         self.health = health
         self.resource = resource
         self.resource_amount = resource_amount
-        self.resource.amount = self.resource_amount
+        try:
+            self.resource.amount = self.resource_amount
+        except AttributeError:
+            self.resource_amount = 0
         self.type = type_
 
     def mark_for_deconstruct(self):

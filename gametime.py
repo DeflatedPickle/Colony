@@ -14,6 +14,7 @@ class GameTime(object):
         self.parent = parent
 
         self._time = colony.Time(0, 0, 0)
+        # self._date = colony.Time(0, 0, 0)
 
         self.update_time()
 

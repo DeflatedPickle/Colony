@@ -9,7 +9,8 @@ __version__ = "1.1.0"
 
 class Scenario(object):
     """Create a new scenario."""
-    def __init__(self, parent, widget, title: str="", description: str="", contents: dict={}):
+
+    def __init__(self, parent, widget, title: str = "", description: str = "", contents: dict = {}):
         self.parent = parent
         self.widget = widget
         self.id = self.parent.current_scenarios
