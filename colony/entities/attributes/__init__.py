@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """"""
 
-from .age import Age
+from .iage import IAge
 from .limbs import Limbs
 from .joy import Joy
 from .health import Health

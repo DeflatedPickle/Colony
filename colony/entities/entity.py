@@ -36,7 +36,7 @@ class Entity(object):
 
         if self.entity_type in ["colonist", "animal"]:
             self.species = None
-            self.age = 0
+            self._age = 0
 
         elif self.entity_type == "item":
             self.amount = None
@@ -165,7 +165,7 @@ class Entity(object):
             self.entity_values_basic["species"] = self.species
             if issubclass(self.__class__, Gender):
                 self.entity_values_basic["gender"] = self.get_gender()
-            self.entity_values_basic["age"] = self.age
+            self.entity_values_basic["age"] = self._age
 
         if issubclass(self.__class__, Health):
             self.entity_values_basic["health"] = self.get_health()

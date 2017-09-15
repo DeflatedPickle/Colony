@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 """"""
 
-from colony.entities.attributes import Age, Health
+from zope.interface import implementer
+
+from colony.entities.attributes import IAge, Health
 from colony.entities import Entity
 from colony.item import Item
 from colony.references import *
@@ -12,13 +14,13 @@ __author__ = "DeflatedPickle"
 __version__ = "1.0.2"
 
 
-class Resource(Entity, Age, Health):
+@implementer(IAge)
+class Resource(Entity, Health):
     """Creates a resource."""
 
     def __init__(self, parent, name: str = "", health: float = 0.0, resource: Item = None, resource_amount: int = 0,
                  type_: str = "", x: int = 0, y: int = 0):
         Entity.__init__(self, parent, x, y, entity_type="resource")
-        Age.__init__(self, parent.time, 1, 0, -1)
         Health.__init__(self)
         self.parent = parent
         self.name = name
@@ -30,6 +32,9 @@ class Resource(Entity, Age, Health):
         except AttributeError:
             self.resource_amount = 0
         self.type = type_
+
+        # Interface Variables
+        self._age = 0
 
     def mark_for_deconstruct(self):
         if "deconstruct" not in self.parent.game_area.itemcget(self.entity, "tags"):
@@ -64,3 +69,17 @@ class Resource(Entity, Age, Health):
         self.parent.game_area.itemconfig(self.entity_health, text="{}/{}".format(self.get_health(), self.get_highest_health()))
         if self.get_health() <= 0:
             self.deconstruct()
+
+    # Interface Stuff
+
+    def get_age(self):
+        return self._age
+
+    def set_age(self, amount):
+        self._age = amount
+
+    def get_lowest_age(self):
+        return 0
+
+    def get_highest_age(self):
+        return 100

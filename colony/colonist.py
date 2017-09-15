@@ -6,7 +6,9 @@ import random
 from string import capwords
 from textwrap import indent
 
-from colony.entities.attributes import Age, Joy, Health, Inventory, Gender
+from zope.interface import implementer
+
+from colony.entities.attributes import IAge, Joy, Health, Inventory, Gender
 from colony.entities import Entity
 from colony.entities import MovingEntity
 from colony.references import get_male_names, get_female_names, get_surnames, get_male_relationship_types, \
@@ -17,12 +19,12 @@ __author__ = "DeflatedPickle"
 __version__ = "1.13.1"
 
 
-class Colonist(MovingEntity, Age, Joy, Health, Inventory, Gender):
+@implementer(IAge)
+class Colonist(MovingEntity, Joy, Health, Inventory, Gender):
     """Creates a colonist."""
 
     def __init__(self, parent, species: str = "Human", forename: str = "", surname: str = "", faction: str = "colony", x: int = 0, y: int = 0):
         MovingEntity.__init__(self, parent, x, y, entity_type="colonist")
-        Age.__init__(self, parent.time, 1, 16, 100)
         Health.__init__(self)
         Inventory.__init__(self)
         Gender.__init__(self)
@@ -44,6 +46,9 @@ class Colonist(MovingEntity, Age, Joy, Health, Inventory, Gender):
         self.faction = faction
         # TODO: Add colonist stats.
         # TODO: Add colonist buffs and debuffs, such as "Fast Walker" to improve move speed.
+
+        # Interface Variables
+        self._age = 0
 
         self.check_action()
 
@@ -86,7 +91,7 @@ class Colonist(MovingEntity, Age, Joy, Health, Inventory, Gender):
             self.name["forename"] = get_female_names()[random.randint(0, len(get_female_names()) - 1)]
 
         self.name["surname"] = get_surnames()[random.randint(0, len(get_surnames()) - 1)]
-        self._age = random.randint(self.get_lowest_age(), self.get_highest_age())
+        self.set_age(random.randint(self.get_lowest_age(), self.get_highest_age()))
 
         return self
 
@@ -191,3 +196,17 @@ class Colonist(MovingEntity, Age, Joy, Health, Inventory, Gender):
         string.append(indent(self.get_pretty_relationships(), " " * 4))
 
         return "\n".join(string)
+
+    # Interface Stuff
+
+    def get_age(self):
+        return self._age
+
+    def set_age(self, amount):
+        self._age = amount
+
+    def get_lowest_age(self):
+        return 0
+
+    def get_highest_age(self):
+        return 100
