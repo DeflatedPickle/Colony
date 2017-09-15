@@ -100,7 +100,8 @@ class ActingEntity(Entity, Energy):
                 # print("{} is moving.".format(self.get_name()))
                 pass
 
-            elif self.action == "looking for work":
+        if self.entity_type == "colonist":
+            if self.action == "looking for work":
                 closest = self.look_for_closest(self.location["x"], self.location["y"], "deconstruct")
                 # print(self.parent.game_area.gettags(closest))
                 # print(closest)
@@ -134,6 +135,10 @@ class ActingEntity(Entity, Energy):
                     # print("Backwards")
                     self.move_to(self.location["x"] - 5, self.location["y"], "going to work")
                     self._move_direction = True
+
+        if self.entity_type == "animal":
+            # Animal things
+            pass
 
         self.parent.parent.after(interval.get_interval(), self.check_action)
 
