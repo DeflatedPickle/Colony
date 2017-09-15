@@ -104,6 +104,7 @@ class MovingEntity(ActingEntity, Limbs):
             self.reached_destination = True
 
         else:
+            # print("Not the same!")
             self.after_actions.remove(self.moving)
             self.moving = self.parent.parent.after(interval.get_interval(), lambda: self.move_until(prev_x, prev_y, x, y, direction_x, direction_y))
             self.after_actions.append(self.moving)

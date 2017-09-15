@@ -35,6 +35,7 @@ class ActingEntity(Entity, Energy):
         self.waiting_actions = ["standing around", "wandering"]
         self.looking_actions = ["looking for work"]
         self.doing_actions = ["chopping a tree", "mining a rock"]
+        self.resting_actions = ["sleeping", "sitting"]
 
     def move_to(self, x, y, because):
         pass
@@ -136,7 +137,7 @@ class ActingEntity(Entity, Energy):
                     self.move_to(self.location["x"] - 5, self.location["y"], "going to work")
                     self._move_direction = True
 
-        if self.entity_type == "animal":
+        elif self.entity_type == "animal":
             # Animal things
             pass
 
@@ -147,16 +148,20 @@ class ActingEntity(Entity, Energy):
         random_number = random.randint(0, 100)
 
         if self.entity_type == "colonist" or self.entity_type == "animal":
-            if self.action in self.waiting_actions:
-                self.action = "looking for work"
+            if not self.get_energy() < (self.get_highest_energy() / 2 * self.get_highest_energy()) / self.get_highest_energy():
+                if self.action in self.waiting_actions:
+                    self.action = "looking for work"
 
-            elif random_number in range(0, 15):
-                # Standing Around
-                self.action = "standing around"
+                elif random_number in range(0, 15):
+                    # Standing Around
+                    self.action = "standing around"
 
-            elif random_number in range(20, 30):
-                # Wandering
-                self.action = "wandering"
+                elif random_number in range(20, 30):
+                    # Wandering
+                    self.action = "wandering"
+
+            else:
+                self.action = random.choice(self.resting_actions)
 
         self.stop_actions()
 
