@@ -9,7 +9,7 @@ from tkinter import font
 
 __title__ = "Pawn"
 __author__ = "DeflatedPickle"
-__version__ = "1.8.0"
+__version__ = "1.9.0"
 
 
 def get_frame_rate():
@@ -185,3 +185,5 @@ class OptionFrame(ttk.Frame):
         ttk.Label(frame_colour, text="Highlight Colour").grid(row=0, column=0)
         ttk.Combobox(frame_colour, textvariable=self.option.variable_highlight_colour, values=["white", "red", "blue", "yellow", "green", "purple", "orange", "pink"], state="readonly", width=7).grid(row=0, column=1)
         frame_colour.grid(row=4, column=0, sticky="we")
+
+        ttk.Checkbutton(self, text="Extra Speed Arrows", variable=self.option.variable_extra_speed_arrows).grid(row=5, column=0, sticky="we")

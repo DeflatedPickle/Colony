@@ -11,7 +11,7 @@ from colony.references import OptionFrame
 
 __title__ = "Window"
 __author__ = "DeflatedPickle"
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 
 
 class BaseWindow(tk.Toplevel):
@@ -65,6 +65,7 @@ class OptionWindow(BaseWindow):
         self.variable_grid = self.parent.variable_grid
         self.variable_grid_highlight = self.parent.variable_grid_highlight
         self.variable_highlight_colour = self.parent.variable_highlight_colour
+        self.variable_extra_speed_arrows = self.parent.variable_extra_speed_arrows
 
         OptionFrame(self.frame_widget, self).pack(fill="both", expand=True)
 
@@ -73,6 +74,7 @@ class OptionWindow(BaseWindow):
 
     def apply(self):
         self.parent.start.scenarios.game.draw_widgets()
+        self.parent.start.scenarios.game.time_frame.extra_arrows()
 
     def ok(self):
         self.apply()

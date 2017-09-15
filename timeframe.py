@@ -9,7 +9,7 @@ import colony
 
 __title__ = "TimeFrame"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
 class TimeFrame(ttk.Frame):
@@ -33,6 +33,17 @@ class TimeFrame(ttk.Frame):
         ttk.Button(self.frame_buttons, text=" > ", command=lambda: colony.interval.set_interval(100), width=3).pack(side="left")
         ttk.Button(self.frame_buttons, text="> >", command=lambda: colony.interval.set_interval(50), width=3).pack(side="left")
 
-        # ttk.Button(self.frame_buttons, text=">>>", command=lambda: colony.interval.set_interval(25), width=4).pack(side="left")
-        # ttk.Button(self.frame_buttons, text=">>>>>", command=lambda: colony.interval.set_interval(15), width=7).pack(side="left")
-        # ttk.Button(self.frame_buttons, text=">>>>>>>>>>>>>>", command=lambda: colony.interval.set_interval(1), width=10).pack(side="left")
+        self.frame_extra = ttk.Frame(self.frame_buttons)
+
+        ttk.Button(self.frame_extra, text=">>>", command=lambda: colony.interval.set_interval(25), width=4).pack(side="left")
+        ttk.Button(self.frame_extra, text=">>>>>", command=lambda: colony.interval.set_interval(15), width=7).pack(side="left")
+        ttk.Button(self.frame_extra, text=">>>>>>>>>>>>>>", command=lambda: colony.interval.set_interval(1), width=19).pack(side="left")
+
+        self.extra_arrows()
+
+    def extra_arrows(self):
+        if self.parent.parent.variable_extra_speed_arrows.get():
+            self.frame_extra.pack(side="left")
+
+        else:
+            self.frame_extra.pack_forget()

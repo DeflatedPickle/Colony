@@ -9,7 +9,7 @@ from start import Start
 
 __title__ = "GameWindow"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
 class GameWindow(tk.Tk):
@@ -36,6 +36,7 @@ class GameWindow(tk.Tk):
         self.variable_grid = tk.BooleanVar(value=0)
         self.variable_grid_highlight = tk.BooleanVar(value=0)
         self.variable_highlight_colour = tk.StringVar(value="white")
+        self.variable_extra_speed_arrows = tk.BooleanVar(value=0)
 
         self.start = None
 
