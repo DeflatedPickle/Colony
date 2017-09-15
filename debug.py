@@ -3,11 +3,11 @@
 """"""
 
 import colony
-from colony.entities.attributes import Inventory, Gender
+from colony.entities.attributes import Inventory, Gender, Energy
 
 __title__ = "ResizingCanvas"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.1"
+__version__ = "1.1.0"
 
 
 class DeBug(object):
@@ -32,6 +32,7 @@ class DeBug(object):
             self.add_debug_line(text="Selected Location: {}".format(self.find_selected_location()))
             self.add_debug_line(text="Selected Action: {}".format(self.find_selected_action()))
             self.add_debug_line(text="Selected Inventory: {}".format(self.find_selected_inventory()))
+            self.add_debug_line(text="Selected Energy: {}".format(self.find_selected_energy()))
             self.counter += 15
             self.add_debug_line(text="Selected Tool: {}".format(self.parent.selected_tool))
             self.counter += 15
@@ -85,6 +86,18 @@ class DeBug(object):
             if entity.selected:
                 if issubclass(entity.__class__, Inventory):
                     return entity.get_inventory()
+
+                else:
+                    return None
+
+    def find_selected_energy(self):
+        for entity in self.parent.entities.values():
+            if entity.selected:
+                if issubclass(entity.__class__, Energy):
+                    return entity.get_energy()
+
+                else:
+                    return None
 
     def change_state(self, *args):
         self.state = not self.state

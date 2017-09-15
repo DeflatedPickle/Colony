@@ -7,19 +7,21 @@ from _tkinter import TclError
 import random
 
 from colony.entities.entity import Entity
+from colony.entities.attributes import Energy
 # from .references import get_interval
 from colony.references import interval
 
 __title__ = "ActingEntity"
 __author__ = "DeflatedPickle"
-__version__ = "1.1.3"
+__version__ = "1.2.1"
 
 
-class ActingEntity(Entity):
+class ActingEntity(Entity, Energy):
     """Creates an entity capable of actions."""
 
     def __init__(self, parent, x: int = 0, y: int = 0, entity_type: str = "acting entity"):
         Entity.__init__(self, parent, x, y, entity_type)
+        Energy.__init__(self)
         self.parent = parent
         self.action = None
         self.working_on = None
@@ -65,8 +67,9 @@ class ActingEntity(Entity):
     def check_action(self):
         """Checks the colonists current action."""
         if self.entity_type == "colonist" or self.entity_type == "animal":
-            if self.action is None:
+            if self.action is None or self.get_energy() <= 0:
                 self.action = "standing around"
+                self.decide_action()
 
             elif self.action == "standing around":
                 # print("{} is standing around.".format(self.get_name()))
@@ -84,6 +87,7 @@ class ActingEntity(Entity):
                     try:
                         entity_location = self.parent.game_area.coords(self.entity)
                         self.move_to(entity_location[0] + random.randint(-15, 15), entity_location[1] + random.randint(-15, 15), "wandering")
+                        self.decrease_energy(0.1)
                     except TclError:
                         pass
 
@@ -120,6 +124,7 @@ class ActingEntity(Entity):
 
                     if self.working_on.get_health() > 0:
                         self.working_on.decrease_health(5)
+                        self.decrease_energy(0.8)
                     else:
                         self.action = "standing around"
 

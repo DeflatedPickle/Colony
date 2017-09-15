@@ -9,7 +9,7 @@ from colony.references import interval
 
 __title__ = "MovingEntity"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 
 
 class MovingEntity(ActingEntity, Limbs):
@@ -89,6 +89,8 @@ class MovingEntity(ActingEntity, Limbs):
 
         except IndexError:
             pass
+
+        self.decrease_energy(0.02)
 
         if self.find_coordinates_own() == [prev_x, prev_y]:
             # print("Stopped!")
