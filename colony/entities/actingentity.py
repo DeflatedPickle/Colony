@@ -35,7 +35,7 @@ class ActingEntity(Entity, Energy):
         self.waiting_actions = ["standing around", "wandering"]
         self.looking_actions = ["looking for work"]
         self.doing_actions = ["chopping a tree", "mining a rock"]
-        self.resting_actions = ["resting", "sitting"]
+        self.resting_actions = ["resting", "sitting", "meditating"]
 
     def move_to(self, x, y, because):
         pass
@@ -108,6 +108,16 @@ class ActingEntity(Entity, Energy):
 
                 elif self.action == "sitting":
                     self.increase_energy(0.01)
+
+                elif self.action == "meditating":
+                    self.increase_energy(0.02)
+
+                energy = self.get_energy()
+
+                if self.action in self.resting_actions:
+                    if energy == (self.get_energy() + random.randint(10, 15)) - random.randint(5, 10):
+                        if random.randint(0, 10) == 0:
+                            self.decide_action()
 
             else:
                 self.decide_action()
