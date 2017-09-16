@@ -13,7 +13,7 @@ from colony.references import interval
 
 __title__ = "ActingEntity"
 __author__ = "DeflatedPickle"
-__version__ = "1.2.1"
+__version__ = "1.3.0"
 
 
 class ActingEntity(Entity, Energy):
@@ -35,7 +35,7 @@ class ActingEntity(Entity, Energy):
         self.waiting_actions = ["standing around", "wandering"]
         self.looking_actions = ["looking for work"]
         self.doing_actions = ["chopping a tree", "mining a rock"]
-        self.resting_actions = ["sleeping", "sitting"]
+        self.resting_actions = ["resting", "sitting"]
 
     def move_to(self, x, y, because):
         pass
@@ -101,6 +101,17 @@ class ActingEntity(Entity, Energy):
                 # print("{} is moving.".format(self.get_name()))
                 pass
 
+            # Resting
+            if self.get_energy() < self.get_highest_energy():
+                if self.action == "resting":
+                    self.increase_energy(0.03)
+
+                elif self.action == "sitting":
+                    self.increase_energy(0.01)
+
+            else:
+                self.decide_action()
+
         if self.entity_type == "colonist":
             if self.action == "looking for work":
                 closest = self.look_for_closest(self.location["x"], self.location["y"], "deconstruct")
@@ -161,7 +172,8 @@ class ActingEntity(Entity, Energy):
                     self.action = "wandering"
 
             else:
-                self.action = random.choice(self.resting_actions)
+                if self.action != "going to work":
+                    self.action = random.choice(self.resting_actions)
 
         self.stop_actions()
 
