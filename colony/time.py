@@ -4,7 +4,7 @@
 
 __title__ = "Time"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.1"
+__version__ = "1.3.0"
 
 
 class Time(object):
@@ -20,6 +20,15 @@ class Time(object):
 
     def get_time_formatted(self):
         return "{}:{}:{}".format(self._hours, self._minutes, self._seconds)
+
+    def get_hours(self):
+        return self._hours
+
+    def get_minutes(self):
+        return self._minutes
+
+    def get_seconds(self):
+        return self._seconds
 
     def set_time(self, hours, minutes, seconds):
         self._hours = hours
