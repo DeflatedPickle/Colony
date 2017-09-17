@@ -16,18 +16,20 @@ class GameTime(object):
         self._time = colony.Time(0, 0, 0)
         self._date = colony.Time(0, 0, 1)  # Hours = Year, Month = Minute, Day = Seconds.
 
-        self._time.increase_time(23, 45, 0)
+        # self._time.increase_time(23, 45, 0)
+
+        # self._time.get_seconds().trace_variable("w")
 
         self.update_time()
 
     def get_world_time_string(self):
-        if 0 <= self._time.get_hours() <= 12:
+        if 0 <= self._time.get_hours().get() <= 12:
             return "Morning"
 
-        elif 12 <= self._time.get_hours() <= 18:
+        elif 12 <= self._time.get_hours().get() <= 18:
             return "Afternoon"
 
-        elif 18 <= self._time.get_hours() <= 24:
+        elif 18 <= self._time.get_hours().get() <= 24:
             return "Evening"
 
     def update_time(self):
