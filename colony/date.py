@@ -6,7 +6,7 @@ from tkinter import IntVar
 
 __title__ = "Date"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 
 class Date(object):
@@ -33,16 +33,19 @@ class Date(object):
         return self._days
 
     def set_time(self, years, months, days):
-        self._years.set(years)
-        self._months.set(months)
-        self._days.set(days)
+        if years > 0:
+            self._years.set(years)
+
+        if months > 0:
+            self._months.set(months)
+
+        if days > 0:
+            self._days.set(days)
 
         self.check_time()
 
     def increase_time(self, years, months, days):
-        self._years.set(self._years.get() + years)
-        self._months.set(self._months.get() + months)
-        self._days.set(self._days.get() + days)
+        self.set_time(self._years.get() + years, self._months.get() + months, self._days.get() + days)
 
         self.check_time()
 

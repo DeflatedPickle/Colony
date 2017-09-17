@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """"""
 
+import inspect
+
 import colony
 from colony.entities.attributes import Age
 
@@ -70,6 +72,6 @@ class GameTime(object):
         pass
 
     def update_years(self, *args):
-        for entity in self.parent.entities:
-            if isinstance(entity, Age):
+        for entity in self.parent.entities.values():
+            if issubclass(entity.__class__, Age):
                 entity.increase_age(1)
