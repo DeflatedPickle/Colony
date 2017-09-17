@@ -14,11 +14,17 @@ class GameTime(object):
         self.parent = parent
 
         self._time = colony.Time(0, 0, 0)
-        self._date = colony.Time(0, 0, 1)  # Hours = Year, Month = Minute, Day = Seconds.
+        self._date = colony.Date(0, 0, 0)  # Hours = Year, Month = Minute, Day = Seconds.
 
-        # self._time.increase_time(23, 45, 0)
+        # self._time.increase_time(23, 58, 0)
 
-        # self._time.get_seconds().trace_variable("w")
+        self._time.get_seconds().trace_variable("w", self.update_seconds)
+        self._time.get_minutes().trace_variable("w", self.update_minutes)
+        self._time.get_hours().trace_variable("w", self.update_hours)
+
+        self._date.get_days().trace_variable("w", self.update_days)
+        self._date.get_months().trace_variable("w", self.update_months)
+        self._date.get_years().trace_variable("w", self.update_years)
 
         self.update_time()
 
@@ -43,3 +49,23 @@ class GameTime(object):
             self._date.increase_time(0, 0, 1)
 
         self.parent.parent.after(colony.interval.get_interval(), self.update_time)
+
+    # Do Stuff When The Time Updates.
+
+    def update_seconds(self, *args):
+        pass
+
+    def update_minutes(self, *args):
+        pass
+
+    def update_hours(self, *args):
+        pass
+
+    def update_days(self, *args):
+        pass
+
+    def update_months(self, *args):
+        pass
+
+    def update_years(self, *args):
+        pass

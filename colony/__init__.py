@@ -14,6 +14,7 @@ from .resource import Resource
 # TODO: Add an Armour class.
 from .scenario import Scenario
 from .time import Time
+from .date import Date
 # TODO: Add an Event class.
 # TODO: Add a Zone class.
 from .window import OptionWindow, InformationWindow, RelationshipsWindow
