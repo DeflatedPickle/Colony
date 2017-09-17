@@ -3,10 +3,11 @@
 """"""
 
 import colony
+from colony.entities.attributes import Age
 
 __title__ = "GameTime"
 __author__ = "DeflatedPickle"
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 
 class GameTime(object):
@@ -16,7 +17,8 @@ class GameTime(object):
         self._time = colony.Time(0, 0, 0)
         self._date = colony.Date(0, 0, 0)  # Hours = Year, Month = Minute, Day = Seconds.
 
-        # self._time.increase_time(23, 58, 0)
+        self._date.increase_time(0, 11, 29)
+        self._time.increase_time(23, 58, 0)
 
         self._time.get_seconds().trace_variable("w", self.update_seconds)
         self._time.get_minutes().trace_variable("w", self.update_minutes)
@@ -45,7 +47,7 @@ class GameTime(object):
         self.parent.time_frame.time_formatted_variable.set(self._time.get_time_formatted())
         self.parent.time_frame.time_world_variable.set(self.get_world_time_string())
 
-        if self._time.get_hours() == 0 and self._time.get_minutes() == 0 and self._time.get_seconds() == 0:
+        if self._time.get_hours().get() == 0 and self._time.get_minutes().get() == 0 and self._time.get_seconds().get() == 0:
             self._date.increase_time(0, 0, 1)
 
         self.parent.parent.after(colony.interval.get_interval(), self.update_time)
@@ -68,4 +70,6 @@ class GameTime(object):
         pass
 
     def update_years(self, *args):
-        pass
+        for entity in self.parent.entities:
+            if isinstance(entity, Age):
+                entity.increase_age(1)

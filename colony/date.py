@@ -17,10 +17,10 @@ class Date(object):
 
         self.check_time()
 
-    def get_time(self):
+    def get_date(self):
         return int("".join(map(str, [self._years.get(), self._months.get(), self._days.get()])))
 
-    def get_time_formatted(self):
+    def get_date_formatted(self):
         return "{}/{}/{}".format(self._years.get(), self._months.get(), self._days.get())
 
     def get_years(self):
