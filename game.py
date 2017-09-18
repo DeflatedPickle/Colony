@@ -49,6 +49,8 @@ class Game(object):
             "brick_limestone": colony.Item(self, name="Limestone Bricks", stack_size=100)
         }
 
+        # Animals registered here, though not drawn, still decide actions to do.
+        # This could be causing lag for the game, or cause more lag when more animals are added.
         self.register_animals = {
             "cat": colony.Animal(self, species="Cat", tame_chance=80, highest_age=10),
             "babirusa": colony.Animal(self, species="Babirusa", tame_chance=30, highest_age=10),
