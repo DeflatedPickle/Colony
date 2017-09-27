@@ -4,28 +4,22 @@
 
 __title__ = "Sound"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
 class Sound(object):
-    """Gives an entity sound."""
+    """Lets an entity hear sound."""
 
-    def __init__(self, sound: int=100, quietest_sound: int=0, loudest_sound: int=100):
-        self._sound = sound
-        self._quietest_sound = quietest_sound
-        self._loudest_sound = loudest_sound
+    def __init__(self, lowest_sound: int=0, highest_sound: int=200, pain_cap: int=140):
+        self._lowest_sound = lowest_sound
+        self._highest_sound = highest_sound
+        self._pain_cap = pain_cap
 
-    def increase_sound(self, amount):
-        self._sound += amount
+    def get_lowest_sound(self):
+        return self._lowest_sound
 
-    def decrease_sound(self, amount):
-        self._sound -= amount
+    def get_highest_sound(self):
+        return self._highest_sound
 
-    def get_sound(self):
-        return self._sound
-
-    def get_quietest_sound(self):
-        return self._quietest_sound
-
-    def get_loudest_sound(self):
-        return self._loudest_sound
+    def get_pain_cap(self):
+        return self._pain_cap
