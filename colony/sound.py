@@ -9,7 +9,7 @@ from colony.entities.entity import Entity
 
 __title__ = "Sound"
 __author__ = "DeflatedPickle"
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 
 class Sound(object):
@@ -20,7 +20,6 @@ class Sound(object):
         self._linger = linger
 
         self._sound_object = None
-        self._sound_drawn = self._sound // 2
 
     def create_given_sound(self, sound):
         """Creates a sound at the given sound level."""
