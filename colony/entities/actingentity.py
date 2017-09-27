@@ -10,6 +10,7 @@ from colony.entities.entity import Entity
 from colony.entities.attributes import Energy
 # from .references import get_interval
 from colony.references import interval
+from colony.sound import Sound
 
 __title__ = "ActingEntity"
 __author__ = "DeflatedPickle"
@@ -147,6 +148,7 @@ class ActingEntity(Entity, Energy):
 
                     if self.working_on.get_health() > 0:
                         self.working_on.decrease_health(5)
+                        Sound(self.working_on, self.parent.game_area).create_sound()
                         self.decrease_energy(0.8)
                     else:
                         self.action = "standing around"

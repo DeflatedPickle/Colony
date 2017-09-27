@@ -15,6 +15,7 @@ from .resource import Resource
 from .scenario import Scenario
 from .time import Time
 from .date import Date
+from .sound import Sound
 # TODO: Add an Event class.
 # TODO: Add a Zone class.
 from .window import OptionWindow, InformationWindow, RelationshipsWindow
@@ -26,7 +27,7 @@ __copyright__ = "Copyright (c) 2017 Dibbo"
 __credits__ = ["DeflatedPickle/Dibbo"]
 
 __license__ = "MIT"
-__version__ = "1.15.0"
+__version__ = "1.16.0"
 __maintainer__ = "DeflatedPickle/Dibbo"
 __email__ = "DeflatedPickle@gmail.com"
 __status__ = "Development"
