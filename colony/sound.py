@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """"""
 
+from tkinter import Canvas
 from random import randint
 
 __title__ = "Sound"
@@ -10,13 +11,19 @@ __version__ = "1.0.0"
 
 
 class Sound(object):
-    def __init__(self, sound: int=10):
+    def __init__(self, producer, canvas: Canvas, sound: int=10):
+        self._producer = producer
+        self._canvas = canvas
         self._sound = sound
+
+    def create_given_sound(self, sound):
+        """Creates a sound at the given sound level."""
+        pass
 
     def create_sound(self):
         """Creates a sound at the set sound level."""
-        pass
+        self.create_given_sound(self._sound)
 
     def create_random_sound(self):
         """Creates a sound between a little under the set level and a little over it."""
-        pass
+        self.create_given_sound(randint(self._sound - randint(0, 5), self._sound + randint(0, 5)))
