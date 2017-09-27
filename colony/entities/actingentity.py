@@ -148,7 +148,7 @@ class ActingEntity(Entity, Energy):
 
                     if self.working_on.get_health() > 0:
                         self.working_on.decrease_health(5)
-                        Sound(self.working_on, self.parent.game_area).create_sound()
+                        Sound(self.working_on, self.parent.game_area, 25, 500).create_sound()
                         self.decrease_energy(0.8)
                     else:
                         self.action = "standing around"

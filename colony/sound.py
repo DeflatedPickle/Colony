@@ -26,7 +26,10 @@ class Sound(object):
         self._sound_object = self._canvas.create_oval(self._producer.location["x"] - sound,
                                                       self._producer.location["y"] - sound,
                                                       self._producer.location["x"] + sound,
-                                                      self._producer.location["y"] + sound)
+                                                      self._producer.location["y"] + sound,
+                                                      tags="sound")
+
+        self._canvas.master.after(self._linger, self.destroy_sound)
 
     def create_sound(self):
         """Creates a sound at the set sound level."""
