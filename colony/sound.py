@@ -39,6 +39,16 @@ class Sound(object):
         """Creates a sound between a little under the set level and a little over it."""
         self.create_given_sound(randint(self._sound - randint(0, 5), self._sound + randint(0, 5)))
 
+    def resize_sound(self, x0, y0, x1, y1):
+        self._canvas.master.coords(self._sound_object, self._producer.location["x"] - x0, self._producer.location["y"] - y0, self._producer.location["x"] + x1, self._producer.location["y"] + y1)
+
+    def resize_sound_by(self, amount):
+        self.resize_sound(amount, amount, amount, amount)
+
     def destroy_sound(self):
         """Destroys a sound."""
         self._canvas.delete(self._sound_object)
+
+    def dissipate_sound(self):
+        """Slowly makes the sound quieter till it's gone."""
+        pass
