@@ -13,6 +13,8 @@ __version__ = "1.0.1"
 
 
 class Sound(object):
+    """Creates a sound in the world."""
+
     def __init__(self, producer: Entity, canvas: Canvas, sound: int=10, linger: int=100):
         self._producer = producer
         self._canvas = canvas
@@ -23,6 +25,7 @@ class Sound(object):
         self.dissipate_number = 0
 
     def draw_sound(self, x0, y0, x1, y1):
+        """Draws the sound on the canvas."""
         self._sound_object = self._canvas.create_oval(self._producer.location["x"] - x0,
                                                       self._producer.location["y"] - y0,
                                                       self._producer.location["x"] + x1,
@@ -45,10 +48,12 @@ class Sound(object):
         self.create_given_sound(randint(self._sound - randint(0, 5), self._sound + randint(0, 5)))
 
     def resize_sound(self, x0, y0, x1, y1):
+        """Resizes the sound."""
         self.destroy_sound()
         self.draw_sound(x0, y0, x1, y1)
 
     def resize_sound_by(self, amount):
+        """Resizes the sound by a given amount."""
         self.resize_sound(amount, amount, amount, amount)
 
     def destroy_sound(self):
