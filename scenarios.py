@@ -195,7 +195,7 @@ class Scenarios(object):
         if "items" in scenario.contents:
             for item in scenario.contents["items"]:
                 if item == "random":
-                    reg_item = self.game.register_items()[random.choice(list(self.game.register_items().keys()))]
+                    reg_item = self.game.register_items[random.choice(list(self.game.register_items.keys()))]
 
                 else:
                     reg_item = self.game.register_items[item]
