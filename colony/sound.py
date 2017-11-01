@@ -23,6 +23,7 @@ class Sound(object):
 
         self._sound_object = None
         self.dissipate_number = 0
+        self.dissipate_linger = linger
 
     def draw_sound(self, x0, y0, x1, y1):
         """Draws the sound on the canvas."""
@@ -62,11 +63,15 @@ class Sound(object):
 
     def dissipate_sound(self):
         """Slowly makes the sound get quieter until it's gone."""
-        self.dissipate_number += 1
 
         if self.dissipate_number <= 10:
             self.resize_sound_by(self.dissipate_number * -1)
-            self._canvas.master.after(self._linger // 2, self.dissipate_sound)
+            self._canvas.master.after(self.dissipate_linger // 2, self.dissipate_sound)
 
         else:
             self.destroy_sound()
+
+        self.dissipate_number += 1
+        self.dissipate_linger //= 2
+
+        print("{}, number: {}, linger: {}".format(self, self.dissipate_number, self.dissipate_linger))
