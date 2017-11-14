@@ -20,5 +20,6 @@ class Item(Entity):
         self.amount = amount
 
     def draw(self):
+        """Draws the item."""
         Entity.draw(self)
         self.parent.items.append(self)

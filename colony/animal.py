@@ -34,6 +34,7 @@ class Animal(MovingEntity, Age, Health, Inventory, Gender):
         self.check_action()
 
     def draw(self):
+        """Draws the animal."""
         MovingEntity.draw(self)
         self.parent.animals.append(self)
 

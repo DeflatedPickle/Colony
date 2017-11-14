@@ -32,6 +32,7 @@ class Resource(Entity, Age, Health):
         self.type = type_
 
     def mark_for_deconstruct(self):
+        """Marks the resource for deconstruction."""
         if "deconstruct" not in self.parent.game_area.itemcget(self.entity, "tags"):
             self.entity_deconstruct = self.parent.game_area.create_text(self.location["x"],
                                                                         self.location["y"],
@@ -43,6 +44,7 @@ class Resource(Entity, Age, Health):
             self.parent.game_area.itemconfigure(self.entity, tag="deconstruct")
 
     def deconstruct(self):
+        """Deconstructs the resource."""
         self.destroy()
 
         self.resource.location = {"x": self.location["x"],
@@ -51,15 +53,18 @@ class Resource(Entity, Age, Health):
         self.resource.draw()
 
     def draw_entity_buttons(self):
+        """Draws the buttons for the entity."""
         self.parent.game_area.create_window(48, self.parent.canvas.winfo_height() - 48,
                                             window=ttk.Button(self.parent.parent, text="Deconstruct",
                                                               command=self.mark_for_deconstruct), anchor="nw",
                                             tags="Buttons")
 
     def remove_entity_buttons(self):
+        """Removes the entity buttons."""
         self.parent.game_area.delete("Buttons")
 
     def decrease_health(self, amount):
+        """Decreases the enity by a given amount."""
         Health.decrease_health(self, amount)
         self.parent.game_area.itemconfig(self.entity_health, text="{}/{}".format(self.get_health(), self.get_highest_health()))
         if self.get_health() <= 0:

@@ -48,11 +48,13 @@ class Colonist(MovingEntity, Age, Joy, Health, Inventory, Gender):
         self.check_action()
 
     def add_to_colonist_bar(self):
+        """Adds the colonist to the bar."""
         self.parent.colonist_bar.add_colonist(self)
 
         return self
 
     def remove_from_colonist_bar(self):
+        """Removes the colonist from the bar."""
         self.parent.colonist_bar.remove_colonist(self)
 
         return self
@@ -70,6 +72,7 @@ class Colonist(MovingEntity, Age, Joy, Health, Inventory, Gender):
         return "Female" if not self.get_gender() else "Male"
 
     def draw(self):
+        """Draws the colonist."""
         MovingEntity.draw(self)
         self.parent.colonists.append(self)
 
@@ -156,19 +159,20 @@ class Colonist(MovingEntity, Age, Joy, Health, Inventory, Gender):
         self.parent.taskbar.menu_relationships.add_relation(self)
 
     def get_relationships(self):
-        """Gets all the relationships of this pawn."""
+        """Returns all the relationships of this pawn."""
         return self.relationships
 
     def get_relationship(self, relation: str):
-        """Gets a specific relationship of this pawn."""
+        """Returns a specific relationship of this pawn."""
         return self.relationships[relation]
 
     def get_relation_to(self, entity: Entity):
-        """Gets a relationship to another pawn."""
+        """Returns a relationship to another pawn."""
         # TODO: Make this function do something.
         pass
 
     def get_pretty_relationships(self):
+        """Returns the relationships in a pretty format."""
         string = list()
 
         for relationship_header in self.relationships:
@@ -182,6 +186,7 @@ class Colonist(MovingEntity, Age, Joy, Health, Inventory, Gender):
         return "\n".join(string)
 
     def get_pretty_information(self):
+        """Returns the colonist information in a pretty format."""
         string = list()
 
         string.append(self.get_name() + ":")
